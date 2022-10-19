@@ -6,3 +6,4 @@ candidate.py
 solution.py
 
 env/
+.env
