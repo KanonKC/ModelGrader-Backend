@@ -1,0 +1,8 @@
+.dist/
+__pycache__
+
+api/sandbox/testcases/*.txt
+candidate.py
+solution.py
+
+env/
