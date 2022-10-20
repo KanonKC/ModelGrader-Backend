@@ -1,3 +1,4 @@
+from statistics import mode
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from ..constant import GET,POST,PUT,DELETE
@@ -25,3 +26,20 @@ def submit_problem(request,problem_id):
     submission.save()
 
     return Response(model_to_dict(submission),status=status.HTTP_201_CREATED)
+
+@api_view([GET])
+def view_all_submission(request):
+    submission = Submission.objects.all()
+    problem_id = request.query_params.get("problem_id", 0)
+    passed = request.query_params.get("passed", -1)
+    if problem_id:
+        submission = submission.filter(problem_id=problem_id)
+    
+    result = [model_to_dict(i) for i in submission]
+
+    if int(passed) == 0:
+        print("Here")
+        result = [i for i in result if 'E' in i['result'] or '-' in i['result']]
+    elif int(passed) == 1:
+        result = [i for i in result if 'E' not in i['result'] and '-' not in i['result']]
+    return Response({'count':len(result),'result':result},status=status.HTTP_200_OK)
