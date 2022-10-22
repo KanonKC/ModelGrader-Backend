@@ -12,11 +12,11 @@ def submit_problem(request,problem_id):
     problem = Problem.objects.get(problem_id=problem_id)
     testcases = Testcase.objects.filter(problem_id=problem_id)
 
-    candidate = request.data['submission_code']
-    solution = model_to_dict(problem)['solution']
-    testcases = [model_to_dict(i)['unit'] for i in testcases]
+    submission_code = request.data['submission_code']
+    solution_input = [model_to_dict(i)['input'] for i in testcases]
+    solution_output = [model_to_dict(i)['output'] for i in testcases]
 
-    grading_result = grader.grading(candidate,solution,testcases)
+    grading_result = grader.grading(submission_code,solution_input,solution_output)
 
     submission = Submission(
         problem_id = problem,

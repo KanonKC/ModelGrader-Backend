@@ -22,7 +22,8 @@ class Problem(models.Model):
 class Testcase(models.Model):
     testcase_id = models.AutoField(primary_key=True)
     problem_id = models.ForeignKey(Problem,on_delete=models.CASCADE,db_column="problem_id")
-    unit = models.CharField(max_length=100000)
+    input = models.CharField(max_length=100000)
+    output = models.CharField(max_length=100000)
 
 class Submission(models.Model):
     submission_id = models.AutoField(primary_key=True)
