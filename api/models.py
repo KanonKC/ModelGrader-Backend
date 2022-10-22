@@ -18,6 +18,7 @@ class Problem(models.Model):
     title = models.CharField(max_length=50)
     description = models.CharField(max_length=10000)
     solution = models.CharField(max_length=20000)
+    time_limit = models.FloatField(default=1.5,blank=True)
 
 class Testcase(models.Model):
     testcase_id = models.AutoField(primary_key=True)
@@ -30,4 +31,5 @@ class Submission(models.Model):
     problem_id = models.ForeignKey(Problem,on_delete=models.CASCADE,db_column="problem_id")
     submission_code = models.CharField(max_length=20000)
     result = models.CharField(max_length=100)
+    is_passed = models.BooleanField()
     date = models.DateTimeField(default=timezone.now)

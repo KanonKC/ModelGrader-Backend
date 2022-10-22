@@ -18,10 +18,17 @@ def submit_problem(request,problem_id):
 
     grading_result = grader.grading(submission_code,solution_input,solution_output)
 
+    
+    if '-' in grading_result or 'E' in grading_result or 'T' in grading_result:
+        is_passed = False
+    else:
+        is_passed = True
+
     submission = Submission(
         problem_id = problem,
         submission_code = request.data['submission_code'],
-        result = grading_result
+        result = grading_result,
+        is_passed = is_passed
     )
     submission.save()
 
@@ -39,7 +46,7 @@ def view_all_submission(request):
 
     if int(passed) == 0:
         print("Here")
-        result = [i for i in result if 'E' in i['result'] or '-' in i['result']]
+        result = [i for i in result if not i['is_passed']]
     elif int(passed) == 1:
-        result = [i for i in result if 'E' not in i['result'] and '-' not in i['result']]
+        result = [i for i in result if i['is_passed']]
     return Response({'count':len(result),'result':result},status=status.HTTP_200_OK)

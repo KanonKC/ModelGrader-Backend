@@ -16,11 +16,12 @@ def create_problem(request):
         language = request.data['language'],
         title = request.data['title'],
         description = request.data['description'],
-        solution = request.data['solution']
+        solution = request.data['solution'],
+        time_limit = request.data['time_limit']
     )
     problem.save()
 
-    checked = checker(request.data['solution'],request.data['testcases'])
+    checked = checker(request.data['solution'],request.data['testcases'],request.data['time_limit'])
 
     if checked['has_error'] or checked['has_timeout']:
         return Response({'detail': 'Error during creating. Your code may has an error/timeout!'},status=status.HTTP_406_NOT_ACCEPTABLE)
@@ -40,5 +41,6 @@ def create_problem(request):
 def get_problem(request,problem_id: int):
     problem = Problem.objects.get(problem_id=problem_id)
     submission = Testcase.objects.filter(problem_id=problem_id)
-
-    return Response({'problem':model_to_dict(problem),'testcases':[model_to_dict(i) for i in submission]},status=status.HTTP_200_OK)
+    result = model_to_dict(problem)
+    result['testcases'] = [model_to_dict(i) for i in submission]
+    return Response(result,status=status.HTTP_200_OK)

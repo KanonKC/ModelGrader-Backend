@@ -43,16 +43,17 @@ body = {
     "language": "py",
     "description": desc,
     "solution": solution,
-    "testcases": ["360","3661","120"]
+    "testcases": ["111","222","333"],
+    "time_limit": 0.5
 }
 
 submit_body = {
     'submission_code': solution
 }
 
-# x = requests.post('http://localhost:8000/api/problems',json=body)
+x = requests.post('http://localhost:8000/api/problems',json=body)
 
 # x = requests.get('http://localhost:8000/api/problems/3')
 
-x = requests.post('http://localhost:8000/api/problems/7/submission',json=submit_body)
+# x = requests.post('http://localhost:8000/api/problems/7/submission',json=submit_body)
 print(x.json())
