@@ -9,33 +9,37 @@ from django.forms.models import model_to_dict
 
 
 # Create your views here.
-@api_view([POST])
-def create_problem(request):
-    print(request.data)
-    problem = Problem(
-        language = request.data['language'],
-        title = request.data['title'],
-        description = request.data['description'],
-        solution = request.data['solution'],
-        time_limit = request.data['time_limit']
-    )
-    problem.save()
-
-    checked = checker(request.data['solution'],request.data['testcases'],request.data['time_limit'])
-
-    if checked['has_error'] or checked['has_timeout']:
-        return Response({'detail': 'Error during creating. Your code may has an error/timeout!'},status=status.HTTP_406_NOT_ACCEPTABLE)
-
-    testcase_result = []
-    for unit in checked['result']:
-        testcase = Testcase(
-            problem_id = problem,
-            input = unit['input'],
-            output = unit['output']
+@api_view([GET,POST])
+def getall_create_problem(request):
+    if request.method == POST:
+        problem = Problem(
+            language = request.data['language'],
+            title = request.data['title'],
+            description = request.data['description'],
+            solution = request.data['solution'],
+            time_limit = request.data['time_limit']
         )
-        testcase.save()
-        testcase_result.append(model_to_dict(testcase))
-    return Response({'detail': 'Problem has been created!','problem': model_to_dict(problem),'testcase': testcase_result},status=status.HTTP_201_CREATED)
+        problem.save()
+
+        checked = checker(request.data['solution'],request.data['testcases'],request.data['time_limit'])
+
+        if checked['has_error'] or checked['has_timeout']:
+            return Response({'detail': 'Error during creating. Your code may has an error/timeout!'},status=status.HTTP_406_NOT_ACCEPTABLE)
+
+        testcase_result = []
+        for unit in checked['result']:
+            testcase = Testcase(
+                problem_id = problem,
+                input = unit['input'],
+                output = unit['output']
+            )
+            testcase.save()
+            testcase_result.append(model_to_dict(testcase))
+        return Response({'detail': 'Problem has been created!','problem': model_to_dict(problem),'testcase': testcase_result},status=status.HTTP_201_CREATED)
+    elif request.method == GET:
+        problem = Problem.objects.all()
+        return Response({'result':[model_to_dict(i) for i in problem]})
+    
 
 @api_view([GET])
 def get_problem(request,problem_id: int):
