@@ -13,7 +13,7 @@ def checker(code:str,testcases:list,timeout=1.5)->dict:
 
     for i in range(len(testcases)):
         try:
-            runner = subprocess.check_output(['python','./api/sandbox/runner.py'],stdin=open(f'./api/sandbox/testcases/{i}.txt','r'),stderr=subprocess.DEVNULL,timeout=timeout)
+            runner = subprocess.check_output(['python','./api/sandbox/runner.py'],stdin=open(f'./api/sandbox/testcases/{i}.txt','r'),stderr=subprocess.DEVNULL,timeout=float(timeout))
             result.append({'input':testcases[i],'output':runner.decode(),'runtime_result':'OK'})
         except subprocess.CalledProcessError:
             hasError = True
