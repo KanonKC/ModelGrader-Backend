@@ -14,13 +14,13 @@ def checker(code:str,testcases:list,timeout=1.5)->dict:
     for i in range(len(testcases)):
         try:
             runner = subprocess.check_output(['python','./api/sandbox/runner.py'],stdin=open(f'./api/sandbox/testcases/{i}.txt','r'),stderr=subprocess.DEVNULL,timeout=float(timeout))
-            result.append({'input':testcases[i],'output':runner.decode(),'runtime_result':'OK'})
+            result.append({'input':testcases[i],'output':runner.decode(),'runtime_status':'OK'})
         except subprocess.CalledProcessError:
             hasError = True
-            result.append({'input':testcases[i],'output':None,'runtime_result':'ERROR'})
+            result.append({'input':testcases[i],'output':None,'runtime_status':'ERROR'})
         except subprocess.TimeoutExpired:
             hasTimeout = True
-            result.append({'input':testcases[i],'output':None,'runtime_result':'TIMEOUT'})
+            result.append({'input':testcases[i],'output':None,'runtime_status':'TIMEOUT'})
 
     return {'result':result,'has_error':hasError,'has_timeout':hasTimeout}
     
@@ -31,12 +31,12 @@ def grading(code:str,input:list,output:list,timeout=1.5)->str:
     graded_result = graded['result']
 
     for i in range(len(output)):
-        if graded_result[i]['runtime_result'] == 'OK':
+        if graded_result[i]['runtime_status'] == 'OK':
             if graded_result[i]['output'] == output[i]:
                 score += 'P'
             else:
                 score += '-'
-        elif graded_result[i]['runtime_result'] == 'TIMEOUT':
+        elif graded_result[i]['runtime_status'] == 'TIMEOUT':
             score += 'T'
         else:
             score += 'E'
