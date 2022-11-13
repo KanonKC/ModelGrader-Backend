@@ -15,10 +15,13 @@ class ProgrammingLanguage(models.TextChoices):
 
 class Account(models.Model):
     account_id = models.AutoField(primary_key=True)
+    email = models.EmailField(max_length=50,unique=True,null=True)
     username = models.CharField(max_length=32,unique=True)
     password = models.CharField(max_length=128)
     token = models.CharField(max_length=256,null=True,default=None)
     token_expire = models.IntegerField(null=True,default=None)
+    is_admin = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
 
 class Problem(models.Model):
     problem_id = models.AutoField(primary_key=True)
