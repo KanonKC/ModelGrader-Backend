@@ -9,12 +9,12 @@ from django.forms.models import model_to_dict
 
 @api_view([POST])
 def create_account(request):
-    account = Account(
-        username = request.data['username'],
-        password = passwordEncryption(request.data['password'])
-    )
-    account.save()
-    return Response({'message':'Registration Completed'},status=status.HTTP_201_CREATED)
+    request.data['password'] = passwordEncryption(request.data['password'])
+    try:
+        account = Account.objects.create(**request.data)
+    except Exception as e:
+        return Response({'message':str(e)},status=status.HTTP_400_BAD_REQUEST)
+    return Response({'message':'Registration Completed','account':model_to_dict(account)},status=status.HTTP_201_CREATED)
 
 @api_view([GET])
 def get_account(request,account_id):
