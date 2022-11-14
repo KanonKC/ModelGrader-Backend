@@ -11,7 +11,7 @@ urlpatterns = [
     path("accounts/<int:account_id>",account.get_account),
 
     path('accounts/<int:account_id>/problems',problem.create_problem),
-    path('problems',problem.getall_problem),
+    path('problems',problem.all_problem),
     path('problems/<int:problem_id>',problem.one_problem),
 
     path('problems/<int:problem_id>/<int:account_id>',submission.submit_problem),

@@ -73,4 +73,5 @@ def view_all_submission(request):
     if sort_score == 1:
         result.sort(key=lambda value: value['score'],reverse=True)
     
+    result = [{'problem': model_to_dict(Problem.objects.get(problem_id=i['problem_id'])),**i} for i in result]
     return Response({'count':len(result),'result':result},status=status.HTTP_200_OK)

@@ -39,15 +39,21 @@ def create_problem(request,account_id):
         testcase_result.append(model_to_dict(testcase))
     return Response({'detail': 'Problem has been created!','problem': model_to_dict(problem),'testcase': testcase_result},status=status.HTTP_201_CREATED)
 
-@api_view([GET])
-def getall_problem(request):
-    problem = Problem.objects.all()
-    result = [model_to_dict(i) for i in problem]
+@api_view([GET,DELETE])
+def all_problem(request):
+    if request.method == GET:
+        problem = Problem.objects.all()
+        result = [model_to_dict(i) for i in problem]
 
-    for i in result:
-        i['creator'] = model_to_dict(Account.objects.get(account_id=i['account_id']))
+        for i in result:
+            i['creator'] = model_to_dict(Account.objects.get(account_id=i['account_id']))
 
-    return Response({'result':result},status=status.HTTP_200_OK)
+        return Response({'result':result},status=status.HTTP_200_OK)
+    elif request.method == DELETE:
+        target = request.data.get("problem",[])
+        problems = Problem.objects.filter(problem_id__in=target)
+        problems.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
     
 
 @api_view([GET,PUT,DELETE])
