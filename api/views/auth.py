@@ -10,7 +10,7 @@ from django.forms.models import model_to_dict
 from uuid import uuid4
 from time import time
 
-TOKEN_LIFETIME = 30*60 # (Second)
+TOKEN_LIFETIME = 2*60*60 # (Second)
 
 @api_view([POST])
 def login(request):
