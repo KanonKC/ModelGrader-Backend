@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import account,auth,problem,submission
+from .views import account,auth,problem,submission,topic
 
 
 urlpatterns = [
@@ -16,4 +16,8 @@ urlpatterns = [
 
     path('problems/<int:problem_id>/<int:account_id>',submission.submit_problem),
     path('submissions',submission.view_all_submission),
+
+    path('accounts/<int:account_id>/topic',topic.create_topic),
+    path('topics/<int:topic_id>',topic.one_topic),
+
 ]
