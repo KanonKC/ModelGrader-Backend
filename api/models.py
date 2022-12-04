@@ -32,6 +32,7 @@ class Problem(models.Model):
     description = models.CharField(max_length=10000)
     solution = models.CharField(max_length=20000)
     time_limit = models.FloatField(default=1.5,blank=True)
+    is_active = models.BooleanField(default=True)
     is_private = models.BooleanField(default=True)
 
 class Testcase(models.Model):

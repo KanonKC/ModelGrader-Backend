@@ -11,6 +11,7 @@ from django.forms.models import model_to_dict
 # Create your views here.
 @api_view([POST])
 def create_problem(request,account_id):
+    print(request.data)
     account = Account.objects.get(account_id=account_id)
     request.data['account_id'] = account
     checked = checker(request.data['solution'],request.data['testcases'],request.data.get('time_limit',1.5))

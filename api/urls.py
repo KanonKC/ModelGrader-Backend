@@ -19,5 +19,5 @@ urlpatterns = [
 
     path('accounts/<int:account_id>/topic',topic.create_topic),
     path('topics/<int:topic_id>',topic.one_topic),
-
+    path('topics/<int:topic_id>/problems',topic.topic_problem),
 ]
