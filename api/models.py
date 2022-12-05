@@ -6,6 +6,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from django.contrib.auth.base_user import AbstractBaseUser,BaseUserManager
+from .utility import uploadTopic
 
 # Create your models here.
 class ProgrammingLanguage(models.TextChoices):
@@ -55,6 +56,7 @@ class Topic(models.Model):
     account_id = models.ForeignKey(Account,on_delete=models.CASCADE,db_column="account_id")
     name = models.CharField(max_length=100)
     description = models.CharField(max_length=1000)
+    image_url = models.CharField(max_length=1000,default="",blank=True)
     is_active = models.BooleanField(default=False)
     is_private = models.BooleanField(default=True)
 

@@ -8,13 +8,10 @@ from rest_framework import status
 from django.forms.models import model_to_dict
 
 @api_view([POST])
-@parser_classes([MultiPartParser,FormParser])
 def create_topic(request,account_id :int):
-    request.data = dict(request.data)
+    print(request.data)
     account = Account.objects.get(account_id=account_id)
-    # request.data.extra(select={'account_id':account})
-    request.data['account_id'] = account
-    topic = Topic(**request.data)
+    topic = Topic(**request.data,account_id=account)
     topic.save()
     return Response({'topic':model_to_dict(topic)},status=status.HTTP_201_CREATED)
 
