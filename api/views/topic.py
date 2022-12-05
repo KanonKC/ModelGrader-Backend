@@ -9,13 +9,25 @@ from django.forms.models import model_to_dict
 
 @api_view([POST])
 def create_topic(request,account_id :int):
-    print(request.data)
     account = Account.objects.get(account_id=account_id)
     topic = Topic(**request.data,account_id=account)
     topic.save()
     return Response({'topic':model_to_dict(topic)},status=status.HTTP_201_CREATED)
 
 @api_view([GET])
+def all_topic(request):
+    topic = Topic.objects.all()
+
+    account_id = request.query_params.get('account_id',0)
+
+    if account_id:
+        topic = topic.filter(account_id=account_id)
+
+    return Response({
+        'topics': [model_to_dict(i) for i in topic]
+    },status=status.HTTP_200_OK)
+
+@api_view([GET,PUT])
 def one_topic(request,topic_id:int):
     topic = Topic.objects.get(topic_id=topic_id)
     topicProblem = Problem.objects.filter(topicproblem__topic_id=topic_id)
