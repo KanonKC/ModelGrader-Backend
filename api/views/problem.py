@@ -14,7 +14,7 @@ def create_problem(request,account_id):
     print(request.data)
     account = Account.objects.get(account_id=account_id)
     request.data['account_id'] = account
-    checked = checker(request.data['solution'],request.data['testcases'],request.data.get('time_limit',1.5))
+    checked = checker(1,request.data['solution'],request.data['testcases'],request.data.get('time_limit',1.5))
 
     if checked['has_error'] or checked['has_timeout']:
         return Response({'detail': 'Error during creating. Your code may has an error/timeout!'},status=status.HTTP_406_NOT_ACCEPTABLE)
@@ -75,7 +75,7 @@ def one_problem(request,problem_id: int):
         problem.solution = request.data.get("solution",problem.solution)
         problem.time_limit = request.data.get("time_limit",problem.time_limit)  
 
-        checked = checker(problem.solution,request.data['testcases'],request.data.get('time_limit',1.5))
+        checked = checker(1,problem.solution,request.data['testcases'],request.data.get('time_limit',1.5))
         if checked['has_error'] or checked['has_timeout']:
             return Response({'detail': 'Error during editing. Your code may has an error/timeout!'},status=status.HTTP_406_NOT_ACCEPTABLE)
 

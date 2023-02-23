@@ -41,6 +41,8 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://localhost:3001",
+    "http://192.168.216.250:3000",
+    # "http://192.168.216.234:3000",
 ]
 
 CORS_ALLOW_METHODS = [
