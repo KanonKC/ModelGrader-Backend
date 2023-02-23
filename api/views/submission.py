@@ -6,6 +6,7 @@ from ..models import Account, Problem, Submission,Testcase
 from rest_framework import status
 from django.forms.models import model_to_dict
 from ..sandbox import grader
+from time import sleep
 
 QUEUE = [0,0,0]
 
@@ -29,6 +30,7 @@ def submit_problem(request,problem_id,account_id):
     empty_queue = avaliableQueue()
     while empty_queue == -1:
         empty_queue = avaliableQueue()
+        sleep(5)
     QUEUE[empty_queue] = 1
     grading_result = grader.grading(empty_queue+1,submission_code,solution_input,solution_output)
     QUEUE[empty_queue] = 0
