@@ -7,7 +7,7 @@ from rest_framework import status
 from django.forms.models import model_to_dict
 from ..sandbox import grader
 
-QUEUE = [0]
+QUEUE = [0,0,0]
 
 def avaliableQueue():
     global QUEUE
