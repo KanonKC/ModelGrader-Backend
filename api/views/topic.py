@@ -6,45 +6,54 @@ from ..constant import GET,POST,PUT,DELETE
 from ..models import Account, Problem, Submission,Testcase, Topic, TopicProblem
 from rest_framework import status
 from django.forms.models import model_to_dict
+from ..serializers import TopicSerializer,TopicProblemSerializer,ProblemSerializer
 
 @api_view([POST])
 def create_topic(request,account_id :int):
     account = Account.objects.get(account_id=account_id)
-    topic = Topic(**request.data,account_id=account)
-    topic.save()
-    return Response({'topic':model_to_dict(topic)},status=status.HTTP_201_CREATED)
+    request.data['account_id'] = account.account_id
+    serializer  = TopicSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save(account_id=account)
+        return Response(serializer.data,status=status.HTTP_201_CREATED)
+    return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 @api_view([GET])
 def all_topic(request):
-    topic = Topic.objects.all()
+    topics = Topic.objects.all()
 
     account_id = request.query_params.get('account_id',0)
 
     if account_id:
-        topic = topic.filter(account_id=account_id)
+        topics = topics.filter(account_id=account_id)
+
+    serializer = TopicSerializer(topics,many=True)
 
     return Response({
-        'topics': [model_to_dict(i) for i in topic]
+        'topics': serializer.data
     },status=status.HTTP_200_OK)
 
-@api_view([GET,PUT])
+@api_view([GET,PUT,DELETE])
 def one_topic(request,topic_id:int):
     topic = Topic.objects.get(topic_id=topic_id)
     topicProblem = Problem.objects.filter(topicproblem__topic_id=topic_id)
 
     if request.method == GET:
+        topic_ser = TopicSerializer(topic)
+        problem_ser = ProblemSerializer(topicProblem,many=True)
         return Response({
-            "topic": model_to_dict(topic),
-            "problem": [model_to_dict(i) for i in topicProblem]
+            "topic": topic_ser.data,
+            "problem": problem_ser.data
         },status=status.HTTP_200_OK)
     elif request.method == PUT:
-        topic.name = request.data.get("name",topic.name)
-        topic.description = request.data.get("description",topic.description)
-        topic.is_active = request.data.get("is_active",topic.is_active)
-        topic.is_private = request.data.get("is_private",topic.is_private)
-        return Response({
-            "topic": model_to_dict(topic)
-        },status=status.HTTP_200_OK)
+        topic_ser = TopicSerializer(topic,data=request.data,partial=True)
+        if topic_ser.is_valid():
+            topic_ser.save()
+            return Response(topic_ser.data,status=status.HTTP_200_OK)
+        return Response(topic_ser.errors,status=status.HTTP_400_BAD_REQUEST)
+    elif request.method == DELETE:
+        topic.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 @api_view([PUT,DELETE])
 def topic_problem(request,topic_id:int):

@@ -55,8 +55,8 @@ class Topic(models.Model):
     topic_id = models.AutoField(primary_key=True)
     account_id = models.ForeignKey(Account,on_delete=models.CASCADE,db_column="account_id")
     name = models.CharField(max_length=100)
-    description = models.CharField(max_length=1000)
-    image_url = models.CharField(max_length=1000,default="",blank=True)
+    description = models.CharField(max_length=1000,null=True,blank=True)
+    image_url = models.ImageField(upload_to='topic/',null=True,blank=True)
     is_active = models.BooleanField(default=False)
     is_private = models.BooleanField(default=True)
 
