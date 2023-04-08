@@ -17,6 +17,11 @@ class TopicSerializer(serializers.ModelSerializer):
         instance.is_private = validate_data.get('is_private',instance.is_private)
         instance.save()
         return instance
+    
+class SubmissionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Submission
+        fields = "__all__"
 
 class TopicProblemSerializer(serializers.ModelSerializer):
     class Meta:
