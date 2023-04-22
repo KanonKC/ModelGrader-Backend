@@ -51,6 +51,14 @@ class Submission(models.Model):
     is_passed = models.BooleanField()
     date = models.DateTimeField(default=timezone.now)
 
+class Collection(models.Model):
+    collection_id = models.AutoField(primary_key=True)
+    owner = models.ForeignKey(Account,on_delete=models.CASCADE,db_column="owner_id")
+    name = models.CharField(max_length=100)
+    description = models.CharField(max_length=1000,null=True,blank=True,default=None)
+    is_active = models.BooleanField(default=False,blank=True)
+    is_private = models.BooleanField(default=True,blank=True)
+
 class Topic(models.Model):
     topic_id = models.AutoField(primary_key=True)
     account_id = models.ForeignKey(Account,on_delete=models.CASCADE,db_column="account_id")
@@ -59,6 +67,14 @@ class Topic(models.Model):
     image_url = models.ImageField(upload_to='topic/',null=True,blank=True,default=None)
     is_active = models.BooleanField(default=False,blank=True)
     is_private = models.BooleanField(default=True,blank=True)
+
+class TopicCollection(models.Model):
+    topic = models.ForeignKey(Topic,on_delete=models.CASCADE,db_column="topic_id")
+    collection = models.ForeignKey(Collection,on_delete=models.CASCADE,db_column="collection_id")
+
+class CollectionProblem(models.Model):
+    collection = models.ForeignKey(Collection,on_delete=models.CASCADE,db_column="collection_id")
+    problem = models.ForeignKey(Problem,on_delete=models.CASCADE,db_column="problem_id")
 
 class TopicProblem(models.Model):
     topic_id = models.ForeignKey(Topic,on_delete=models.CASCADE,db_column="topic_id")

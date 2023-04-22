@@ -32,3 +32,30 @@ class ProblemSerializer(serializers.ModelSerializer):
     class Meta:
         model = Problem
         fields = "__all__"
+
+class TopicCollectionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TopicCollection
+        fields = "__all__"
+
+class CollectionProblemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CollectionProblem
+        fields = "__all__"
+
+class CollectionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Collection
+        fields = "__all__"
+    
+    def create(self,validate_data):
+        return Collection.objects.create(**validate_data)
+
+    def update(self, instance, validated_data):
+        instance.name = validated_data.get('name',instance.name)
+        instance.description = validated_data.get('description',instance.description)
+        instance.is_active = validated_data.get('is_active',instance.is_active)
+        instance.is_private = validated_data.get('is_private',instance.is_private)
+
+        instance.save()
+        return instance

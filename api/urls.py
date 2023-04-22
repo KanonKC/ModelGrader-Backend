@@ -21,5 +21,5 @@ urlpatterns = [
     path('accounts/<int:account_id>/topics',topic.create_topic),
     path('topics',topic.all_topic),
     path('topics/<int:topic_id>',topic.one_topic),
-    path('topics/<int:topic_id>/problems',topic.topic_problem),
+    path('topics/<int:topic_id>/collections',topic.topic_collection),
 ]
