@@ -39,14 +39,32 @@ def all_topic(request):
 def one_topic(request,topic_id:int):
     topic = Topic.objects.get(topic_id=topic_id)
     topicProblem = Problem.objects.filter(topicproblem__topic_id=topic_id)
-    collection = Collection.objects.filter(topiccollection__topic_id=topic_id)
-
+    collections = Collection.objects.filter(topiccollection__topic_id=topic_id)
+    topicCollections = TopicCollection.objects.filter(topic_id=topic_id)
+    
     if request.method == GET:
         topic_ser = TopicSerializer(topic)
-        collection_ser = CollectionSerializer(collection,many=True)
+        populate_collections = []
+
+        for top_col in topicCollections:
+            collection_serialize = CollectionSerializer(top_col.collection)
+            collection_data = collection_serialize.data
+
+            populate_problems = []
+            collection_problems = CollectionProblem.objects.filter(collection=top_col.collection)
+            for col_prob in collection_problems:
+                prob_serialize = ProblemSerializer(col_prob.problem)
+                col_prob_serialize = CollectionProblemSerializer(col_prob)
+                populate_problems.append({**col_prob_serialize.data,**prob_serialize.data})
+
+            collection_data['problems'] = populate_problems
+            top_col_serialize = TopicCollectionSerializer(top_col)
+            populate_collections.append({**top_col_serialize.data,**collection_data})
+
+
         return Response({
             "topic": topic_ser.data,
-            "problem": collection_ser.data
+            "collections": populate_collections
         },status=status.HTTP_200_OK)
     elif request.method == PUT:
         topic_ser = TopicSerializer(topic,data=request.data,partial=True)
@@ -63,20 +81,29 @@ def topic_collection(request,topic_id:int):
     topic = Topic.objects.get(topic_id=topic_id)
 
     if request.method == PUT:
-        populated_problem = []
+        populated_collections = []
+        
+        index = 0
         for collection_id in request.data['collection_ids']:
             collection = Collection.objects.get(collection_id=collection_id)
-            if TopicCollection.objects.filter(topic_id=topic.topic_id,collection_id=collection.collection_id):
-                continue
+
+            alreadyExist = TopicCollection.objects.filter(topic_id=topic.topic_id,collection_id=collection.collection_id)
+            if alreadyExist:
+                alreadyExist.delete()
+                
             topicCollection = TopicCollection(
                 topic=topic,
-                collection=collection
-            )    
+                collection=collection,
+                order=index
+            )
             topicCollection.save()
-            populated_problem.append(model_to_dict(collection))
+            index += 1
+            tc_serialize = TopicCollectionSerializer(topicCollection)
+            populated_collections.append(tc_serialize.data)
+        
         return Response({
             "topic": TopicSerializer(topic).data,
-            "problems": populated_problem
+            "collections": populated_collections
         },status=status.HTTP_201_CREATED)
 
     elif request.method == DELETE:

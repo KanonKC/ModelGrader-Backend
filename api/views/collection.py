@@ -10,8 +10,7 @@ from ..serializers import *
 
 @api_view([POST])
 def create_collections(request,account_id:int):
-    request.data._mutable=True
-    request.data['account_id'] = account_id
+    request.data['owner'] = account_id
 
     serialize = CollectionSerializer(data=request.data)
 
@@ -20,6 +19,21 @@ def create_collections(request,account_id:int):
         return Response(serialize.data,status=status.HTTP_201_CREATED)
     else:
         return Response(serialize.errors,status=status.HTTP_400_BAD_REQUEST)
+
+@api_view([GET])
+def all_collections(request):
+    collections = Collection.objects.all()
+
+    account_id = request.query_params.get('account_id',0)
+
+    if account_id:
+        collections = collections.filter(owner_id=account_id)
+    
+    serialize = CollectionSerializer(collections,many=True)
+
+    return Response({
+        'collections': serialize.data
+    },status=status.HTTP_200_OK)
 
 @api_view([GET,PUT,DELETE])
 def one_collection(request,collection_id:int):
@@ -32,7 +46,7 @@ def one_collection(request,collection_id:int):
 
         return Response({
             'collection': collection_ser.data,
-            'problem': [i.data for i in problems_ser]
+            'problem': problems_ser.data
         } ,status=status.HTTP_200_OK)
     
     if request.method == PUT:
@@ -49,4 +63,36 @@ def one_collection(request,collection_id:int):
 
 @api_view([PUT,DELETE])
 def collection_problems(request,collection_id:int):
-    pass
+    collection = Collection.objects.get(collection_id=collection_id)
+
+    if request.method == PUT:
+        populated_problems = []
+        add_problems = Problem.objects.filter(problem_id__in=request.data['problem_ids'])
+
+        index = 0
+        for problem in add_problems:
+
+            alreadyExist = CollectionProblem.objects.filter(problem=problem,collection=collection)
+            if alreadyExist:
+                alreadyExist.delete()
+            
+            collection_problem = CollectionProblem(
+                problem=problem,
+                collection=collection,
+                order=index
+            )
+            collection_problem.save()
+            index += 1
+            cp_serialize = CollectionProblemSerializer(collection_problem)
+            populated_problems.append(cp_serialize.data)
+        
+        collection_serialize = CollectionSerializer(collection)
+
+        return Response({
+            'collection': collection_serialize.data,
+            'problems': populated_problems
+        },status=status.HTTP_201_CREATED)
+    
+    if request.method == DELETE:
+        CollectionProblem.objects.filter(collection=collection,problem_id__in=request.data['problem_ids']).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
