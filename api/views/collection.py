@@ -28,25 +28,46 @@ def all_collections(request):
 
     if account_id:
         collections = collections.filter(owner_id=account_id)
+
+    populated_collections = []
+    for collection in collections:
+        con_probs = CollectionProblem.objects.filter(collection=collection)
+
+        populated_cp = []
+        for cp in con_probs:
+            prob_serialize = ProblemSerializer(cp.problem)
+            cp_serialize = CollectionProblemSerializer(cp)
+            populated_cp.append({**cp_serialize.data,**prob_serialize.data})
     
-    serialize = CollectionSerializer(collections,many=True)
+        serialize = CollectionSerializer(collection)
+        collection_data = serialize.data
+        collection_data['problems'] = populated_cp
+        # print()
+
+        populated_collections.append(collection_data)
 
     return Response({
-        'collections': serialize.data
+        'collections': populated_collections
     },status=status.HTTP_200_OK)
 
 @api_view([GET,PUT,DELETE])
 def one_collection(request,collection_id:int):
     collection = Collection.objects.get(collection_id=collection_id)
     problems = Problem.objects.filter(collectionproblem__collection_id=collection_id)
+    collectionProblems = CollectionProblem.objects.filter(collection=collection)
 
     if request.method == GET:
         collection_ser = CollectionSerializer(collection)
-        problems_ser = ProblemSerializer(problems,many=True)
+        
+        populated_problems = []
+        for col_prob in collectionProblems:
+            col_prob_serialize = CollectionProblemSerializer(col_prob)
+            prob_serialize = ProblemSerializer(col_prob.problem)
+            populated_problems.append({**col_prob_serialize.data,**prob_serialize.data})
 
         return Response({
             'collection': collection_ser.data,
-            'problem': problems_ser.data
+            'problems': populated_problems
         } ,status=status.HTTP_200_OK)
     
     if request.method == PUT:
@@ -67,10 +88,11 @@ def collection_problems(request,collection_id:int):
 
     if request.method == PUT:
         populated_problems = []
-        add_problems = Problem.objects.filter(problem_id__in=request.data['problem_ids'])
 
         index = 0
-        for problem in add_problems:
+        for problem_id in request.data['problem_ids']:
+
+            problem = Problem.objects.get(problem_id=problem_id)
 
             alreadyExist = CollectionProblem.objects.filter(problem=problem,collection=collection)
             if alreadyExist:
@@ -81,6 +103,7 @@ def collection_problems(request,collection_id:int):
                 collection=collection,
                 order=index
             )
+            print(problem,index)
             collection_problem.save()
             index += 1
             cp_serialize = CollectionProblemSerializer(collection_problem)
