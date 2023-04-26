@@ -21,10 +21,10 @@ urlpatterns = [
     path('accounts/<int:account_id>/topics',topic.create_topic),
     path('topics',topic.all_topic),
     path('topics/<int:topic_id>',topic.one_topic),
-    path('topics/<int:topic_id>/collections',topic.topic_collection),
+    path('topics/<int:topic_id>/collections/<str:method>',topic.topic_collection),
 
     path('accounts/<int:account_id>/collections',collection.create_collections),
     path('collections',collection.all_collections),
     path('collections/<int:collection_id>',collection.one_collection),
-    path('collections/<int:collection_id>/problems',collection.collection_problems),
+    path('collections/<int:collection_id>/problems/<str:method>',collection.collection_problems),
 ]

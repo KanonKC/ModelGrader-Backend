@@ -67,7 +67,7 @@ def one_collection(request,collection_id:int):
 
         return Response({
             'collection': collection_ser.data,
-            'problems': populated_problems
+            'problems': sorted(populated_problems,key=lambda problem: problem['order'])
         } ,status=status.HTTP_200_OK)
     
     if request.method == PUT:
@@ -82,11 +82,11 @@ def one_collection(request,collection_id:int):
         collection.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-@api_view([PUT,DELETE])
-def collection_problems(request,collection_id:int):
+@api_view([PUT])
+def collection_problems(request,collection_id:int,method:str):
     collection = Collection.objects.get(collection_id=collection_id)
 
-    if request.method == PUT:
+    if method == "add":
         populated_problems = []
 
         index = 0
@@ -116,6 +116,6 @@ def collection_problems(request,collection_id:int):
             'problems': populated_problems
         },status=status.HTTP_201_CREATED)
     
-    if request.method == DELETE:
+    if  method == "remove":
         CollectionProblem.objects.filter(collection=collection,problem_id__in=request.data['problem_ids']).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

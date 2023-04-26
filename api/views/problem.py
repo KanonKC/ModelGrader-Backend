@@ -12,6 +12,7 @@ from django.forms.models import model_to_dict
 @api_view([POST])
 def create_problem(request,account_id):
     print(request.data)
+    request._mutable = True
     account = Account.objects.get(account_id=account_id)
     request.data['account_id'] = account
     checked = checker(1,request.data['solution'],request.data['testcases'],request.data.get('time_limit',1.5))

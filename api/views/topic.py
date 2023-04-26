@@ -61,10 +61,9 @@ def one_topic(request,topic_id:int):
             top_col_serialize = TopicCollectionSerializer(top_col)
             populate_collections.append({**top_col_serialize.data,**collection_data})
 
-
         return Response({
             "topic": topic_ser.data,
-            "collections": populate_collections
+            "collections": sorted(populate_collections,key=lambda collection: collection['order'])
         },status=status.HTTP_200_OK)
     elif request.method == PUT:
         topic_ser = TopicSerializer(topic,data=request.data,partial=True)
@@ -76,11 +75,11 @@ def one_topic(request,topic_id:int):
         topic.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-@api_view([PUT,DELETE])
-def topic_collection(request,topic_id:int):
+@api_view([PUT])
+def topic_collection(request,topic_id:int,method:str):
     topic = Topic.objects.get(topic_id=topic_id)
 
-    if request.method == PUT:
+    if method == "add":
         populated_collections = []
         
         index = 0
@@ -106,7 +105,7 @@ def topic_collection(request,topic_id:int):
             "collections": populated_collections
         },status=status.HTTP_201_CREATED)
 
-    elif request.method == DELETE:
+    elif method == "remove":
         TopicCollection.objects.filter(topic_id=topic_id,collection_id__in=request.data['collection_ids']).delete()
         # collections = Collection.objects.filter(collection_id__in=request.data['collection_ids'])
         # problems = Problem.objects.filter(problem_id__in=request.data['problems_id'])
