@@ -1,6 +1,0 @@
-{
-    "nuxt.isNuxtApp": false,
-    "python.analysis.extraPaths": [
-        "./env/Lib/site-packages"
-    ]
-}

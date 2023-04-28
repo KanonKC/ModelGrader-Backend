@@ -9,10 +9,10 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
-from datetime import timedelta
 import os
-from pathlib import Path
 import environ
+from datetime import timedelta
+from pathlib import Path
 
 env = environ.Env(
     # set casting, default value
@@ -30,7 +30,7 @@ environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-7fk!^ke_z%97-at2-fff=%v+mk!7)&0(!bvku5)v#&*olpu#gp'
-
+FRONEND_URL = env('FRONTEND_URL')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -44,7 +44,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://192.168.216.250:3000",
     "http://192.168.0.2:3000",
     "http://192.168.0.5:3000",
-    # "http://192.168.216.234:3000",
+    FRONEND_URL
 ]
 
 CORS_ALLOW_METHODS = [
