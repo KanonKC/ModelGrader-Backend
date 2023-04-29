@@ -50,6 +50,7 @@ def all_problem(request):
         for i in result:
             i['creator'] = model_to_dict(Account.objects.get(account_id=i['account_id']))
 
+        result.reverse()
         return Response({'result':result},status=status.HTTP_200_OK)
     elif request.method == DELETE:
         target = request.data.get("problem",[])
