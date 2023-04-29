@@ -9,8 +9,10 @@ from rest_framework import status
 from django.forms.models import model_to_dict
 from uuid import uuid4
 from time import time
+from decouple import config
 
-TOKEN_LIFETIME = 2*60*60 # (Second)
+TOKEN_LIFETIME_HOURS = int(config('TOKEN_LIFETIME_HOURS'))
+TOKEN_LIFETIME = TOKEN_LIFETIME_HOURS * 60 * 60 # (Second)
 
 @api_view([POST])
 def login(request):
