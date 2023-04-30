@@ -7,4 +7,10 @@ runner.py
 env/
 .env
 
+[0-9]*.txt
+
+# *png
+# *jpg
+# *jpeg
+# *webp
 tempCodeRunnerFile.py

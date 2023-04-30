@@ -1,19 +1,19 @@
 import subprocess
 
-def checker(code:str,testcases:list,timeout=1.5)->dict:
+def checker(section:int,code:str,testcases:list,timeout=1.5)->dict:
     result = []
     hasError = False
     hasTimeout = False
     for i in range(len(testcases)):
-        with open(f'./api/sandbox/testcases/{i}.txt','w') as f:
+        with open(f'./api/sandbox/section{section}/testcases/{i}.txt','w') as f:
             f.write(testcases[i])
     
-    with open('./api/sandbox/runner.py','w') as f:
+    with open(f'./api/sandbox/section{section}/runner.py','w') as f:
         f.write(code)
 
     for i in range(len(testcases)):
         try:
-            runner = subprocess.check_output(['python','./api/sandbox/runner.py'],stdin=open(f'./api/sandbox/testcases/{i}.txt','r'),stderr=subprocess.DEVNULL,timeout=float(timeout))
+            runner = subprocess.check_output(['python',f'./api/sandbox/section{section}/runner.py'],stdin=open(f'./api/sandbox/section{section}/testcases/{i}.txt','r'),stderr=subprocess.DEVNULL,timeout=float(timeout))
             result.append({'input':testcases[i],'output':runner.decode(),'runtime_status':'OK'})
         except subprocess.CalledProcessError:
             hasError = True
@@ -25,9 +25,9 @@ def checker(code:str,testcases:list,timeout=1.5)->dict:
     return {'result':result,'has_error':hasError,'has_timeout':hasTimeout}
     
 
-def grading(code:str,input:list,output:list,timeout=1.5)->str:
+def grading(section:int,code:str,input:list,output:list,timeout=1.5)->str:
     score = ''
-    graded = checker(code,input,timeout)
+    graded = checker(section,code,input,timeout)
     graded_result = graded['result']
 
     for i in range(len(output)):

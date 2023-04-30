@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import account,auth,problem,submission,topic
+from .views import account,auth,problem,submission,topic,collection
 
 
 urlpatterns = [
@@ -9,6 +9,7 @@ urlpatterns = [
 
     path("accounts",account.create_account),
     path("accounts/<int:account_id>",account.get_account),
+    path("accounts/<int:account_id>/daily-submissions",account.get_daily_submission),
 
     path('accounts/<int:account_id>/problems',problem.create_problem),
     path('problems',problem.all_problem),
@@ -20,5 +21,10 @@ urlpatterns = [
     path('accounts/<int:account_id>/topics',topic.create_topic),
     path('topics',topic.all_topic),
     path('topics/<int:topic_id>',topic.one_topic),
-    path('topics/<int:topic_id>/problems',topic.topic_problem),
+    path('topics/<int:topic_id>/collections/<str:method>',topic.topic_collection),
+
+    path('accounts/<int:account_id>/collections',collection.create_collections),
+    path('collections',collection.all_collections),
+    path('collections/<int:collection_id>',collection.one_collection),
+    path('collections/<int:collection_id>/problems/<str:method>',collection.collection_problems),
 ]

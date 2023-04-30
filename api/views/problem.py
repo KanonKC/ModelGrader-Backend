@@ -12,9 +12,10 @@ from django.forms.models import model_to_dict
 @api_view([POST])
 def create_problem(request,account_id):
     print(request.data)
+    request._mutable = True
     account = Account.objects.get(account_id=account_id)
     request.data['account_id'] = account
-    checked = checker(request.data['solution'],request.data['testcases'],request.data.get('time_limit',1.5))
+    checked = checker(1,request.data['solution'],request.data['testcases'],request.data.get('time_limit',1.5))
 
     if checked['has_error'] or checked['has_timeout']:
         return Response({'detail': 'Error during creating. Your code may has an error/timeout!'},status=status.HTTP_406_NOT_ACCEPTABLE)
@@ -49,6 +50,7 @@ def all_problem(request):
         for i in result:
             i['creator'] = model_to_dict(Account.objects.get(account_id=i['account_id']))
 
+        result.reverse()
         return Response({'result':result},status=status.HTTP_200_OK)
     elif request.method == DELETE:
         target = request.data.get("problem",[])
@@ -74,24 +76,29 @@ def one_problem(request,problem_id: int):
         problem.description = request.data.get("description",problem.description)
         problem.solution = request.data.get("solution",problem.solution)
         problem.time_limit = request.data.get("time_limit",problem.time_limit)  
+        problem.is_private = request.data.get("is_private",problem.is_private)
 
-        checked = checker(problem.solution,request.data['testcases'],request.data.get('time_limit',1.5))
-        if checked['has_error'] or checked['has_timeout']:
-            return Response({'detail': 'Error during editing. Your code may has an error/timeout!'},status=status.HTTP_406_NOT_ACCEPTABLE)
+        if 'testcases' in request.data:
+            checked = checker(1,problem.solution,request.data['testcases'],request.data.get('time_limit',1.5))
+            if checked['has_error'] or checked['has_timeout']:
+                return Response({'detail': 'Error during editing. Your code may has an error/timeout!'},status=status.HTTP_406_NOT_ACCEPTABLE)
 
-        testcases.delete()
-        testcase_result = []
-        for unit in checked['result']:
-            testcase = Testcase(
-                problem_id = problem,
-                input = unit['input'],
-                output = unit['output']
-            )
-            testcase.save()
-            testcase_result.append(model_to_dict(testcase))
+            testcases.delete()
+            testcase_result = []
+            for unit in checked['result']:
+                testcase = Testcase(
+                    problem_id = problem,
+                    input = unit['input'],
+                    output = unit['output']
+                )
+                testcase.save()
+                testcase_result.append(model_to_dict(testcase))
+            problem.save()
+
+            return Response({'detail': 'Problem has been edited!','problem': model_to_dict(problem),'testcase': testcase_result},status=status.HTTP_201_CREATED)
+
         problem.save()
-
-        return Response({'detail': 'Problem has been edited!','problem': model_to_dict(problem),'testcase': testcase_result},status=status.HTTP_201_CREATED)
+        return Response({'detail': 'Problem has been edited!','problem': model_to_dict(problem)},status=status.HTTP_201_CREATED)
 
     elif request.method == DELETE:
         problem.delete()

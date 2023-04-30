@@ -3,71 +3,111 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view,parser_classes
 from rest_framework.parsers import MultiPartParser, FormParser
 from ..constant import GET,POST,PUT,DELETE
-from ..models import Account, Problem, Submission,Testcase, Topic, TopicProblem
+from ..models import Account, Problem, Submission,Testcase, Topic, TopicProblem, Collection
 from rest_framework import status
 from django.forms.models import model_to_dict
+from ..serializers import *
 
 @api_view([POST])
+@parser_classes([MultiPartParser,FormParser])
 def create_topic(request,account_id :int):
-    account = Account.objects.get(account_id=account_id)
-    topic = Topic(**request.data,account_id=account)
-    topic.save()
-    return Response({'topic':model_to_dict(topic)},status=status.HTTP_201_CREATED)
+    request.data._mutable=True
+    request.data['account_id'] = account_id
+    serializer = TopicSerializer(data=request.data)
+
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data,status=status.HTTP_201_CREATED)
+    return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 @api_view([GET])
 def all_topic(request):
-    topic = Topic.objects.all()
+    topics = Topic.objects.all()
 
     account_id = request.query_params.get('account_id',0)
 
     if account_id:
-        topic = topic.filter(account_id=account_id)
+        topics = topics.filter(account_id=account_id)
+
+    serializer = TopicSerializer(topics,many=True)
 
     return Response({
-        'topics': [model_to_dict(i) for i in topic]
+        'topics': serializer.data
     },status=status.HTTP_200_OK)
 
-@api_view([GET,PUT])
+@api_view([GET,PUT,DELETE])
 def one_topic(request,topic_id:int):
     topic = Topic.objects.get(topic_id=topic_id)
     topicProblem = Problem.objects.filter(topicproblem__topic_id=topic_id)
-
+    collections = Collection.objects.filter(topiccollection__topic_id=topic_id)
+    topicCollections = TopicCollection.objects.filter(topic_id=topic_id)
+    
     if request.method == GET:
+        topic_ser = TopicSerializer(topic)
+        populate_collections = []
+
+        for top_col in topicCollections:
+            collection_serialize = CollectionSerializer(top_col.collection)
+            collection_data = collection_serialize.data
+
+            populate_problems = []
+            collection_problems = CollectionProblem.objects.filter(collection=top_col.collection)
+            for col_prob in collection_problems:
+                prob_serialize = ProblemSerializer(col_prob.problem)
+                col_prob_serialize = CollectionProblemSerializer(col_prob)
+                populate_problems.append({**col_prob_serialize.data,**prob_serialize.data})
+
+            collection_data['problems'] = populate_problems
+            top_col_serialize = TopicCollectionSerializer(top_col)
+            populate_collections.append({**top_col_serialize.data,**collection_data})
+
         return Response({
-            "topic": model_to_dict(topic),
-            "problem": [model_to_dict(i) for i in topicProblem]
+            "topic": topic_ser.data,
+            "collections": sorted(populate_collections,key=lambda collection: collection['order'])
         },status=status.HTTP_200_OK)
     elif request.method == PUT:
-        topic.name = request.data.get("name",topic.name)
-        topic.description = request.data.get("description",topic.description)
-        topic.is_active = request.data.get("is_active",topic.is_active)
-        topic.is_private = request.data.get("is_private",topic.is_private)
-        return Response({
-            "topic": model_to_dict(topic)
-        },status=status.HTTP_200_OK)
+        topic_ser = TopicSerializer(topic,data=request.data,partial=True)
+        if topic_ser.is_valid():
+            topic_ser.save()
+            return Response(topic_ser.data,status=status.HTTP_200_OK)
+        return Response(topic_ser.errors,status=status.HTTP_400_BAD_REQUEST)
+    elif request.method == DELETE:
+        topic.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
-@api_view([PUT,DELETE])
-def topic_problem(request,topic_id:int):
+@api_view([PUT])
+def topic_collection(request,topic_id:int,method:str):
     topic = Topic.objects.get(topic_id=topic_id)
 
-    if request.method == PUT:
-        populated_problem = []
-        for id in request.data['problems_id']:
-            problem = Problem.objects.get(problem_id=id)
-            if TopicProblem.objects.filter(topic_id=topic,problem_id=problem):
-                continue
-            topicProblem = TopicProblem(
-                topic_id=topic,
-                problem_id=problem
-            )    
-            topicProblem.save()
-            populated_problem.append(model_to_dict(problem))
+    if method == "add":
+        populated_collections = []
+        
+        index = 0
+        for collection_id in request.data['collection_ids']:
+            collection = Collection.objects.get(collection_id=collection_id)
+
+            alreadyExist = TopicCollection.objects.filter(topic_id=topic.topic_id,collection_id=collection.collection_id)
+            if alreadyExist:
+                alreadyExist.delete()
+                
+            topicCollection = TopicCollection(
+                topic=topic,
+                collection=collection,
+                order=index
+            )
+            topicCollection.save()
+            index += 1
+            tc_serialize = TopicCollectionSerializer(topicCollection)
+            populated_collections.append(tc_serialize.data)
+        
         return Response({
-            "topic": model_to_dict(topic),
-            "problems": populated_problem
+            "topic": TopicSerializer(topic).data,
+            "collections": populated_collections
         },status=status.HTTP_201_CREATED)
 
-    elif request.method == DELETE:
-        problems = Problem.objects.filter(problem_id__in=request.data['problems_id'])
-        TopicProblem.objects.filter(topic_id=topic,problem_id__in=problems).delete()
+    elif method == "remove":
+        TopicCollection.objects.filter(topic_id=topic_id,collection_id__in=request.data['collection_ids']).delete()
+        # collections = Collection.objects.filter(collection_id__in=request.data['collection_ids'])
+        # problems = Problem.objects.filter(problem_id__in=request.data['problems_id'])
+        # TopicProblem.objects.filter(topic_id=topic,problem_id__in=problems).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
