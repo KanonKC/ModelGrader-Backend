@@ -40,6 +40,4 @@ def get_daily_submission(request,account_id:int):
         else:
             submission_by_date[date] = {"count":1, "submissions": [ submission ]}
     
-    print(submission_by_date)
-
     return Response({"submissions_by_date": submission_by_date})

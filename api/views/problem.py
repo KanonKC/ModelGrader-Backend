@@ -44,13 +44,27 @@ def create_problem(request,account_id):
 @api_view([GET,DELETE])
 def all_problem(request):
     if request.method == GET:
+
         problem = Problem.objects.all()
+
+        get_private = int(request.query_params.get("private",0))
+        get_deactive = int(request.query_params.get("deactive",0))
+        account_id = int(request.query_params.get("account_id",0))
+        
+        if not get_private:
+            problem = problem.filter(is_private=False)
+        if not get_deactive:
+            problem = problem.filter(is_active=True)
+        if account_id != 0:
+            problem = problem.filter(account_id=account_id)
+
+        problem = problem.order_by('-problem_id')
+
         result = [model_to_dict(i) for i in problem]
 
         for i in result:
             i['creator'] = model_to_dict(Account.objects.get(account_id=i['account_id']))
 
-        result.reverse()
         return Response({'result':result},status=status.HTTP_200_OK)
     elif request.method == DELETE:
         target = request.data.get("problem",[])
