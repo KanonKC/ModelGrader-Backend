@@ -8,7 +8,7 @@ from django.forms.models import model_to_dict
 from ..sandbox import grader
 from time import sleep
 
-QUEUE = [0,0,0]
+QUEUE = [0,0,0,0,0,0,0,0,0,0]
 
 def avaliableQueue():
     global QUEUE
