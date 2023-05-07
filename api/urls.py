@@ -10,6 +10,7 @@ urlpatterns = [
     path("accounts",account.create_account),
     path("accounts/<int:account_id>",account.get_account),
     path("accounts/<int:account_id>/daily-submissions",account.get_daily_submission),
+    path("accounts/<int:account_id>/password",account.change_password),
 
     path('accounts/<int:account_id>/problems',problem.create_problem),
     path('problems',problem.all_problem),

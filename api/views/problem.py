@@ -18,7 +18,7 @@ def create_problem(request,account_id):
     checked = checker(1,request.data['solution'],request.data['testcases'],request.data.get('time_limit',1.5))
 
     if checked['has_error'] or checked['has_timeout']:
-        return Response({'detail': 'Error during creating. Your code may has an error/timeout!'},status=status.HTTP_406_NOT_ACCEPTABLE)
+        return Response({'detail': 'Error during creating. Your code may has an error/timeout!','result': checked},status=status.HTTP_406_NOT_ACCEPTABLE)
         
     problem = Problem(
         language = request.data['language'],
