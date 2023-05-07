@@ -25,6 +25,14 @@ def get_account(request,account_id):
     except:
         return Response({'message':'Account not found!'},status=status.HTTP_404_NOT_FOUND)
 
+@api_view([PUT])
+def change_password(request,account_id):
+    account = Account.objects.get(account_id=account_id)
+    account.password = passwordEncryption(request.data['password'])
+    account.save()
+
+    return Response({'message':"Your password has been changed"})
+
 @api_view([GET])
 def get_daily_submission(request,account_id:int):
     submissions = Submission.objects.filter(account_id=account_id)
@@ -40,6 +48,4 @@ def get_daily_submission(request,account_id:int):
         else:
             submission_by_date[date] = {"count":1, "submissions": [ submission ]}
     
-    print(submission_by_date)
-
     return Response({"submissions_by_date": submission_by_date})

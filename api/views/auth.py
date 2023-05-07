@@ -11,8 +11,7 @@ from uuid import uuid4
 from time import time
 from decouple import config
 
-TOKEN_LIFETIME_HOURS = int(config('TOKEN_LIFETIME_HOURS'))
-TOKEN_LIFETIME = TOKEN_LIFETIME_HOURS * 60 * 60 # (Second)
+TOKEN_LIFETIME = int(config('TOKEN_LIFETIME_SECOND')) # (Second)
 
 @api_view([POST])
 def login(request):

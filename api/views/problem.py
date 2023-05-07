@@ -18,7 +18,7 @@ def create_problem(request,account_id):
     checked = checker(1,request.data['solution'],request.data['testcases'],request.data.get('time_limit',1.5))
 
     if checked['has_error'] or checked['has_timeout']:
-        return Response({'detail': 'Error during creating. Your code may has an error/timeout!'},status=status.HTTP_406_NOT_ACCEPTABLE)
+        return Response({'detail': 'Error during creating. Your code may has an error/timeout!','result': checked},status=status.HTTP_406_NOT_ACCEPTABLE)
         
     problem = Problem(
         language = request.data['language'],
@@ -44,13 +44,27 @@ def create_problem(request,account_id):
 @api_view([GET,DELETE])
 def all_problem(request):
     if request.method == GET:
+
         problem = Problem.objects.all()
+
+        get_private = int(request.query_params.get("private",0))
+        get_deactive = int(request.query_params.get("deactive",0))
+        account_id = int(request.query_params.get("account_id",0))
+        
+        if not get_private:
+            problem = problem.filter(is_private=False)
+        if not get_deactive:
+            problem = problem.filter(is_active=True)
+        if account_id != 0:
+            problem = problem.filter(account_id=account_id)
+
+        problem = problem.order_by('-problem_id')
+
         result = [model_to_dict(i) for i in problem]
 
         for i in result:
             i['creator'] = model_to_dict(Account.objects.get(account_id=i['account_id']))
 
-        result.reverse()
         return Response({'result':result},status=status.HTTP_200_OK)
     elif request.method == DELETE:
         target = request.data.get("problem",[])
