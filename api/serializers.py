@@ -1,6 +1,11 @@
 from rest_framework import serializers
 from .models import *
 
+class AccountSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Account
+        fields = "__all__"
+
 class TopicSerializer(serializers.ModelSerializer):
     class Meta:
         model = Topic
@@ -59,3 +64,8 @@ class CollectionSerializer(serializers.ModelSerializer):
 
         instance.save()
         return instance
+
+class TopicAccountAccessSerialize(serializers.ModelSerializer):
+    class Meta:
+        model = TopicAccountAccess
+        fields = "__all__"

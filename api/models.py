@@ -82,3 +82,7 @@ class CollectionProblem(models.Model):
 class TopicProblem(models.Model):
     topic_id = models.ForeignKey(Topic,on_delete=models.CASCADE,db_column="topic_id")
     problem_id = models.ForeignKey(Problem,on_delete=models.CASCADE,db_column="problem_id")
+
+class TopicAccountAccess(models.Model):
+    topic = models.ForeignKey(Topic,on_delete=models.CASCADE,db_column="topic_id")
+    account = models.ForeignKey(Account,on_delete=models.CASCADE,db_column="account_id")
