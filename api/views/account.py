@@ -6,16 +6,24 @@ from ..constant import GET,POST,PUT,DELETE
 from ..models import *
 from rest_framework import status
 from django.forms.models import model_to_dict
-from ..serializers import SubmissionSerializer
+from ..serializers import *
 
-@api_view([POST])
-def create_account(request):
-    request.data['password'] = passwordEncryption(request.data['password'])
-    try:
-        account = Account.objects.create(**request.data)
-    except Exception as e:
-        return Response({'message':str(e)},status=status.HTTP_400_BAD_REQUEST)
-    return Response({'message':'Registration Completed','account':model_to_dict(account)},status=status.HTTP_201_CREATED)
+@api_view([GET,POST])
+def account_collection(request):
+    if request.method == GET:
+        accounts = Account.objects.all()
+        serialize = AccountSerializer(accounts,many=True)
+        return Response({
+            "accounts": serialize.data
+        },status=status.HTTP_200_OK)
+    
+    elif request.method == POST:
+        request.data['password'] = passwordEncryption(request.data['password'])
+        try:
+            account = Account.objects.create(**request.data)
+        except Exception as e:
+            return Response({'message':str(e)},status=status.HTTP_400_BAD_REQUEST)
+        return Response({'message':'Registration Completed','account':model_to_dict(account)},status=status.HTTP_201_CREATED)
 
 @api_view([GET])
 def get_account(request,account_id):

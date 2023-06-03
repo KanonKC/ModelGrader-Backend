@@ -7,7 +7,7 @@ urlpatterns = [
     path("logout",auth.logout),
     path('token',auth.get_authorization),
 
-    path("accounts",account.create_account),
+    path("accounts",account.account_collection),
     path("accounts/<int:account_id>",account.get_account),
     path("accounts/<int:account_id>/daily-submissions",account.get_daily_submission),
     path("accounts/<int:account_id>/password",account.change_password),
