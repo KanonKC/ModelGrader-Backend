@@ -111,3 +111,4 @@ def topic_collection(request,topic_id:int,method:str):
         # problems = Problem.objects.filter(problem_id__in=request.data['problems_id'])
         # TopicProblem.objects.filter(topic_id=topic,problem_id__in=problems).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
