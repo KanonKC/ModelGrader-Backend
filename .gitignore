@@ -14,3 +14,6 @@ env/
 *jpeg
 *webp
 tempCodeRunnerFile.py
+
+*.sqlite3
+*.exe
