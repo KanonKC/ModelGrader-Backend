@@ -33,9 +33,12 @@ def grading(section:int,code:str,input:list,output:list,timeout=1.5)->str:
     graded = checker(section,code,input,timeout)
     graded_result = graded['result']
 
+    # print(graded)
+    # print(graded_result)
+
     for i in range(len(output)):
         if graded_result[i]['runtime_status'] == 'OK':
-            if forgiveableFormat(graded_result[i]['output']) == output[i]:
+            if graded_result[i]['output'] == forgiveableFormat(output[i]):
                 score += 'P'
             else:
                 score += '-'
