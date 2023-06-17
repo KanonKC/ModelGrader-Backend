@@ -27,7 +27,7 @@ class Account(models.Model):
 
 class Problem(models.Model):
     problem_id = models.AutoField(primary_key=True)
-    account_id = models.ForeignKey(Account,on_delete=models.CASCADE,db_column="account_id")
+    account = models.ForeignKey(Account,on_delete=models.CASCADE,db_column="account_id")
     language = models.CharField(max_length=10,choices=ProgrammingLanguage.choices,default=ProgrammingLanguage.PYTHON)
     title = models.CharField(max_length=50)
     description = models.CharField(max_length=10000)
@@ -38,14 +38,14 @@ class Problem(models.Model):
 
 class Testcase(models.Model):
     testcase_id = models.AutoField(primary_key=True)
-    problem_id = models.ForeignKey(Problem,on_delete=models.CASCADE,db_column="problem_id")
+    problem = models.ForeignKey(Problem,on_delete=models.CASCADE,db_column="problem_id")
     input = models.CharField(max_length=100000)
     output = models.CharField(max_length=100000)
 
 class Submission(models.Model):
     submission_id = models.AutoField(primary_key=True)
-    problem_id = models.ForeignKey(Problem,on_delete=models.CASCADE,db_column="problem_id")
-    account_id = models.ForeignKey(Account,on_delete=models.CASCADE,db_column="account_id")
+    problem = models.ForeignKey(Problem,on_delete=models.CASCADE,db_column="problem_id")
+    account = models.ForeignKey(Account,on_delete=models.CASCADE,db_column="account_id")
     submission_code = models.CharField(max_length=20000)
     result = models.CharField(max_length=100)
     is_passed = models.BooleanField()
@@ -61,7 +61,7 @@ class Collection(models.Model):
 
 class Topic(models.Model):
     topic_id = models.AutoField(primary_key=True)
-    account_id = models.ForeignKey(Account,on_delete=models.CASCADE,db_column="account_id")
+    account = models.ForeignKey(Account,on_delete=models.CASCADE,db_column="account_id")
     name = models.CharField(max_length=100)
     description = models.CharField(max_length=1000,null=True,blank=True,default=None)
     image_url = models.ImageField(upload_to='topic/',null=True,blank=True,default=None)
@@ -80,8 +80,8 @@ class CollectionProblem(models.Model):
 
 # Doesn't use anymore
 class TopicProblem(models.Model):
-    topic_id = models.ForeignKey(Topic,on_delete=models.CASCADE,db_column="topic_id")
-    problem_id = models.ForeignKey(Problem,on_delete=models.CASCADE,db_column="problem_id")
+    topic = models.ForeignKey(Topic,on_delete=models.CASCADE,db_column="topic_id")
+    problem = models.ForeignKey(Problem,on_delete=models.CASCADE,db_column="problem_id")
 
 class TopicAccountAccess(models.Model):
     topic = models.ForeignKey(Topic,on_delete=models.CASCADE,db_column="topic_id")

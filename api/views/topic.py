@@ -12,7 +12,7 @@ from ..serializers import *
 @parser_classes([MultiPartParser,FormParser])
 def create_topic(request,account_id :int):
     request.data._mutable=True
-    request.data['account_id'] = account_id
+    request.data['account'] = account_id
     serializer = TopicSerializer(data=request.data)
 
     if serializer.is_valid():

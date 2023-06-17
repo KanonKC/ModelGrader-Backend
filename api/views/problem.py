@@ -22,7 +22,7 @@ def create_problem(request,account_id):
         
     problem = Problem(
         language = request.data['language'],
-        account_id = account,
+        account = account,
         title = request.data['title'],
         description = request.data['description'],
         solution = request.data['solution'],
@@ -33,7 +33,7 @@ def create_problem(request,account_id):
     testcase_result = []
     for unit in checked['result']:
         testcase = Testcase(
-            problem_id = problem,
+            problem = problem,
             input = unit['input'],
             output = unit['output']
         )
@@ -63,7 +63,7 @@ def all_problem(request):
         result = [model_to_dict(i) for i in problem]
 
         for i in result:
-            i['creator'] = model_to_dict(Account.objects.get(account_id=i['account_id']))
+            i['creator'] = model_to_dict(Account.objects.get(account_id=i['account']))
 
         return Response({'result':result},status=status.HTTP_200_OK)
     elif request.method == DELETE:
@@ -75,14 +75,16 @@ def all_problem(request):
 
 @api_view([GET,PUT,DELETE])
 def one_problem(request,problem_id: int):
-    problem = Problem.objects.get(problem_id=problem_id)
+    try:
+        problem = Problem.objects.get(problem_id=problem_id)
+    except Problem.DoesNotExist:
+        return Response({'detail': "Problem doesn't exist!"},status=status.HTTP_404_NOT_FOUND)
     testcases = Testcase.objects.filter(problem_id=problem_id)
 
     if request.method == GET:
-        result = model_to_dict(problem)
-        account = Account.objects.get(account_id=result['account_id'])
-        return Response({**result,'testcases':[model_to_dict(i) for i in testcases],'creator': model_to_dict(account)},status=status.HTTP_200_OK)
-    
+            result = model_to_dict(problem)
+            account = Account.objects.get(account_id=result['account'])
+            return Response({**result,'testcases':[model_to_dict(i) for i in testcases],'creator': model_to_dict(account)},status=status.HTTP_200_OK)
     elif request.method == PUT:
         
         problem.title = request.data.get("title",problem.title)

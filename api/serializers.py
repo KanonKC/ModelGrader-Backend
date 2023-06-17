@@ -69,3 +69,9 @@ class TopicAccountAccessSerialize(serializers.ModelSerializer):
     class Meta:
         model = TopicAccountAccess
         fields = "__all__"
+
+class SubmissionPoplulateProblemSerializer(serializers.ModelSerializer):
+    problem = ProblemSerializer()
+    class Meta:
+        model = Submission
+        fields = "__all__"

@@ -1,6 +1,8 @@
 from statistics import mode
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
+
+from api.serializers import SubmissionPoplulateProblemSerializer
 from ..constant import GET,POST,PUT,DELETE
 from ..models import Account, Problem, Submission,Testcase
 from rest_framework import status
@@ -21,7 +23,7 @@ def avaliableQueue():
 def submit_problem(request,problem_id,account_id):
     global QUEUE
     problem = Problem.objects.get(problem_id=problem_id)
-    testcases = Testcase.objects.filter(problem_id=problem_id)
+    testcases = Testcase.objects.filter(problem=problem)
 
     submission_code = request.data['submission_code']
     solution_input = [model_to_dict(i)['input'] for i in testcases]
@@ -41,8 +43,8 @@ def submit_problem(request,problem_id,account_id):
         is_passed = True
 
     submission = Submission(
-        problem_id = problem,
-        account_id = Account.objects.get(account_id=account_id),
+        problem = problem,
+        account = Account.objects.get(account_id=account_id),
         submission_code = request.data['submission_code'],
         result = grading_result,
         is_passed = is_passed
@@ -61,33 +63,49 @@ def view_all_submission(request):
     sort_score = int(request.query_params.get("sort_score", 0))
     sort_date = int(request.query_params.get("sort_date", 0))
 
-    if problem_id:
+    if problem_id != 0:
         submission = submission.filter(problem_id=problem_id)
-    if account_id:
+    if account_id != 0:
         submission = submission.filter(account_id=account_id)
+
+    if passed == 0:
+        submission = submission.filter(is_passed=False)
+    elif passed == 1:
+        submission = submission.filter(is_passed=True)
+
+    # if sort_score == -1:
+    #     submission = submission.order_by('result')
+    # elif sort_score == 1:
+    #     submission = submission.order_by('-result')
+
     if sort_date == -1:
         submission = submission.order_by('date')
     elif sort_date == 1:
         submission = submission.order_by('-date') 
         
-    result = [model_to_dict(i) for i in submission]
+    # result = [model_to_dict(i) for i in submission]
+    serialize = SubmissionPoplulateProblemSerializer(submission,many=True)
+    return Response({"result": serialize.data},status=status.HTTP_200_OK)
+    # result = serialize.data
 
-    for row in result:
-        count = 0
-        for j in row['result']:
-            if j == 'P':
-                count += 1
-        row['score'] = count
+    # print(result[0])
 
-    if passed == 0:
-        result = [i for i in result if not i['is_passed']]
-    elif passed == 1:
-        result = [i for i in result if i['is_passed']]
+    # for row in result:
+    #     count = 0
+    #     for j in row.get('result'):
+    #         if j == 'P':
+    #             count += 1
+    #     row['score'] = count
 
-    if sort_score == -1:
-        result.sort(key=lambda value: value['score'])
-    if sort_score == 1:
-        result.sort(key=lambda value: value['score'],reverse=True)
+    # if passed == 0:
+    #     result = [i for i in result if not i['is_passed']]
+    # elif passed == 1:
+    #     result = [i for i in result if i['is_passed']]
+
+    # if sort_score == -1:
+    #     result.sort(key=lambda value: value['score'])
+    # if sort_score == 1:
+    #     result.sort(key=lambda value: value['score'],reverse=True)
     
-    result = [{'problem': model_to_dict(Problem.objects.get(problem_id=i['problem_id'])),**i} for i in result]
-    return Response({'count':len(result),'result':result},status=status.HTTP_200_OK)
+    # result = [{'problem': model_to_dict(Problem.objects.get(problem_id=i['problem'])),**i} for i in result]
+    # return Response({'count':len(result),'result':result},status=status.HTTP_200_OK)
