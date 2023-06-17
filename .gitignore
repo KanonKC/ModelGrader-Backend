@@ -9,8 +9,11 @@ env/
 
 [0-9]*.txt
 
-# *png
-# *jpg
-# *jpeg
-# *webp
+*png
+*jpg
+*jpeg
+*webp
 tempCodeRunnerFile.py
+
+*.sqlite3
+*.exe

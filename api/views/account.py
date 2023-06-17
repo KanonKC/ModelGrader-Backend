@@ -57,3 +57,9 @@ def get_daily_submission(request,account_id:int):
             submission_by_date[date] = {"count":1, "submissions": [ submission ]}
     
     return Response({"submissions_by_date": submission_by_date})
+
+# @api_view([GET])
+# def get_passed_submission(request,account_id:int):
+#     submissions = Submission.objects.filter(account_id=account_id,is_passed=True)
+
+#     serialize = SubmissionSerializer(submissions,many=True)
