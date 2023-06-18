@@ -47,7 +47,10 @@ def submit_problem(request,problem_id,account_id):
         account = Account.objects.get(account_id=account_id),
         submission_code = request.data['submission_code'],
         result = grading_result,
-        is_passed = is_passed
+        is_passed = is_passed,
+        score = grading_result.count('P'),
+        max_score = len(grading_result),
+        passed_ratio = grading_result.count('P')/len(grading_result)
     )
     submission.save()
 
@@ -73,10 +76,10 @@ def view_all_submission(request):
     elif passed == 1:
         submission = submission.filter(is_passed=True)
 
-    # if sort_score == -1:
-    #     submission = submission.order_by('result')
-    # elif sort_score == 1:
-    #     submission = submission.order_by('-result')
+    if sort_score == -1:
+        submission = submission.order_by('passed_ratio')
+    elif sort_score == 1:
+        submission = submission.order_by('-passed_ratio')
 
     if sort_date == -1:
         submission = submission.order_by('date')

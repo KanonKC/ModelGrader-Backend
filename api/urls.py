@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import account,auth,problem,submission,topic,collection
+from .views import account,auth,problem, script,submission,topic,collection
 
 
 urlpatterns = [
@@ -29,4 +29,6 @@ urlpatterns = [
     path('collections',collection.all_collections),
     path('collections/<int:collection_id>',collection.one_collection),
     path('collections/<int:collection_id>/problems/<str:method>',collection.collection_problems),
+
+    path('script',script.run_script),
 ]

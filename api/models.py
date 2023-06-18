@@ -50,6 +50,9 @@ class Submission(models.Model):
     result = models.CharField(max_length=100)
     is_passed = models.BooleanField()
     date = models.DateTimeField(default=timezone.now)
+    score = models.IntegerField(default=0)
+    max_score = models.IntegerField(default=0)
+    passed_ratio = models.FloatField(default=0)
 
 class Collection(models.Model):
     collection_id = models.AutoField(primary_key=True)
