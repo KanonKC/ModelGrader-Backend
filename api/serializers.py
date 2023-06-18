@@ -6,6 +6,11 @@ class AccountSerializer(serializers.ModelSerializer):
         model = Account
         fields = "__all__"
 
+class AccountDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Account
+        fields = ['account_id','username']
+
 class TopicSerializer(serializers.ModelSerializer):
     class Meta:
         model = Topic

@@ -12,7 +12,7 @@ from ..serializers import *
 def account_collection(request):
     if request.method == GET:
         accounts = Account.objects.all()
-        serialize = AccountSerializer(accounts,many=True)
+        serialize = AccountDetailSerializer(accounts,many=True)
         return Response({
             "accounts": serialize.data
         },status=status.HTTP_200_OK)
@@ -29,7 +29,8 @@ def account_collection(request):
 def get_account(request,account_id):
     try:
         account = Account.objects.get(account_id=account_id)
-        return Response(model_to_dict(account),status=status.HTTP_200_OK)
+        serialize = AccountSerializer(account)
+        return Response(serialize.data,status=status.HTTP_200_OK)
     except:
         return Response({'message':'Account not found!'},status=status.HTTP_404_NOT_FOUND)
 
