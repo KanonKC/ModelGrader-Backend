@@ -40,10 +40,6 @@ def create_problem(request,account_id):
         testcase.save()
         testcase_result.append(model_to_dict(testcase))
 
-    testfile_result = []
-    if file in request.data["test_file"]:
-        serialize = TestFileSerializer(data=request.data["test_file"])
-
     return Response({'detail': 'Problem has been created!','problem': model_to_dict(problem),'testcase': testcase_result},status=status.HTTP_201_CREATED)
 
 @api_view([GET,DELETE])
@@ -125,3 +121,30 @@ def one_problem(request,problem_id: int):
         problem.delete()
         testcases.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+@api_view([POST])
+def add_testfile(request,problem_id:int):
+
+    problem = Problem.objects.get(problem_id=problem_id)
+    problem_serialize = ProblemSerializer(problem)
+
+    testfile_result = []
+    for testfile_instance in request.data["test_file"]:
+        testfile = TestFile(
+            problem = problem,
+            file = testfile_instance
+        )
+        testfile.save()
+        testfile_result.append(testfile)
+    testfile_serialize = TestFileSerializer(testfile_result,many=True)
+
+    return Response({'problem':problem_serialize.data,'testfile': testfile_serialize.data},status=status.HTTP_201_CREATED)
+
+@api_view([PUT])
+def remove_testfile(request,problem_id:int):
+    problem = Problem.objects.get(problem_id=problem_id)
+    problem_serialize = ProblemSerializer(problem)
+
+    TestFile.objects.filter(problem=problem).delete()
+
+    return Response({'problem':problem_serialize.data},status=status.HTTP_204_NO_CONTENT)

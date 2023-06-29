@@ -94,4 +94,3 @@ class TestFile(models.Model):
     testfile_id = models.AutoField(primary_key=True)
     problem = models.ForeignKey(Problem,on_delete=models.CASCADE,db_column="problem_id")
     file = models.FileField(upload_to='testfile/',null=True,blank=True,default=None)
-    file_type = models.CharField(max_length=10,null=True,blank=True,default=None)
