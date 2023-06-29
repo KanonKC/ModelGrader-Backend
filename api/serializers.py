@@ -80,3 +80,11 @@ class SubmissionPoplulateProblemSerializer(serializers.ModelSerializer):
     class Meta:
         model = Submission
         fields = "__all__"
+
+class TestFileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TestFile
+        fields = "__all__"
+
+    def create(self, validated_data):
+        return Testcase.objects.create(**validated_data)

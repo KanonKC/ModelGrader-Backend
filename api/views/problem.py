@@ -6,12 +6,12 @@ from ..constant import GET,POST,PUT,DELETE
 from ..models import Account, Problem,Testcase
 from rest_framework import status
 from django.forms.models import model_to_dict
+from ..serializers import *
 
 
 # Create your views here.
 @api_view([POST])
 def create_problem(request,account_id):
-    print(request.data)
     request._mutable = True
     account = Account.objects.get(account_id=account_id)
     request.data['account_id'] = account
@@ -39,6 +39,11 @@ def create_problem(request,account_id):
         )
         testcase.save()
         testcase_result.append(model_to_dict(testcase))
+
+    testfile_result = []
+    if file in request.data["test_file"]:
+        serialize = TestFileSerializer(data=request.data["test_file"])
+
     return Response({'detail': 'Problem has been created!','problem': model_to_dict(problem),'testcase': testcase_result},status=status.HTTP_201_CREATED)
 
 @api_view([GET,DELETE])
