@@ -10,3 +10,9 @@ def formParser(querydict):
 
 def uploadTopic(instance,filename):
     return f"topics/{filename}"
+
+def handle_uploaded_file(f):
+    with open(f) as destination:
+        for chunk in f.chunks():
+            destination.write(chunk)
+        return destination

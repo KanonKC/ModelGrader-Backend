@@ -81,8 +81,7 @@ class CollectionProblem(models.Model):
     problem = models.ForeignKey(Problem,on_delete=models.CASCADE,db_column="problem_id")
     order = models.IntegerField(blank=True,default=0)
 
-# Doesn't use anymore
-class TopicProblem(models.Model):
+class TopicProblem(models.Model): # DEPRECATED (Doesn't use anymore)
     topic = models.ForeignKey(Topic,on_delete=models.CASCADE,db_column="topic_id")
     problem = models.ForeignKey(Problem,on_delete=models.CASCADE,db_column="problem_id")
 

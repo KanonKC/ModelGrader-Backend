@@ -7,6 +7,7 @@ from ..models import Account, Problem,Testcase
 from rest_framework import status
 from django.forms.models import model_to_dict
 from ..serializers import *
+from ..utility import handle_uploaded_file
 
 
 # Create your views here.
@@ -73,7 +74,6 @@ def all_problem(request):
         problems.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
-
 @api_view([GET,PUT,DELETE])
 def one_problem(request,problem_id: int):
     try:
@@ -122,29 +122,45 @@ def one_problem(request,problem_id: int):
         testcases.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
-@api_view([POST])
+@api_view([PUT])
 def add_testfile(request,problem_id:int):
 
     problem = Problem.objects.get(problem_id=problem_id)
     problem_serialize = ProblemSerializer(problem)
 
-    testfile_result = []
-    for testfile_instance in request.data["test_file"]:
-        testfile = TestFile(
-            problem = problem,
-            file = testfile_instance
-        )
-        testfile.save()
-        testfile_result.append(testfile)
-    testfile_serialize = TestFileSerializer(testfile_result,many=True)
+    request.data._mutable=True
+    request.data['problem'] = problem_id
+    serialize = TestFileSerializer(data=request.data)
 
-    return Response({'problem':problem_serialize.data,'testfile': testfile_serialize.data},status=status.HTTP_201_CREATED)
+    if serialize.is_valid():
+        serialize.save()
+        return Response({'problem':problem_serialize.data,'testfile': serialize.data},status=status.HTTP_201_CREATED)
+    else:
+        print(serialize.errors)
+        return Response({'detail': 'Error during creating. Your code may has an error/timeout!'},status=status.HTTP_406_NOT_ACCEPTABLE)
+
+    # testfile_result = []
+    # print(request.FILES)
+
+    # Loop through testfile and push it to database
+    # for testfile_instance in request.FILES.getlist("testfile"):
+    #     print(type(testfile_instance))
+    #     testfile = TestFileSerializer(data={"problem":problem_id,"testfile":testfile_instance})
+    #     if testfile.is_valid():
+    #         testfile.save()
+    #         print(testfile.data)
+    #         testfile_result.append(testfile.data)
+    #         print("OK Cool")
+    #     else:
+    #         print(testfile.errors)
+
+    # return Response({'problem':problem_serialize.data,'testfile': testfile_result},status=status.HTTP_201_CREATED)
 
 @api_view([PUT])
 def remove_testfile(request,problem_id:int):
     problem = Problem.objects.get(problem_id=problem_id)
     problem_serialize = ProblemSerializer(problem)
 
-    TestFile.objects.filter(problem=problem).delete()
+    TestFile.objects.filter(problem=problem,testfile_id__in=request.data["testfile_id"]).delete()
 
     return Response({'problem':problem_serialize.data},status=status.HTTP_204_NO_CONTENT)
