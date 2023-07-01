@@ -16,6 +16,7 @@ def create_problem(request,account_id):
     request._mutable = True
     account = Account.objects.get(account_id=account_id)
     request.data['account_id'] = account
+    
     checked = checker(1,request.data['solution'],request.data['testcases'],request.data.get('time_limit',1.5))
 
     if checked['has_error'] or checked['has_timeout']:
@@ -81,11 +82,16 @@ def one_problem(request,problem_id: int):
     except Problem.DoesNotExist:
         return Response({'detail': "Problem doesn't exist!"},status=status.HTTP_404_NOT_FOUND)
     testcases = Testcase.objects.filter(problem_id=problem_id)
+    testfiles = TestFile.objects.filter(problem_id=problem_id)
+
+    testcase_serializes = TestcaseSerializer(testcases,many=True)
+    testfile_serializes = TestFileSerializer(testfiles,many=True)
 
     if request.method == GET:
             result = model_to_dict(problem)
             account = Account.objects.get(account_id=result['account'])
-            return Response({**result,'testcases':[model_to_dict(i) for i in testcases],'creator': model_to_dict(account)},status=status.HTTP_200_OK)
+            account_serialize = AccountDetailSerializer(account)
+            return Response({**result,'creator': account_serialize.data,'testcases':testcase_serializes.data,'testfiles': testfile_serializes.data},status=status.HTTP_200_OK)
     elif request.method == PUT:
         
         problem.title = request.data.get("title",problem.title)
@@ -128,39 +134,21 @@ def add_testfile(request,problem_id:int):
     problem = Problem.objects.get(problem_id=problem_id)
     problem_serialize = ProblemSerializer(problem)
 
-    request.data._mutable=True
-    request.data['problem'] = problem_id
-    serialize = TestFileSerializer(data=request.data)
-
-    if serialize.is_valid():
-        serialize.save()
-        return Response({'problem':problem_serialize.data,'testfile': serialize.data},status=status.HTTP_201_CREATED)
-    else:
-        print(serialize.errors)
-        return Response({'detail': 'Error during creating. Your code may has an error/timeout!'},status=status.HTTP_406_NOT_ACCEPTABLE)
-
-    # testfile_result = []
-    # print(request.FILES)
-
-    # Loop through testfile and push it to database
-    # for testfile_instance in request.FILES.getlist("testfile"):
-    #     print(type(testfile_instance))
-    #     testfile = TestFileSerializer(data={"problem":problem_id,"testfile":testfile_instance})
-    #     if testfile.is_valid():
-    #         testfile.save()
-    #         print(testfile.data)
-    #         testfile_result.append(testfile.data)
-    #         print("OK Cool")
-    #     else:
-    #         print(testfile.errors)
-
-    # return Response({'problem':problem_serialize.data,'testfile': testfile_result},status=status.HTTP_201_CREATED)
+    testfile_serializes = []
+    for file in request.FILES.getlist('testfile'):
+        serialize = TestFileSerializer(data={'problem':problem_id,'file':file})
+        if serialize.is_valid():
+            serialize.save()
+            testfile_serializes.append(serialize.data)
+        else:
+            return Response({'detail': 'Error during creating. Your code may has an error/timeout!'},status=status.HTTP_406_NOT_ACCEPTABLE)
+    return Response({**problem_serialize.data,'testfile': testfile_serializes},status=status.HTTP_201_CREATED)
 
 @api_view([PUT])
 def remove_testfile(request,problem_id:int):
     problem = Problem.objects.get(problem_id=problem_id)
     problem_serialize = ProblemSerializer(problem)
 
-    TestFile.objects.filter(problem=problem,testfile_id__in=request.data["testfile_id"]).delete()
+    TestFile.objects.filter(problem=problem,testfile_id__in=request.data["testfile_ids"]).delete()
 
-    return Response({'problem':problem_serialize.data},status=status.HTTP_204_NO_CONTENT)
+    return Response(problem_serialize.data,status=status.HTTP_204_NO_CONTENT)

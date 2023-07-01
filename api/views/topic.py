@@ -14,6 +14,7 @@ def create_topic(request,account_id :int):
     request.data._mutable=True
     request.data['account'] = account_id
     serializer = TopicSerializer(data=request.data)
+    print(serializer)
 
     if serializer.is_valid():
         serializer.save()

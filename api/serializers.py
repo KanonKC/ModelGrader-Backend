@@ -88,3 +88,8 @@ class TestFileSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         return TestFile.objects.create(**validated_data)
+
+class TestcaseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Testcase
+        fields = "__all__"

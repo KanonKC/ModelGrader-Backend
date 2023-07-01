@@ -4,14 +4,20 @@ def forgiveableFormat(string:str)->str:
     return string.replace('\r','')
     # return string
 
-def checker(section:int,code:str,testcases:list,timeout=1.5)->dict:
+def checker(section:int,code:str,testcases:list,mediafiles:list,timeout=1.5)->dict:
     result = []
     hasError = False
     hasTimeout = False
     for i in range(len(testcases)):
         with open(f'./api/sandbox/section{section}/testcases/{i}.txt','w') as f:
             f.write(testcases[i])
-    
+
+    for file in mediafiles:
+        filename = file.split('/')[-1]
+        testfile = open(file,'r').read()
+        with open(f'./api/sandbox/section{section}/{filename}','w') as f:
+            f.write(testfile)
+        
     with open(f'./api/sandbox/section{section}/runner.py','w') as f:
         f.write(code)
 
@@ -29,9 +35,9 @@ def checker(section:int,code:str,testcases:list,timeout=1.5)->dict:
     return {'result':result,'has_error':hasError,'has_timeout':hasTimeout}
     
 
-def grading(section:int,code:str,input:list,output:list,timeout=1.5)->str:
+def grading(section:int,code:str,files:list,input:list,output:list,timeout=1.5)->str:
     score = ''
-    graded = checker(section,code,input,timeout)
+    graded = checker(section,code,input,files,timeout)
     graded_result = graded['result']
 
     # print(graded)

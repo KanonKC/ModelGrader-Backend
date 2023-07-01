@@ -9,6 +9,9 @@ env/
 
 [0-9]*.txt
 
+media/testfile
+media/topic
+
 *png
 *jpg
 *jpeg
