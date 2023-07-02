@@ -93,3 +93,8 @@ class TestcaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Testcase
         fields = "__all__"
+
+class ResourceFileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ResourceFile
+        fields = "__all__"

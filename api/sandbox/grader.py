@@ -1,7 +1,7 @@
 import subprocess
 
 def forgiveableFormat(string:str)->str:
-    return string.replace('\r','')
+    return string.replace('\r','').strip()
     # return string
 
 def checker(section:int,code:str,testcases:list,mediafiles:list,timeout=1.5)->dict:
@@ -45,6 +45,7 @@ def grading(section:int,code:str,files:list,input:list,output:list,timeout=1.5)-
 
     for i in range(len(output)):
         if graded_result[i]['runtime_status'] == 'OK':
+            # print({'A':forgiveableFormat(graded_result[i]['output']),'B':forgiveableFormat(output[i])})
             if forgiveableFormat(graded_result[i]['output']) == forgiveableFormat(output[i]):
                 score += 'P'
             else:
