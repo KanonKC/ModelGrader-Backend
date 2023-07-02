@@ -92,7 +92,7 @@ class TopicAccountAccess(models.Model):
 class ResourceFile(models.Model):
     resource_id = models.AutoField(primary_key=True)
     owner = models.ForeignKey(Account,on_delete=models.CASCADE,db_column="owner_id")
-    file =  models.FileField(upload_to='testfile/',null=True,blank=True,default=None)
+    file =  models.FileField(upload_to='resource/',null=True,blank=True,default=None)
 
 class TestFile(models.Model):
     testfile_id = models.AutoField(primary_key=True)
