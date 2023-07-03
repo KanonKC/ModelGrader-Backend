@@ -4,7 +4,7 @@ def forgiveableFormat(string:str)->str:
     return string.replace('\r','').strip()
     # return string
 
-def checker(section:int,code:str,testcases:list,mediafiles:list,timeout=1.5)->dict:
+def checker(section:int,code:str,mediafiles:list,testcases:list,timeout=1.5)->dict:
     result = []
     hasError = False
     hasTimeout = False

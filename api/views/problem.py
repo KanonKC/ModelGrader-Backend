@@ -16,11 +16,13 @@ def create_problem(request,account_id):
     request._mutable = True
     account = Account.objects.get(account_id=account_id)
     request.data['account_id'] = account
-    
-    checked = checker(1,request.data['solution'],request.data['testcases'],request.data.get('time_limit',1.5))
 
-    if checked['has_error'] or checked['has_timeout']:
-        return Response({'detail': 'Error during creating. Your code may has an error/timeout!','result': checked},status=status.HTTP_406_NOT_ACCEPTABLE)
+    
+    
+    # checked = checker(1,request.data['solution'],request.data['testcases'],request.data.get('time_limit',1.5))
+
+    # if checked['has_error'] or checked['has_timeout']:
+    #     return Response({'detail': 'Error during creating. Your code may has an error/timeout!','result': checked},status=status.HTTP_406_NOT_ACCEPTABLE)
         
     problem = Problem(
         language = request.data['language'],
@@ -31,6 +33,23 @@ def create_problem(request,account_id):
         time_limit = request.data['time_limit']
     )
     problem.save()
+
+
+    testfile_result = []
+    testfiles = []
+    for res in request.data['testfiles']:
+        resource = ResourceFile.objects.get(resource_id=res.resource_id)
+        testfile = TestFile(
+            problem = problem,
+            resource = resource,
+            filename = res.filename
+        )
+        testfile.save()
+        testfiles.append(testfile)
+        testfile_serialize = TestFileSerializer(testfile)
+        testfile_result.append(testfile_serialize.data)
+
+    checked = checker(1,request.data['solution'],request.data['testcases'],request.data.get('time_limit',1.5))
 
     testcase_result = []
     for unit in checked['result']:
