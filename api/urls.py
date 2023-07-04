@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import account,auth,problem,script,submission,topic,collection,resourceFile
+from .views import account,auth,problem,script,submission,topic,collection,testfile,testcase
 
 
 urlpatterns = [
@@ -16,6 +16,8 @@ urlpatterns = [
 
     # Problem
     path('accounts/<int:account_id>/problems',problem.create_problem),
+    # path('problems/<int:problem_id>/testcases',problem.create_problem),
+    path('problems/<int:problem_id>/testfiles',testfile.upload_testfile),
     path('problems',problem.all_problem),
     path('problems/<int:problem_id>',problem.one_problem),
 
@@ -24,7 +26,7 @@ urlpatterns = [
     path('problems/<int:problem_id>/testfiles/remove',problem.remove_testfile),  
 
     # Resource File
-    path('accounts/<int:account_id>/resources',resourceFile.manage_resource),
+    # path('accounts/<int:account_id>/resources',resourceFile.manage_resource),
 
     # Submission
     path('problems/<int:problem_id>/<int:account_id>',submission.submit_problem),

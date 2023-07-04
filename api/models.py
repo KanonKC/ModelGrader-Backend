@@ -89,13 +89,19 @@ class TopicAccountAccess(models.Model):
     topic = models.ForeignKey(Topic,on_delete=models.CASCADE,db_column="topic_id")
     account = models.ForeignKey(Account,on_delete=models.CASCADE,db_column="account_id")
 
-class ResourceFile(models.Model):
-    resource_id = models.AutoField(primary_key=True)
-    owner = models.ForeignKey(Account,on_delete=models.CASCADE,db_column="owner_id")
-    file =  models.FileField(upload_to='resource/',null=True,blank=True,default=None)
+# class ResourceFile(models.Model):
+#     resource_id = models.AutoField(primary_key=True)
+#     owner = models.ForeignKey(Account,on_delete=models.CASCADE,db_column="owner_id")
+#     file =  models.FileField(upload_to='resource/',null=True,blank=True,default=None)
+
+# class TestFile(models.Model):
+#     testfile_id = models.AutoField(primary_key=True)
+#     problem = models.ForeignKey(Problem,on_delete=models.CASCADE,db_column="problem_id")
+#     resource = models.ForeignKey(ResourceFile,on_delete=models.CASCADE,db_column="resource_id")
+#     filename = models.CharField(max_length=100)
 
 class TestFile(models.Model):
     testfile_id = models.AutoField(primary_key=True)
     problem = models.ForeignKey(Problem,on_delete=models.CASCADE,db_column="problem_id")
-    resource = models.ForeignKey(ResourceFile,on_delete=models.CASCADE,db_column="resource_id")
+    file =  models.FileField(upload_to='testfile/',null=True,blank=True,default=None)
     filename = models.CharField(max_length=100)

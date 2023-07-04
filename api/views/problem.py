@@ -32,36 +32,40 @@ def create_problem(request,account_id):
         solution = request.data['solution'],
         time_limit = request.data['time_limit']
     )
-    problem.save()
+    # problem.save()
 
 
-    testfile_result = []
-    testfiles = []
-    for res in request.data['testfiles']:
-        resource = ResourceFile.objects.get(resource_id=res.resource_id)
-        testfile = TestFile(
-            problem = problem,
-            resource = resource,
-            filename = res.filename
-        )
-        testfile.save()
-        testfiles.append(testfile)
-        testfile_serialize = TestFileSerializer(testfile)
-        testfile_result.append(testfile_serialize.data)
+    # testfile_results = []
+    # testfiles = []
+    # for res in request.FILES.getlist('testfiles'):
+    #     print(res)
+        # testfile = TestFile(
+        #     problem = problem,
+        #     file = res,
+        #     filename = res.filename
+        # )
+        # testfile.save()
+        # testfiles.append(testfile)
+        # testfile_serialize = TestFileSerializer(testfile)
+        # testfile_results.append(testfile_serialize.data)
 
-    checked = checker(1,request.data['solution'],request.data['testcases'],request.data.get('time_limit',1.5))
+    # checked = checker(1,request.data['solution'],request.data['testcases'],request.data.get('time_limit',1.5))
 
-    testcase_result = []
-    for unit in checked['result']:
-        testcase = Testcase(
-            problem = problem,
-            input = unit['input'],
-            output = unit['output']
-        )
-        testcase.save()
-        testcase_result.append(model_to_dict(testcase))
+    # testcase_result = []
+    # for unit in checked['result']:
+    #     testcase = Testcase(
+    #         problem = problem,
+    #         input = unit['input'],
+    #         output = unit['output']
+    #     )
+    #     testcase.save()
+    #     testcase_result.append(model_to_dict(testcase))
 
-    return Response({'detail': 'Problem has been created!','problem': model_to_dict(problem),'testcase': testcase_result},status=status.HTTP_201_CREATED)
+    return Response({
+        'detail': 'Problem has been created!',
+        'problem': model_to_dict(problem),
+        # 'testfile': testfile_results
+        },status=status.HTTP_201_CREATED)
 
 @api_view([GET,DELETE])
 def all_problem(request):
