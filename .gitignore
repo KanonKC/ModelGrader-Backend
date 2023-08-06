@@ -9,6 +9,10 @@ env/
 
 [0-9]*.txt
 
+media/testfile
+media/topic
+media/resource
+
 *png
 *jpg
 *jpeg
@@ -17,3 +21,4 @@ tempCodeRunnerFile.py
 
 *.sqlite3
 *.exe
+
