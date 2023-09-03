@@ -54,6 +54,13 @@ class Submission(models.Model):
     max_score = models.IntegerField(default=0)
     passed_ratio = models.FloatField(default=0)
 
+class SubmissionOutput(models.Model):
+    submission_output_id = models.AutoField(primary_key=True)
+    submission = models.ForeignKey(Submission,on_delete=models.CASCADE,db_column="submission_id")
+    output = models.CharField(max_length=100000)
+    runtime_status=models.CharField(max_length=10)
+    is_passed = models.BooleanField(default=False)
+
 class Collection(models.Model):
     collection_id = models.AutoField(primary_key=True)
     owner = models.ForeignKey(Account,on_delete=models.CASCADE,db_column="owner_id")

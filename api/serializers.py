@@ -33,6 +33,11 @@ class SubmissionSerializer(serializers.ModelSerializer):
         model = Submission
         fields = "__all__"
 
+class SubmissionOutputSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SubmissionOutput
+        fields = "__all__"
+
 class TopicProblemSerializer(serializers.ModelSerializer):
     class Meta:
         model = TopicProblem
@@ -79,4 +84,9 @@ class SubmissionPoplulateProblemSerializer(serializers.ModelSerializer):
     problem = ProblemSerializer()
     class Meta:
         model = Submission
+        fields = "__all__"
+
+class TestcaseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Testcase
         fields = "__all__"

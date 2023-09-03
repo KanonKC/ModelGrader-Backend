@@ -4,11 +4,12 @@ from rest_framework.decorators import api_view
 
 from api.serializers import SubmissionPoplulateProblemSerializer
 from ..constant import GET,POST,PUT,DELETE
-from ..models import Account, Problem, Submission,Testcase
+from ..models import Account, Problem, Submission,Testcase, SubmissionOutput
 from rest_framework import status
 from django.forms.models import model_to_dict
 from ..sandbox import grader
 from time import sleep
+from ..serializers import *
 
 QUEUE = [0,0,0,0,0,0,0,0,0,0]
 
@@ -34,7 +35,7 @@ def submit_problem(request,problem_id,account_id):
         empty_queue = avaliableQueue()
         sleep(5)
     QUEUE[empty_queue] = 1
-    grading_result = grader.grading(empty_queue+1,submission_code,solution_input,solution_output)
+    [grading_result,output] = grader.grading(empty_queue+1,submission_code,solution_input,solution_output)
     QUEUE[empty_queue] = 0
 
     if '-' in grading_result or 'E' in grading_result or 'T' in grading_result:
@@ -54,7 +55,39 @@ def submit_problem(request,problem_id,account_id):
     )
     submission.save()
 
-    return Response(model_to_dict(submission),status=status.HTTP_201_CREATED)
+    submission_output = [
+        SubmissionOutput(submission=submission,output=i['output'],runtime_status=i['runtime_status'],is_passed=i["is_passed"]) for i in output
+    ]
+    SubmissionOutput.objects.bulk_create(submission_output)
+
+    submission_serializer = SubmissionSerializer(submission)
+    submission_output_serializer = SubmissionOutputSerializer(submission_output,many=True)
+
+    return Response({
+        **submission_serializer.data
+    },status=status.HTTP_201_CREATED)
+
+@api_view([GET])
+def get_submission_detail(request,submission_id:int):
+    try:
+        submission = Submission.objects.get(submission_id=submission_id)
+        submission_output = SubmissionOutput.objects.filter(submission=submission)
+        testcases = Testcase.objects.filter(problem=submission.problem)
+        
+        submission_serializer = SubmissionSerializer(submission)
+        submission_output_serializer = SubmissionOutputSerializer(submission_output,many=True)
+        testcases_serializer = TestcaseSerializer(testcases,many=True)
+
+        return Response(
+            {
+                **submission_serializer.data,
+                "submission_output": submission_output_serializer.data,
+                "testcases": testcases_serializer.data
+            },
+            status=status.HTTP_200_OK
+        )
+    except Submission.DoesNotExist:
+        return Response({'message': 'Submission not found'},status=status.HTTP_404_NOT_FOUND)
 
 @api_view([GET])
 def view_all_submission(request):
