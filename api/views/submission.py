@@ -60,8 +60,10 @@ def submit_problem(request,problem_id,account_id):
 def view_all_submission(request):
     submission = Submission.objects.all()
     
+    # Query params
     problem_id = int(request.query_params.get("problem_id", 0))
     account_id = int(request.query_params.get("account_id", 0))
+    topic_id = int(request.query_params.get("topic_id", 0))
     passed = int(request.query_params.get("passed", -1))
     sort_score = int(request.query_params.get("sort_score", 0))
     sort_date = int(request.query_params.get("sort_date", 0))
@@ -70,6 +72,8 @@ def view_all_submission(request):
         submission = submission.filter(problem_id=problem_id)
     if account_id != 0:
         submission = submission.filter(account_id=account_id)
+    if topic_id != 0:
+        submission = submission.filter(problem__topic_id=topic_id)
 
     if passed == 0:
         submission = submission.filter(is_passed=False)
@@ -86,29 +90,5 @@ def view_all_submission(request):
     elif sort_date == 1:
         submission = submission.order_by('-date') 
         
-    # result = [model_to_dict(i) for i in submission]
     serialize = SubmissionPoplulateProblemSerializer(submission,many=True)
     return Response({"result": serialize.data},status=status.HTTP_200_OK)
-    # result = serialize.data
-
-    # print(result[0])
-
-    # for row in result:
-    #     count = 0
-    #     for j in row.get('result'):
-    #         if j == 'P':
-    #             count += 1
-    #     row['score'] = count
-
-    # if passed == 0:
-    #     result = [i for i in result if not i['is_passed']]
-    # elif passed == 1:
-    #     result = [i for i in result if i['is_passed']]
-
-    # if sort_score == -1:
-    #     result.sort(key=lambda value: value['score'])
-    # if sort_score == 1:
-    #     result.sort(key=lambda value: value['score'],reverse=True)
-    
-    # result = [{'problem': model_to_dict(Problem.objects.get(problem_id=i['problem'])),**i} for i in result]
-    # return Response({'count':len(result),'result':result},status=status.HTTP_200_OK)
