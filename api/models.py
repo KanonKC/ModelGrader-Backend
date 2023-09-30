@@ -35,6 +35,7 @@ class Problem(models.Model):
     time_limit = models.FloatField(default=1.5,blank=True)
     is_active = models.BooleanField(default=True,blank=True)
     is_private = models.BooleanField(default=False,blank=True)
+    submission_regex = models.CharField(max_length=1000,null=True,blank=True,default=".*")
 
 class Testcase(models.Model):
     testcase_id = models.AutoField(primary_key=True)

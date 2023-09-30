@@ -7,6 +7,7 @@ from rest_framework import status
 from django.forms.models import model_to_dict
 from ..sandbox import grader
 from time import sleep
+from ..utility import regexMatching
 
 QUEUE = [0,0,0,0,0,0,0,0,0,0]
 
@@ -27,13 +28,17 @@ def submit_problem(request,problem_id,account_id):
     solution_input = [model_to_dict(i)['input'] for i in testcases]
     solution_output = [model_to_dict(i)['output'] for i in testcases]
 
-    empty_queue = avaliableQueue()
-    while empty_queue == -1:
+    if not regexMatching(problem.submission_regex,submission_code):
+        grading_result = '-'*len(solution_input)
+    else:
         empty_queue = avaliableQueue()
-        sleep(5)
-    QUEUE[empty_queue] = 1
-    grading_result = grader.grading(empty_queue+1,submission_code,solution_input,solution_output)
-    QUEUE[empty_queue] = 0
+        while empty_queue == -1:
+            empty_queue = avaliableQueue()
+            sleep(5)
+
+        QUEUE[empty_queue] = 1
+        grading_result = grader.grading(empty_queue+1,submission_code,solution_input,solution_output)
+        QUEUE[empty_queue] = 0
 
     if '-' in grading_result or 'E' in grading_result or 'T' in grading_result:
         is_passed = False
