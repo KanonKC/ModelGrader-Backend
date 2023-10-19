@@ -33,6 +33,8 @@ class SubmissionSerializer(serializers.ModelSerializer):
         model = Submission
         fields = "__all__"
 
+
+
 class SubmissionOutputSerializer(serializers.ModelSerializer):
     class Meta:
         model = SubmissionOutput
@@ -80,8 +82,15 @@ class TopicAccountAccessSerialize(serializers.ModelSerializer):
         model = TopicAccountAccess
         fields = "__all__"
 
-class SubmissionPoplulateProblemSerializer(serializers.ModelSerializer):
+class SubmissionPopulateProblemSerializer(serializers.ModelSerializer):
     problem = ProblemSerializer()
+    class Meta:
+        model = Submission
+        fields = "__all__"
+
+class SubmissionPopulateAllSerializer(serializers.ModelSerializer):
+    problem = ProblemSerializer()
+    account = AccountDetailSerializer()
     class Meta:
         model = Submission
         fields = "__all__"
