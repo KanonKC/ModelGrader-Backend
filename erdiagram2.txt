@@ -1,0 +1,103 @@
+Table Account {
+  account_id integer [primary key]
+  email varchar
+  username varchar
+  password varchar
+  token varchar
+  token_expire integer
+  is_active boolean
+  is_private boolean
+}
+
+Table Problem {
+  problem_id integer [primary key]
+  account integer
+  language varchar
+  title varchar
+  description varchar
+  solution varchar
+  time_limit integer
+  is_active boolean
+  is_private boolean
+}
+
+Table Testcase {
+  testcase_id integer [primary key]
+  problem integer
+  input varchar
+  output varchar
+}
+
+Table Submission {
+  submission_id integer [primary key]
+  problem integer
+  account integer
+  submission_code varchar
+  is_passed boolean
+  date datetime
+  score integer
+  max_score integer
+  passed_ratio float
+}
+
+Table SubmissionTestcase {
+  submission_testcase_id integer [primary key]
+  submission integer
+  testcase integer
+  output varchar
+  runtime_status varchar
+  is_passed boolean
+}
+
+Table Collection {
+  collection_id integer [primary key]
+  owner integer
+  name varchar
+  description varchar
+}
+
+Table Course {
+  topic_id integer [primary key]
+  owner integer
+  name varchar
+  description varchar
+  image_url varchar
+  is_private boolean
+}
+
+Table CourseCollection { 
+  topic integer [primary key]
+  collection integer
+  order integer
+}
+
+Table CollectionProblem {
+  collection integer [primary key]
+  problem integer
+  order integer
+}
+
+
+Ref: "Problem"."account" > "Account"."account_id"
+
+Ref: "Problem"."problem_id" < "Testcase"."problem"
+
+Ref: "Problem"."problem_id" < "Submission"."problem"
+
+Ref: "Account"."account_id" < "Submission"."account"
+
+Ref: "Submission"."submission_id" < "SubmissionTestcase"."submission"
+
+Ref: "Testcase"."testcase_id" < "SubmissionTestcase"."testcase"
+
+Ref: "Problem"."problem_id" < "CollectionProblem"."problem"
+
+Ref: "Collection"."collection_id" < "CollectionProblem"."collection"
+
+Ref: "Collection"."collection_id" < "CourseCollection"."collection"
+
+Ref: "Course"."topic_id" < "CourseCollection"."topic"
+
+Ref: "Account"."account_id" < "Collection"."owner"
+
+Ref: "Account"."account_id" < "Course"."owner"
