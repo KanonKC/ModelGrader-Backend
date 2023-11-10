@@ -1,24 +1,22 @@
 # from ..utility import JSONParser, JSONParserOne, passwordEncryption
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from api.sandbox.grader import grading, checker
+from api.sandbox.grader import PythonGrader
 from ..constant import GET,POST,PUT,DELETE
 from ..models import Account, Problem,Testcase
 from rest_framework import status
 from django.forms.models import model_to_dict
-
+from ..serializers import *
 
 # Create your views here.
 @api_view([POST])
 def create_problem(request,account_id):
-    print(request.data)
-    request._mutable = True
     account = Account.objects.get(account_id=account_id)
-    request.data['account_id'] = account
-    checked = checker(1,request.data['solution'],request.data['testcases'],request.data.get('time_limit',1.5))
-
-    if checked['has_error'] or checked['has_timeout']:
-        return Response({'detail': 'Error during creating. Your code may has an error/timeout!','result': checked},status=status.HTTP_406_NOT_ACCEPTABLE)
+    
+    program_output = PythonGrader(request.data['solution'],request.data['testcases'],1,1.5).generate_output()
+    for result in program_output:
+        if result.runtime_status != "OK":
+            return Response({'detail': 'Error during creating. Your code may has an error/timeout!','output': [dict(i) for i in program_output]},status=status.HTTP_406_NOT_ACCEPTABLE)
         
     problem = Problem(
         language = request.data['language'],
@@ -30,16 +28,21 @@ def create_problem(request,account_id):
     )
     problem.save()
 
-    testcase_result = []
-    for unit in checked['result']:
-        testcase = Testcase(
-            problem = problem,
-            input = unit['input'],
-            output = unit['output']
-        )
-        testcase.save()
-        testcase_result.append(model_to_dict(testcase))
-    return Response({'detail': 'Problem has been created!','problem': model_to_dict(problem),'testcase': testcase_result},status=status.HTTP_201_CREATED)
+    testcases_result = []
+    for unit in program_output:
+        testcases_result.append(
+            Testcase(
+                problem = problem,
+                input = unit.input,
+                output = unit.output
+        ))
+
+    Testcase.objects.bulk_create(testcases_result)
+
+    problem_serialize = ProblemSerializer(problem)
+    testcases_serialize = TestcaseSerializer(testcases_result,many=True)
+
+    return Response({**problem_serialize.data,'testcases': testcases_serialize.data},status=status.HTTP_201_CREATED)
 
 @api_view([GET,DELETE])
 def all_problem(request):

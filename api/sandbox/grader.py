@@ -4,47 +4,47 @@ def forgiveableFormat(string:str)->str:
     return string.replace('\r','')
     # return string
 
-def checker(section:int,code:str,testcases:list,timeout=1.5)->dict:
-    result = []
-    hasError = False
-    hasTimeout = False
-    for i in range(len(testcases)):
-        with open(f'./api/sandbox/section{section}/testcases/{i}.txt','w') as f:
-            f.write(testcases[i])
+# def checker(section:int,code:str,testcases:list,timeout=1.5)->dict:
+#     result = []
+#     hasError = False
+#     hasTimeout = False
+#     for i in range(len(testcases)):
+#         with open(f'./api/sandbox/section{section}/testcases/{i}.txt','w') as f:
+#             f.write(testcases[i])
     
-    with open(f'./api/sandbox/section{section}/runner.py','w') as f:
-        f.write(code)
+#     with open(f'./api/sandbox/section{section}/runner.py','w') as f:
+#         f.write(code)
 
-    for i in range(len(testcases)):
-        try:
-            runner = subprocess.check_output(['python',f'./api/sandbox/section{section}/runner.py'],stdin=open(f'./api/sandbox/section{section}/testcases/{i}.txt','r'),stderr=subprocess.DEVNULL,timeout=float(timeout))
-            result.append({'input':testcases[i],'output':runner.decode(),'runtime_status':'OK'})
-        except subprocess.CalledProcessError:
-            hasError = True
-            result.append({'input':testcases[i],'output':None,'runtime_status':'ERROR'})
-        except subprocess.TimeoutExpired:
-            hasTimeout = True
-            result.append({'input':testcases[i],'output':None,'runtime_status':'TIMEOUT'})
+#     for i in range(len(testcases)):
+#         try:
+#             runner = subprocess.check_output(['python',f'./api/sandbox/section{section}/runner.py'],stdin=open(f'./api/sandbox/section{section}/testcases/{i}.txt','r'),stderr=subprocess.DEVNULL,timeout=float(timeout))
+#             result.append({'input':testcases[i],'output':runner.decode(),'runtime_status':'OK'})
+#         except subprocess.CalledProcessError:
+#             hasError = True
+#             result.append({'input':testcases[i],'output':None,'runtime_status':'ERROR'})
+#         except subprocess.TimeoutExpired:
+#             hasTimeout = True
+#             result.append({'input':testcases[i],'output':None,'runtime_status':'TIMEOUT'})
 
-    return {'result':result,'has_error':hasError,'has_timeout':hasTimeout}
+#     return {'result':result,'has_error':hasError,'has_timeout':hasTimeout}
     
-def grading(section:int,code:str,input:list,output:list,timeout=1.5)->str:
-    score = ''
-    graded = checker(section,code,input,timeout)
-    graded_result = graded['result']
+# def grading(section:int,code:str,input:list,output:list,timeout=1.5)->str:
+#     score = ''
+#     graded = checker(section,code,input,timeout)
+#     graded_result = graded['result']
 
-    for i in range(len(output)):
-        if graded_result[i]['runtime_status'] == 'OK':
-            if forgiveableFormat(graded_result[i]['output']) == forgiveableFormat(output[i]):
-                score += 'P'
-            else:
-                score += '-'
-        elif graded_result[i]['runtime_status'] == 'TIMEOUT':
-            score += 'T'
-        else:
-            score += 'E'
+#     for i in range(len(output)):
+#         if graded_result[i]['runtime_status'] == 'OK':
+#             if forgiveableFormat(graded_result[i]['output']) == forgiveableFormat(output[i]):
+#                 score += 'P'
+#             else:
+#                 score += '-'
+#         elif graded_result[i]['runtime_status'] == 'TIMEOUT':
+#             score += 'T'
+#         else:
+#             score += 'E'
     
-    return score
+#     return score
 
 
 class RuntimeResult:
@@ -59,6 +59,20 @@ class RuntimeResult:
         self.input = input
         self.output = output
         self.runtime_status = runtime_status
+
+    def __iter__(self):
+        yield 'input',self.input
+        yield 'output',self.output
+        yield 'runtime_status',self.runtime_status
+
+class GradingResult:
+    def __init__(self,input:str,output:str,runtime_status:RuntimeResult.RUNTIME_STATUS,expected_output:str,is_passed:bool) -> None:
+        self.input = input
+        self.output = output
+        self.runtime_status = runtime_status
+        self.expected_output = expected_output
+        self.is_passed = is_passed
+
 
 class ProgramGrader:
     def __init__(self,code:str,testcases:list[str],section:int,timeout:float) -> None:
@@ -90,7 +104,7 @@ class ProgramGrader:
         self.compile()
         return self.runtime()
 
-    def grading(self,expected_output:list[str]) -> list[dict]:
+    def grading(self,expected_output:list[str]) -> list[GradingResult]:
         self.setup()
         self.compile()
         runtime_result = self.runtime()
@@ -110,15 +124,16 @@ class ProgramGrader:
                 if forgiveableFormat(runtime_result[i].output) == forgiveableFormat(expected_output[i]):
                     is_passed = True
             
-            grading_result.append({
-                "input": runtime_result[i].input,
-                "output": output,
-                "runtime_status": runtime_result[i].runtime_status,
-                "expected_output": expected_output[i],
-                "is_passed": is_passed
-            })
+            grading_result.append(GradingResult(
+                 runtime_result[i].input,
+                 output,
+                 runtime_result[i].runtime_status,
+                 expected_output[i],
+                 is_passed
+            ))
 
         return grading_result
+
 
 class PythonGrader(ProgramGrader):
 

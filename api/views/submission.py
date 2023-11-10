@@ -2,12 +2,12 @@ from statistics import mode
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 
-from api.serializers import SubmissionPoplulateProblemSerializer
+from api.serializers import *
 from ..constant import GET,POST,PUT,DELETE
-from ..models import Account, Problem, Submission,Testcase
+from ..models import *
 from rest_framework import status
 from django.forms.models import model_to_dict
-from ..sandbox import grader
+from ..sandbox.grader import PythonGrader
 from time import sleep
 from ..utility import regexMatching
 
@@ -39,27 +39,49 @@ def submit_problem(request,problem_id,account_id):
             sleep(5)
 
         QUEUE[empty_queue] = 1
-        grading_result = grader.grading(empty_queue+1,submission_code,solution_input,solution_output)
+        # grading_result = grader.grading(empty_queue+1,submission_code,solution_input,solution_output)
+        grading_result = PythonGrader(submission_code,solution_input,empty_queue+1,1.5).grading(solution_output)
         QUEUE[empty_queue] = 0
 
-    if '-' in grading_result or 'E' in grading_result or 'T' in grading_result:
-        is_passed = False
-    else:
-        is_passed = True
+    is_passed = True
+    for result in grading_result:
+        if not result.is_passed:
+            is_passed = False
+            break
+
+    total_score = sum([i.is_passed for i in grading_result if i.is_passed])
+    max_score = len(grading_result)
 
     submission = Submission(
         problem = problem,
         account = Account.objects.get(account_id=account_id),
         submission_code = request.data['submission_code'],
-        result = grading_result,
         is_passed = is_passed,
-        score = grading_result.count('P'),
-        max_score = len(grading_result),
-        passed_ratio = grading_result.count('P')/len(grading_result)
+        score = total_score,
+        max_score = max_score,
+        passed_ratio = total_score/max_score
     )
     submission.save()
 
-    return Response(model_to_dict(submission),status=status.HTTP_201_CREATED)
+    submission_testcases = []
+    for i in range(len(grading_result)):
+        submission_testcases.append(SubmissionTestcase(
+            submission = submission,
+            testcase = testcases[i],
+            output = grading_result[i].output,
+            is_passed = grading_result[i].is_passed,
+            runtime_status = grading_result[i].runtime_status
+        ))
+
+    SubmissionTestcase.objects.bulk_create(submission_testcases)
+
+    submission_serialize = SubmissionPoplulateProblemSerializer(submission)
+    testcases_serialize = SubmissionTestcaseSerializer(submission_testcases,many=True)
+
+    return Response({
+        **submission_serialize.data,
+        "runtime_output": testcases_serialize.data
+    },status=status.HTTP_201_CREATED)
 
 @api_view([GET])
 def view_all_submission(request):

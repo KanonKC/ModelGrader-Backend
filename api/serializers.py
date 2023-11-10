@@ -80,3 +80,13 @@ class SubmissionPoplulateProblemSerializer(serializers.ModelSerializer):
     class Meta:
         model = Submission
         fields = "__all__"
+
+class SubmissionTestcaseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SubmissionTestcase
+        fields = "__all__"
+
+class TestcaseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Testcase
+        fields = "__all__"

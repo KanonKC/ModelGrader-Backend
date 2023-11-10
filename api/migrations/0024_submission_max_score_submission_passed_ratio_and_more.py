@@ -25,4 +25,9 @@ class Migration(migrations.Migration):
             name='score',
             field=models.IntegerField(default=0),
         ),
+        migrations.RemoveField(
+            model_name='submission',
+            name='result'
+        ),
+        
     ]
