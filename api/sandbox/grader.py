@@ -73,6 +73,13 @@ class GradingResult:
         self.expected_output = expected_output
         self.is_passed = is_passed
 
+    def __iter__(self):
+        yield 'input',self.input
+        yield 'output',self.output
+        yield 'runtime_status',self.runtime_status
+        yield 'expected_output',self.expected_output
+        yield 'is_passed',self.is_passed
+
 
 class ProgramGrader:
     def __init__(self,code:str,testcases:list[str],section:int,timeout:float) -> None:
