@@ -118,4 +118,4 @@ def view_all_submission(request):
         submission = submission.order_by('-date') 
         
     serialize = SubmissionPoplulateProblemSerializer(submission,many=True)
-    return Response({"result": serialize.data},status=status.HTTP_200_OK)
+    return Response({"submissions": serialize.data},status=status.HTTP_200_OK)

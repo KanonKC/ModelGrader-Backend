@@ -23,7 +23,8 @@ def account_collection(request):
             account = Account.objects.create(**request.data)
         except Exception as e:
             return Response({'message':str(e)},status=status.HTTP_400_BAD_REQUEST)
-        return Response({'message':'Registration Completed','account':model_to_dict(account)},status=status.HTTP_201_CREATED)
+        serialize = AccountSerializer(account)
+        return Response(serialize.data,status=status.HTTP_201_CREATED)
 
 @api_view([GET])
 def get_account(request,account_id):

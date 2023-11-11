@@ -43,6 +43,12 @@ class ProblemSerializer(serializers.ModelSerializer):
         model = Problem
         fields = "__all__"
 
+class ProblemPopulateAccountSerializer(serializers.ModelSerializer):
+    account = AccountSecureSerializer()
+    class Meta:
+        model = Problem
+        fields = "__all__"
+
 class TopicCollectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = TopicCollection
