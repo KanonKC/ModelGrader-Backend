@@ -12,7 +12,7 @@ from ..serializers import *
 def account_collection(request):
     if request.method == GET:
         accounts = Account.objects.all()
-        serialize = AccountDetailSerializer(accounts,many=True)
+        serialize = AccountSecureSerializer(accounts,many=True)
         return Response({
             "accounts": serialize.data
         },status=status.HTTP_200_OK)

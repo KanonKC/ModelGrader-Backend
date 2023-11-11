@@ -60,7 +60,7 @@ def one_topic(request,topic_id:int):
             top_col_serialize = TopicCollectionSerializer(top_col)
             populate_collections.append({**top_col_serialize.data,**collection_data})
 
-        accessedAccountsSerialize = AccountSerializer(accessedAccounts,many=True)
+        accessedAccountsSerialize = AccountSecureSerializer(accessedAccounts,many=True)
 
         return Response({
             "topic": topic_ser.data,
