@@ -42,7 +42,6 @@ def all_collections(request):
         serialize = CollectionSerializer(collection)
         collection_data = serialize.data
         collection_data['problems'] = populated_cp
-        # print()
 
         populated_collections.append(collection_data)
 
@@ -103,7 +102,6 @@ def collection_problems(request,collection_id:int,method:str):
                 collection=collection,
                 order=index
             )
-            print(problem,index)
             collection_problem.save()
             index += 1
             cp_serialize = CollectionProblemSerializer(collection_problem)

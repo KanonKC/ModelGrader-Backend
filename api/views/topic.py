@@ -126,10 +126,8 @@ def account_access(request,topic_id:int):
                 topic = topic,
                 account = account
             )
-            # print(topic_account)
             topic_account.save()
             accessedAccounts.append(topic_account)
-            # ta_serialize = TopicAccountAccessSerialize(topic_account)
         
         serialize = TopicAccountAccessSerialize(accessedAccounts,many=True)
 
