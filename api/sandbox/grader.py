@@ -65,6 +65,9 @@ class RuntimeResult:
         yield 'output',self.output
         yield 'runtime_status',self.runtime_status
 
+    def __str__(self) -> str:
+        return str(dict(self))
+
 class GradingResult:
     def __init__(self,input:str,output:str,runtime_status:RuntimeResult.RUNTIME_STATUS,expected_output:str,is_passed:bool) -> None:
         self.input = input
@@ -79,6 +82,9 @@ class GradingResult:
         yield 'runtime_status',self.runtime_status
         yield 'expected_output',self.expected_output
         yield 'is_passed',self.is_passed
+
+    def __str__(self) -> str:
+        return str(dict(self))
 
 
 class ProgramGrader:
@@ -223,11 +229,16 @@ class CppGrader(ProgramGrader):
             return result
 
 
+Grader:list[ProgramGrader] = {
+    "python": PythonGrader,
+    "c": CGrader,
+    "cpp": CppGrader
+}
+
 adder = '''
 x = int(input("x: "))
 y = int(input("y: "))
-while True:
-    pass
+print(x-y)
 '''
 
 adderC = r'''
@@ -270,6 +281,6 @@ test = [
 pyresult = ["x: y: -1\r\n","x: y: 34\r\n","x: y: 14\r\n"]
 cresult = ["-1\r\n","34\r\n","14\r\n"]
 
-program1 = CppGrader(adderCpp,test,1,1.5)
-for i in program1.grading(cresult):
-    print(i)
+grader = Grader['python']
+result = grader(adder,test,1,1.5).grading(pyresult)
+print(result)
