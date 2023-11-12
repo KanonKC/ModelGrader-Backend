@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view,parser_classes
 from rest_framework.parsers import MultiPartParser, FormParser
 from ..constant import GET,POST,PUT,DELETE
-from ..models import Account, Problem, Submission,Testcase, Topic, TopicProblem, Collection
+from ..models import *
 from rest_framework import status
 from django.forms.models import model_to_dict
 from ..serializers import *
@@ -12,7 +12,7 @@ from ..serializers import *
 @parser_classes([MultiPartParser,FormParser])
 def create_topic(request,account_id :int):
     request.data._mutable=True
-    request.data['account_id'] = account_id
+    request.data['account'] = account_id
     serializer = TopicSerializer(data=request.data)
 
     if serializer.is_valid():
@@ -38,9 +38,8 @@ def all_topic(request):
 @api_view([GET,PUT,DELETE])
 def one_topic(request,topic_id:int):
     topic = Topic.objects.get(topic_id=topic_id)
-    topicProblem = Problem.objects.filter(topicproblem__topic_id=topic_id)
-    collections = Collection.objects.filter(topiccollection__topic_id=topic_id)
     topicCollections = TopicCollection.objects.filter(topic_id=topic_id)
+    accessedAccounts = Account.objects.filter(topicaccountaccess__topic_id=topic_id)
     
     if request.method == GET:
         topic_ser = TopicSerializer(topic)
@@ -61,9 +60,12 @@ def one_topic(request,topic_id:int):
             top_col_serialize = TopicCollectionSerializer(top_col)
             populate_collections.append({**top_col_serialize.data,**collection_data})
 
+        accessedAccountsSerialize = AccountSecureSerializer(accessedAccounts,many=True)
+
         return Response({
-            "topic": topic_ser.data,
-            "collections": sorted(populate_collections,key=lambda collection: collection['order'])
+            **topic_ser.data,
+            "collections": sorted(populate_collections,key=lambda collection: collection['order']),
+            "accessed_accounts": accessedAccountsSerialize.data
         },status=status.HTTP_200_OK)
     elif request.method == PUT:
         topic_ser = TopicSerializer(topic,data=request.data,partial=True)
@@ -101,7 +103,7 @@ def topic_collection(request,topic_id:int,method:str):
             populated_collections.append(tc_serialize.data)
         
         return Response({
-            "topic": TopicSerializer(topic).data,
+            **TopicSerializer(topic).data,
             "collections": populated_collections
         },status=status.HTTP_201_CREATED)
 
@@ -112,3 +114,28 @@ def topic_collection(request,topic_id:int,method:str):
         # TopicProblem.objects.filter(topic_id=topic,problem_id__in=problems).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+@api_view([POST,PUT])
+def account_access(request,topic_id:int):
+    topic = Topic.objects.get(topic_id=topic_id)
+    target_accounts = Account.objects.filter(account_id__in=request.data['account_ids'])
+
+    if request.method == POST:
+        accessedAccounts = []
+        for account in target_accounts:
+            topic_account = TopicAccountAccess(
+                topic = topic,
+                account = account
+            )
+            topic_account.save()
+            accessedAccounts.append(topic_account)
+        
+        serialize = TopicAccountAccessSerialize(accessedAccounts,many=True)
+
+        return Response({
+            "accounts": serialize.data
+        },status=status.HTTP_201_CREATED)
+    
+    elif request.method == PUT:
+        topicAccountAccesses = TopicAccountAccess.objects.filter(account_id__in=request.data['account_ids'])
+        topicAccountAccesses.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

@@ -1,28 +1,26 @@
 # from ..utility import JSONParser, JSONParserOne, passwordEncryption
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from api.sandbox.grader import grading, checker
+from api.sandbox.grader import PythonGrader
 from ..constant import GET,POST,PUT,DELETE
 from ..models import Account, Problem,Testcase
 from rest_framework import status
 from django.forms.models import model_to_dict
-
+from ..serializers import *
 
 # Create your views here.
 @api_view([POST])
 def create_problem(request,account_id):
-    print(request.data)
-    request._mutable = True
     account = Account.objects.get(account_id=account_id)
-    request.data['account_id'] = account
-    checked = checker(1,request.data['solution'],request.data['testcases'],request.data.get('time_limit',1.5))
-
-    if checked['has_error'] or checked['has_timeout']:
-        return Response({'detail': 'Error during creating. Your code may has an error/timeout!','result': checked},status=status.HTTP_406_NOT_ACCEPTABLE)
+    
+    program_output = PythonGrader(request.data['solution'],request.data['testcases'],1,1.5).generate_output()
+    for result in program_output:
+        if result.runtime_status != "OK":
+            return Response({'detail': 'Error during creating. Your code may has an error/timeout!','output': [dict(i) for i in program_output]},status=status.HTTP_406_NOT_ACCEPTABLE)
         
     problem = Problem(
         language = request.data['language'],
-        account_id = account,
+        account = account,
         title = request.data['title'],
         description = request.data['description'],
         solution = request.data['solution'],
@@ -30,16 +28,21 @@ def create_problem(request,account_id):
     )
     problem.save()
 
-    testcase_result = []
-    for unit in checked['result']:
-        testcase = Testcase(
-            problem_id = problem,
-            input = unit['input'],
-            output = unit['output']
-        )
-        testcase.save()
-        testcase_result.append(model_to_dict(testcase))
-    return Response({'detail': 'Problem has been created!','problem': model_to_dict(problem),'testcase': testcase_result},status=status.HTTP_201_CREATED)
+    testcases_result = []
+    for unit in program_output:
+        testcases_result.append(
+            Testcase(
+                problem = problem,
+                input = unit.input,
+                output = unit.output
+        ))
+
+    Testcase.objects.bulk_create(testcases_result)
+
+    problem_serialize = ProblemSerializer(problem)
+    testcases_serialize = TestcaseSerializer(testcases_result,many=True)
+
+    return Response({**problem_serialize.data,'testcases': testcases_serialize.data},status=status.HTTP_201_CREATED)
 
 @api_view([GET,DELETE])
 def all_problem(request):
@@ -60,12 +63,14 @@ def all_problem(request):
 
         problem = problem.order_by('-problem_id')
 
+        serialize = ProblemPopulateAccountSerializer(problem,many=True)
+
         result = [model_to_dict(i) for i in problem]
 
         for i in result:
-            i['creator'] = model_to_dict(Account.objects.get(account_id=i['account_id']))
+            i['creator'] = model_to_dict(Account.objects.get(account_id=i['account']))
 
-        return Response({'result':result},status=status.HTTP_200_OK)
+        return Response({'problems':serialize.data},status=status.HTTP_200_OK)
     elif request.method == DELETE:
         target = request.data.get("problem",[])
         problems = Problem.objects.filter(problem_id__in=target)
@@ -75,14 +80,16 @@ def all_problem(request):
 
 @api_view([GET,PUT,DELETE])
 def one_problem(request,problem_id: int):
-    problem = Problem.objects.get(problem_id=problem_id)
+    try:
+        problem = Problem.objects.get(problem_id=problem_id)
+    except Problem.DoesNotExist:
+        return Response({'detail': "Problem doesn't exist!"},status=status.HTTP_404_NOT_FOUND)
     testcases = Testcase.objects.filter(problem_id=problem_id)
 
     if request.method == GET:
-        result = model_to_dict(problem)
-        account = Account.objects.get(account_id=result['account_id'])
-        return Response({**result,'testcases':[model_to_dict(i) for i in testcases],'creator': model_to_dict(account)},status=status.HTTP_200_OK)
-    
+            problem_serialize = ProblemPopulateAccountSerializer(problem)
+            testcases_serialize = TestcaseSerializer(testcases,many=True)
+            return Response({**problem_serialize.data,'testcases': testcases_serialize.data},status=status.HTTP_200_OK)
     elif request.method == PUT:
         
         problem.title = request.data.get("title",problem.title)
@@ -93,26 +100,31 @@ def one_problem(request,problem_id: int):
         problem.is_private = request.data.get("is_private",problem.is_private)
 
         if 'testcases' in request.data:
-            checked = checker(1,problem.solution,request.data['testcases'],request.data.get('time_limit',1.5))
-            if checked['has_error'] or checked['has_timeout']:
+            program_output = PythonGrader(problem.solution,request.data['testcases'],1,1.5).generate_output()
+
+            if sum([1 for i in program_output if i.runtime_status != "OK"]) > 0:
                 return Response({'detail': 'Error during editing. Your code may has an error/timeout!'},status=status.HTTP_406_NOT_ACCEPTABLE)
 
             testcases.delete()
             testcase_result = []
-            for unit in checked['result']:
+            for unit in program_output:
                 testcase = Testcase(
-                    problem_id = problem,
-                    input = unit['input'],
-                    output = unit['output']
+                    problem = problem,
+                    input = unit.input,
+                    output = unit.output
                 )
                 testcase.save()
-                testcase_result.append(model_to_dict(testcase))
+                testcase_result.append(testcase)
             problem.save()
 
-            return Response({'detail': 'Problem has been edited!','problem': model_to_dict(problem),'testcase': testcase_result},status=status.HTTP_201_CREATED)
+            problem_serialize = ProblemSerializer(problem)
+            testcases_serialize = TestcaseSerializer(testcase_result,many=True)
+
+            return Response({**problem_serialize.data,'testcases': testcases_serialize.data},status=status.HTTP_201_CREATED)
 
         problem.save()
-        return Response({'detail': 'Problem has been edited!','problem': model_to_dict(problem)},status=status.HTTP_201_CREATED)
+        problem_serialize = ProblemSerializer(problem)
+        return Response(problem_serialize.data,status=status.HTTP_201_CREATED)
 
     elif request.method == DELETE:
         problem.delete()

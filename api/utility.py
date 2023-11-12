@@ -14,5 +14,4 @@ def uploadTopic(instance,filename):
 
 def regexMatching(regex:str,code:str)->bool:
     code = ";".join([i.strip() for i in code.split("\n") if i != ""])
-    print(bool(re.search(regex, code)))
     return re.search(regex, code)

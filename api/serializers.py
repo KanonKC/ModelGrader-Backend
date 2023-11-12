@@ -1,6 +1,16 @@
 from rest_framework import serializers
 from .models import *
 
+class AccountSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Account
+        fields = "__all__"
+
+class AccountSecureSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Account
+        fields = ['account_id','username']
+
 class TopicSerializer(serializers.ModelSerializer):
     class Meta:
         model = Topic
@@ -33,6 +43,12 @@ class ProblemSerializer(serializers.ModelSerializer):
         model = Problem
         fields = "__all__"
 
+class ProblemPopulateAccountSerializer(serializers.ModelSerializer):
+    account = AccountSecureSerializer()
+    class Meta:
+        model = Problem
+        fields = "__all__"
+
 class TopicCollectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = TopicCollection
@@ -59,3 +75,24 @@ class CollectionSerializer(serializers.ModelSerializer):
 
         instance.save()
         return instance
+
+class TopicAccountAccessSerialize(serializers.ModelSerializer):
+    class Meta:
+        model = TopicAccountAccess
+        fields = "__all__"
+
+class SubmissionPoplulateProblemSerializer(serializers.ModelSerializer):
+    problem = ProblemSerializer()
+    class Meta:
+        model = Submission
+        fields = "__all__"
+
+class SubmissionTestcaseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SubmissionTestcase
+        fields = "__all__"
+
+class TestcaseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Testcase
+        fields = "__all__"

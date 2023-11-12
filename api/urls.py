@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import account,auth,problem,submission,topic,collection
+from .views import account,auth,problem, script,submission,topic,collection
 
 
 urlpatterns = [
@@ -7,7 +7,7 @@ urlpatterns = [
     path("logout",auth.logout),
     path('token',auth.get_authorization),
 
-    path("accounts",account.create_account),
+    path("accounts",account.account_collection),
     path("accounts/<int:account_id>",account.get_account),
     path("accounts/<int:account_id>/daily-submissions",account.get_daily_submission),
     path("accounts/<int:account_id>/password",account.change_password),
@@ -22,10 +22,13 @@ urlpatterns = [
     path('accounts/<int:account_id>/topics',topic.create_topic),
     path('topics',topic.all_topic),
     path('topics/<int:topic_id>',topic.one_topic),
+    path('topics/<int:topic_id>/access',topic.account_access),
     path('topics/<int:topic_id>/collections/<str:method>',topic.topic_collection),
 
     path('accounts/<int:account_id>/collections',collection.create_collections),
     path('collections',collection.all_collections),
     path('collections/<int:collection_id>',collection.one_collection),
     path('collections/<int:collection_id>/problems/<str:method>',collection.collection_problems),
+
+    path('script',script.run_script),
 ]
