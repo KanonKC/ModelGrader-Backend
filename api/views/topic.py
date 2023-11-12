@@ -63,7 +63,7 @@ def one_topic(request,topic_id:int):
         accessedAccountsSerialize = AccountSecureSerializer(accessedAccounts,many=True)
 
         return Response({
-            "topic": topic_ser.data,
+            **topic_ser.data,
             "collections": sorted(populate_collections,key=lambda collection: collection['order']),
             "accessed_accounts": accessedAccountsSerialize.data
         },status=status.HTTP_200_OK)
@@ -103,7 +103,7 @@ def topic_collection(request,topic_id:int,method:str):
             populated_collections.append(tc_serialize.data)
         
         return Response({
-            "topic": TopicSerializer(topic).data,
+            **TopicSerializer(topic).data,
             "collections": populated_collections
         },status=status.HTTP_201_CREATED)
 

@@ -65,7 +65,7 @@ def one_collection(request,collection_id:int):
             populated_problems.append({**col_prob_serialize.data,**prob_serialize.data})
 
         return Response({
-            'collection': collection_ser.data,
+            **collection_ser.data,
             'problems': sorted(populated_problems,key=lambda problem: problem['order'])
         } ,status=status.HTTP_200_OK)
     
@@ -110,7 +110,7 @@ def collection_problems(request,collection_id:int,method:str):
         collection_serialize = CollectionSerializer(collection)
 
         return Response({
-            'collection': collection_serialize.data,
+            **collection_serialize.data,
             'problems': populated_problems
         },status=status.HTTP_201_CREATED)
     
