@@ -14,7 +14,6 @@ def create_problem(request,account_id):
     account = Account.objects.get(account_id=account_id)
     
     running_result = PythonGrader(request.data['solution'],request.data['testcases'],1,1.5).generate_output()
-    print(running_result.has_error,running_result.has_timeout,running_result.runnable)
 
     if not running_result.runnable:
         return Response({'detail': 'Error during creating. Your code may has an error/timeout!','output': running_result.getResult()},status=status.HTTP_406_NOT_ACCEPTABLE)
