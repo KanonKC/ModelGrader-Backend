@@ -1,51 +1,16 @@
 import subprocess
 
+"""
+Usecases:
+- Create problem
+- Update code
+- Update testcases
+- Submit problem
+"""
+
 def forgiveableFormat(string:str)->str:
     return string.replace('\r','')
     # return string
-
-# def checker(section:int,code:str,testcases:list,timeout=1.5)->dict:
-#     result = []
-#     hasError = False
-#     hasTimeout = False
-#     for i in range(len(testcases)):
-#         with open(f'./api/sandbox/section{section}/testcases/{i}.txt','w') as f:
-#             f.write(testcases[i])
-    
-#     with open(f'./api/sandbox/section{section}/runner.py','w') as f:
-#         f.write(code)
-
-#     for i in range(len(testcases)):
-#         try:
-#             runner = subprocess.check_output(['python',f'./api/sandbox/section{section}/runner.py'],stdin=open(f'./api/sandbox/section{section}/testcases/{i}.txt','r'),stderr=subprocess.DEVNULL,timeout=float(timeout))
-#             result.append({'input':testcases[i],'output':runner.decode(),'runtime_status':'OK'})
-#         except subprocess.CalledProcessError:
-#             hasError = True
-#             result.append({'input':testcases[i],'output':None,'runtime_status':'ERROR'})
-#         except subprocess.TimeoutExpired:
-#             hasTimeout = True
-#             result.append({'input':testcases[i],'output':None,'runtime_status':'TIMEOUT'})
-
-#     return {'result':result,'has_error':hasError,'has_timeout':hasTimeout}
-    
-# def grading(section:int,code:str,input:list,output:list,timeout=1.5)->str:
-#     score = ''
-#     graded = checker(section,code,input,timeout)
-#     graded_result = graded['result']
-
-#     for i in range(len(output)):
-#         if graded_result[i]['runtime_status'] == 'OK':
-#             if forgiveableFormat(graded_result[i]['output']) == forgiveableFormat(output[i]):
-#                 score += 'P'
-#             else:
-#                 score += '-'
-#         elif graded_result[i]['runtime_status'] == 'TIMEOUT':
-#             score += 'T'
-#         else:
-#             score += 'E'
-    
-#     return score
-
 
 class RuntimeResult:
 
@@ -87,6 +52,28 @@ class GradingResult:
         return str(dict(self))
 
 
+class RuntimeResultList:
+    def __init__(self,runtimeResult:list[RuntimeResult]) -> None:
+        self.data = runtimeResult
+        self.has_error = len([res for res in runtimeResult if res.runtime_status == "ERROR"]) > 0
+        self.has_timeout = len([res for res in runtimeResult if res.runtime_status == "TIMEOUT"]) > 0
+        self.runnable = not (self.has_error or self.has_timeout)
+
+    def getResult(self) -> list[dict]:
+        return [dict(i) for i in self.data]
+
+class GradingResultList:
+    def __init__(self,gradingResult:list[GradingResult]) -> None:
+        self.data = gradingResult
+        self.has_error = len([res for res in gradingResult if res.runtime_status == "ERROR"]) > 0
+        self.has_timeout = len([res for res in gradingResult if res.runtime_status == "TIMEOUT"]) > 0
+        self.runnable = not (self.has_error or self.has_timeout)
+        self.is_passed = len([res for res in gradingResult if res.is_passed]) == len(gradingResult)
+
+    def getResult(self) -> list[dict]:
+        return [dict(i) for i in self.data]
+        
+
 class ProgramGrader:
     def __init__(self,code:str,testcases:list[str],section:int,timeout:float) -> None:
         self.code = code
@@ -112,12 +99,12 @@ class ProgramGrader:
     def runtime(self) -> list[RuntimeResult]:
         pass
         
-    def generate_output(self) -> list[RuntimeResult]:
+    def generate_output(self) -> RuntimeResultList:
         self.setup()
         self.compile()
-        return self.runtime()
+        return RuntimeResultList(self.runtime())
 
-    def grading(self,expected_output:list[str]) -> list[GradingResult]:
+    def grading(self,expected_output:list[str]) -> GradingResultList:
         self.setup()
         self.compile()
         runtime_result = self.runtime()
@@ -134,6 +121,7 @@ class ProgramGrader:
             if runtime_result[i].runtime_status == "OK":
                 
                 output = runtime_result[i].output
+                print({"act":runtime_result[i].output,"exp":expected_output[i]})
                 if forgiveableFormat(runtime_result[i].output) == forgiveableFormat(expected_output[i]):
                     is_passed = True
             
@@ -145,8 +133,7 @@ class ProgramGrader:
                  is_passed
             ))
 
-        return grading_result
-
+        return GradingResultList(grading_result)
 
 class PythonGrader(ProgramGrader):
 
@@ -283,4 +270,4 @@ cresult = ["-1\r\n","34\r\n","14\r\n"]
 
 grader = Grader['python']
 result = grader(adder,test,1,1.5).grading(pyresult)
-print(result)
+print(result.getResult())

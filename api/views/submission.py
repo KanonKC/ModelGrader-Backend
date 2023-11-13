@@ -43,20 +43,14 @@ def submit_problem(request,problem_id,account_id):
         grading_result = PythonGrader(submission_code,solution_input,empty_queue+1,1.5).grading(solution_output)
         QUEUE[empty_queue] = 0
 
-    is_passed = True
-    for result in grading_result:
-        if not result.is_passed:
-            is_passed = False
-            break
-
-    total_score = sum([i.is_passed for i in grading_result if i.is_passed])
-    max_score = len(grading_result)
+    total_score = sum([i.is_passed for i in grading_result.data if i.is_passed])
+    max_score = len(grading_result.data)
 
     submission = Submission(
         problem = problem,
         account = Account.objects.get(account_id=account_id),
         submission_code = request.data['submission_code'],
-        is_passed = is_passed,
+        is_passed = grading_result.is_passed,
         score = total_score,
         max_score = max_score,
         passed_ratio = total_score/max_score
@@ -64,13 +58,13 @@ def submit_problem(request,problem_id,account_id):
     submission.save()
 
     submission_testcases = []
-    for i in range(len(grading_result)):
+    for i in range(len(grading_result.data)):
         submission_testcases.append(SubmissionTestcase(
             submission = submission,
             testcase = testcases[i],
-            output = grading_result[i].output,
-            is_passed = grading_result[i].is_passed,
-            runtime_status = grading_result[i].runtime_status
+            output = grading_result.data[i].output,
+            is_passed = grading_result.data[i].is_passed,
+            runtime_status = grading_result.data[i].runtime_status
         ))
 
     SubmissionTestcase.objects.bulk_create(submission_testcases)

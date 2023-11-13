@@ -13,10 +13,11 @@ from ..serializers import *
 def create_problem(request,account_id):
     account = Account.objects.get(account_id=account_id)
     
-    program_output = PythonGrader(request.data['solution'],request.data['testcases'],1,1.5).generate_output()
-    for result in program_output:
-        if result.runtime_status != "OK":
-            return Response({'detail': 'Error during creating. Your code may has an error/timeout!','output': [dict(i) for i in program_output]},status=status.HTTP_406_NOT_ACCEPTABLE)
+    running_result = PythonGrader(request.data['solution'],request.data['testcases'],1,1.5).generate_output()
+    print(running_result.has_error,running_result.has_timeout,running_result.runnable)
+
+    if not running_result.runnable:
+        return Response({'detail': 'Error during creating. Your code may has an error/timeout!','output': running_result.getResult()},status=status.HTTP_406_NOT_ACCEPTABLE)
         
     problem = Problem(
         language = request.data['language'],
@@ -29,7 +30,7 @@ def create_problem(request,account_id):
     problem.save()
 
     testcases_result = []
-    for unit in program_output:
+    for unit in running_result.data:
         testcases_result.append(
             Testcase(
                 problem = problem,
@@ -100,14 +101,14 @@ def one_problem(request,problem_id: int):
         problem.is_private = request.data.get("is_private",problem.is_private)
 
         if 'testcases' in request.data:
-            program_output = PythonGrader(problem.solution,request.data['testcases'],1,1.5).generate_output()
+            running_result = PythonGrader(problem.solution,request.data['testcases'],1,1.5).generate_output()
 
-            if sum([1 for i in program_output if i.runtime_status != "OK"]) > 0:
+            if not running_result.runnable:
                 return Response({'detail': 'Error during editing. Your code may has an error/timeout!'},status=status.HTTP_406_NOT_ACCEPTABLE)
 
             testcases.delete()
             testcase_result = []
-            for unit in program_output:
+            for unit in running_result.data:
                 testcase = Testcase(
                     problem = problem,
                     input = unit.input,
@@ -121,6 +122,13 @@ def one_problem(request,problem_id: int):
             testcases_serialize = TestcaseSerializer(testcase_result,many=True)
 
             return Response({**problem_serialize.data,'testcases': testcases_serialize.data},status=status.HTTP_201_CREATED)
+        
+        elif 'solution' in request.data:
+            program_input = [i.input for i in testcases]
+            running_result = PythonGrader(problem.solution,program_input,1,1.5).generate_output()
+
+            if not running_result.runnable:
+                return Response({'detail': 'Error during editing. Your code may has an error/timeout!'},status=status.HTTP_406_NOT_ACCEPTABLE)
 
         problem.save()
         problem_serialize = ProblemSerializer(problem)
