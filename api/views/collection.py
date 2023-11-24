@@ -27,7 +27,7 @@ def all_collections(request):
     account_id = request.query_params.get('account_id',0)
 
     if account_id:
-        collections = collections.filter(owner_id=account_id)
+        collections = collections.filter(creator_id=account_id)
 
     populated_collections = []
     for collection in collections:

@@ -47,10 +47,10 @@ def get_authorization(request):
         account = Account.objects.get(account_id=request.data['account_id'])
         account_dict = model_to_dict(account)
         if account_dict['token_expire'] >= time() and account_dict['token'] == request.data['token']:
-            return Response({'result':True,'is_admin':account.is_admin},status=status.HTTP_200_OK)
-        return Response({'result':False,'is_admin':False},status=status.HTTP_200_OK)
+            return Response({'result':True},status=status.HTTP_200_OK)
+        return Response({'result':False},status=status.HTTP_200_OK)
     except Account.DoesNotExist:
-        return Response({'result':False,'is_admin':False},status=status.HTTP_200_OK)
+        return Response({'result':False},status=status.HTTP_200_OK)
         # return Response({'detail':"User doesn't exists!"},status=status.HTTP_404_NOT_FOUND)
 
 # @api_view([GET])

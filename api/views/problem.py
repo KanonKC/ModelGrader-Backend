@@ -59,16 +59,11 @@ def all_problem(request):
         if not get_deactive:
             problem = problem.filter(is_active=True)
         if account_id != 0:
-            problem = problem.filter(account_id=account_id)
+            problem = problem.filter(creator_id=account_id)
 
         problem = problem.order_by('-problem_id')
 
         serialize = ProblemPopulateAccountSerializer(problem,many=True)
-
-        result = [model_to_dict(i) for i in problem]
-
-        for i in result:
-            i['creator'] = model_to_dict(Account.objects.get(account_id=i['account']))
 
         return Response({'problems':serialize.data},status=status.HTTP_200_OK)
     elif request.method == DELETE:

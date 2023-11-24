@@ -270,4 +270,4 @@ cresult = ["-1\r\n","34\r\n","14\r\n"]
 
 grader = Grader['python']
 result = grader(adder,test,1,1.5).grading(pyresult)
-print(result.getResult())
+# print(result.getResult())

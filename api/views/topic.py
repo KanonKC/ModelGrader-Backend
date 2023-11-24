@@ -12,7 +12,7 @@ from ..serializers import *
 @parser_classes([MultiPartParser,FormParser])
 def create_topic(request,account_id :int):
     request.data._mutable=True
-    request.data['account'] = account_id
+    request.data['creator'] = account_id
     serializer = TopicSerializer(data=request.data)
 
     if serializer.is_valid():
@@ -27,7 +27,7 @@ def all_topic(request):
     account_id = request.query_params.get('account_id',0)
 
     if account_id:
-        topics = topics.filter(account_id=account_id)
+        topics = topics.filter(creator_id=account_id)
 
     serializer = TopicSerializer(topics,many=True)
 

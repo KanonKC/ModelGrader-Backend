@@ -16,8 +16,8 @@ class ProblemAdmin(admin.ModelAdmin):
     list_filter = ['language']
 
 class AccountAdmin(admin.ModelAdmin):
-    list_display = ['account_id','username','email','is_admin','is_active']
-    list_filter = ['is_admin','is_active']
+    list_display = ['account_id','username','email','is_active']
+    list_filter = ['is_active']
 
 admin.site.register(Problem,ProblemAdmin)
 admin.site.register(Account,AccountAdmin)

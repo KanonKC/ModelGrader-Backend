@@ -21,13 +21,13 @@ class Account(models.Model):
     password = models.CharField(max_length=128)
     token = models.CharField(max_length=256,null=True,default=None)
     token_expire = models.IntegerField(null=True,default=None)
-    is_admin = models.BooleanField(default=False)
+    # is_admin = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_private = models.BooleanField(default=True)
 
 class Problem(models.Model):
     problem_id = models.AutoField(primary_key=True)
-    account = models.ForeignKey(Account,on_delete=models.CASCADE,db_column="account_id")
+    creator = models.ForeignKey(Account,on_delete=models.CASCADE,db_column="creator_id")
     language = models.CharField(max_length=15) # ,choices=ProgrammingLanguage.choices,default=ProgrammingLanguage.PYTHON)
     title = models.CharField(max_length=50)
     description = models.CharField(max_length=10000)
@@ -56,7 +56,7 @@ class Submission(models.Model):
 
 class Collection(models.Model):
     collection_id = models.AutoField(primary_key=True)
-    owner = models.ForeignKey(Account,on_delete=models.CASCADE,db_column="owner_id")
+    creator = models.ForeignKey(Account,on_delete=models.CASCADE,db_column="creator_id")
     name = models.CharField(max_length=100)
     description = models.CharField(max_length=1000,null=True,blank=True,default=None)
     is_active = models.BooleanField(default=True,blank=True)
@@ -64,7 +64,7 @@ class Collection(models.Model):
 
 class Topic(models.Model):
     topic_id = models.AutoField(primary_key=True)
-    account = models.ForeignKey(Account,on_delete=models.CASCADE,db_column="account_id")
+    creator = models.ForeignKey(Account,on_delete=models.CASCADE,db_column="creator_id")
     name = models.CharField(max_length=100)
     description = models.CharField(max_length=1000,null=True,blank=True,default=None)
     image_url = models.ImageField(upload_to='topic/',null=True,blank=True,default=None)
