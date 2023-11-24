@@ -69,8 +69,8 @@ def submit_problem(request,problem_id,account_id):
 
     SubmissionTestcase.objects.bulk_create(submission_testcases)
 
-    submission_serialize = SubmissionPoplulateProblemSerializer(submission)
-    testcases_serialize = SubmissionTestcaseSerializer(submission_testcases,many=True)
+    submission_serialize = SubmissionPoplulateProblemSecureSerializer(submission)
+    testcases_serialize = SubmissionTestcaseSecureSerializer(submission_testcases,many=True)
 
     return Response({
         **submission_serialize.data,

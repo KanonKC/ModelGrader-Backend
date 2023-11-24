@@ -44,7 +44,7 @@ class ProblemSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 class ProblemPopulateAccountSerializer(serializers.ModelSerializer):
-    account = AccountSecureSerializer()
+    creator = AccountSecureSerializer()
     class Meta:
         model = Problem
         fields = "__all__"
@@ -96,3 +96,20 @@ class TestcaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Testcase
         fields = "__all__"
+
+class ProblemPopulateAccountSecureSerializer(serializers.ModelSerializer):
+    creator = AccountSecureSerializer()
+    class Meta:
+        model = Problem
+        fields = ['problem_id','title','description','creator']
+
+class SubmissionPoplulateProblemSecureSerializer(serializers.ModelSerializer):
+    problem = ProblemPopulateAccountSecureSerializer()
+    class Meta:
+        model = Submission
+        fields = "__all__"
+
+class SubmissionTestcaseSecureSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SubmissionTestcase
+        fields = ['is_passed','runtime_status']
