@@ -20,7 +20,7 @@ def create_problem(request,account_id):
         
     problem = Problem(
         language = request.data['language'],
-        account = account,
+        creator = account,
         title = request.data['title'],
         description = request.data['description'],
         solution = request.data['solution'],
