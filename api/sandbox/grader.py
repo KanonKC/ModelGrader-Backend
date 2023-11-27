@@ -121,7 +121,6 @@ class ProgramGrader:
             if runtime_result[i].runtime_status == "OK":
                 
                 output = runtime_result[i].output
-                print({"act":runtime_result[i].output,"exp":expected_output[i]})
                 if forgiveableFormat(runtime_result[i].output) == forgiveableFormat(expected_output[i]):
                     is_passed = True
             
