@@ -17,13 +17,16 @@ from ..controllers.submission.get_submissions_by_account_problem import *
 
 
 @api_view([POST])
-def submit_problem_view(request,problem_id,account_id):
-    return submit_problem(problem_id,account_id,request)
+def account_problem_submission_view(request,problem_id,account_id):
+    if request.method == POST:
+        return submit_problem(account_id,problem_id,request)
+    if request.method == GET:
+        return get_submissions_by_account_problem(account_id,problem_id)
 
 @api_view([GET])
 def all_submission_view(request):
     return get_submission_by_quries(request)
 
-@api_view([GET])
-def submission_account_problem_view(request,account_id:int,problem_id:int):
-    return get_submissions_by_account_problem(account_id,problem_id)
+# @api_view([GET])
+# def submission_account_problem_view(request,account_id:int,problem_id:int):
+#     return get_submissions_by_account_problem(account_id,problem_id)

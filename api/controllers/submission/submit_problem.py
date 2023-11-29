@@ -19,7 +19,7 @@ def avaliableQueue():
             return i
     return -1
 
-def submit_problem(problem_id:int,account_id:int,request):
+def submit_problem(account_id:int,problem_id:int,request):
     global QUEUE
     problem = Problem.objects.get(problem_id=problem_id)
     testcases = Testcase.objects.filter(problem=problem)

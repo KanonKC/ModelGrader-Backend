@@ -10,7 +10,11 @@ from ...serializers import *
 
 def get_submissions_by_account_problem(account_id:int,problem_id:int):
     submissions = Submission.objects.filter(account=account_id,problem=problem_id)
+    submissions = submissions.order_by('-submission_id')
+    
+    best_submission_id = submissions.order_by('-passed_ratio').first().submission_id
 
+    best_submission = None
     result = []
     for submission in submissions:
         submission_testcases = SubmissionTestcase.objects.filter(submission=submission)
@@ -18,6 +22,9 @@ def get_submissions_by_account_problem(account_id:int,problem_id:int):
         serializer = SubmissionSerializer(submission)
         submission_testcases_serializer = SubmissionTestcaseSecureSerializer(submission_testcases,many=True)
 
-        result.append({**serializer.data,"testcases":submission_testcases_serializer.data})
+        result.append({**serializer.data,"runtime_output":submission_testcases_serializer.data})
 
-    return Response({"submissions": result},status=status.HTTP_200_OK)
+        if submission.submission_id == best_submission_id:
+            best_submission = {**serializer.data,"runtime_output":submission_testcases_serializer.data}
+
+    return Response({"best_submission": best_submission,"submissions": result},status=status.HTTP_200_OK)

@@ -16,9 +16,9 @@ urlpatterns = [
     path('problems',problem.all_problems_view),
     path('problems/<int:problem_id>',problem.one_problem_view),
 
-    path('problems/<int:problem_id>/<int:account_id>',submission.submit_problem_view),
+    # path('problems/<int:problem_id>/<int:account_id>',submission.submit_problem_view),
     path('submissions',submission.all_submission_view),
-    path("accounts/<int:account_id>/problems/<int:problem_id>/submissions",submission.submission_account_problem_view),
+    path("accounts/<int:account_id>/problems/<int:problem_id>/submissions",submission.account_problem_submission_view),
 
     path('accounts/<int:account_id>/topics',topic.create_topic_view),
     path('topics',topic.all_topics_view),
