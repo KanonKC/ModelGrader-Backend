@@ -13,6 +13,8 @@ from ..utility import regexMatching
 
 from ..controllers.submission.submit_problem import *
 from ..controllers.submission.get_submission_by_quries import *
+from ..controllers.submission.get_submissions_by_account_problem import *
+
 
 @api_view([POST])
 def submit_problem_view(request,problem_id,account_id):
@@ -21,3 +23,7 @@ def submit_problem_view(request,problem_id,account_id):
 @api_view([GET])
 def all_submission_view(request):
     return get_submission_by_quries(request)
+
+@api_view([GET])
+def submission_account_problem_view(request,account_id:int,problem_id:int):
+    return get_submissions_by_account_problem(account_id,problem_id)
