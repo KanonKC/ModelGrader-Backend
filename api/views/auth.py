@@ -10,23 +10,15 @@ from uuid import uuid4
 from time import time
 from decouple import config
 
+from ..controllers.auth.authorization import *
+from ..controllers.auth.login import *
+from ..controllers.auth.logout import *
+
 TOKEN_LIFETIME = int(config('TOKEN_LIFETIME_SECOND')) # (Second)
 
 @api_view([POST])
-def login(request):
-    try:
-        account = Account.objects.get(username=request.data['username'])
-        account_dict = model_to_dict(account)
-
-        if passwordEncryption(request.data['password']) == account_dict['password']:
-            account.token = uuid4().hex
-            account.token_expire = int(time()+TOKEN_LIFETIME)
-            account.save()
-            return Response(model_to_dict(account),status=status.HTTP_202_ACCEPTED)
-        else:
-            return Response({'message':"Incorrect password!"},status=status.HTTP_406_NOT_ACCEPTABLE)
-    except Account.DoesNotExist:
-        return Response({'message':"User doesn't exists!"},status=status.HTTP_404_NOT_FOUND)
+def login_account(request):
+    return login(request)
 
 @api_view([POST])
 def logout(request):

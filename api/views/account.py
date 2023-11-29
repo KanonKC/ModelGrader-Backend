@@ -7,33 +7,21 @@ from ..models import *
 from rest_framework import status
 from django.forms.models import model_to_dict
 from ..serializers import *
+from ..controllers.account.create_account import *
+from ..controllers.account.get_account import *
+from ..controllers.account.get_all_accounts import *
 
 @api_view([GET,POST])
-def account_collection(request):
+def all_accounts(request):
     if request.method == GET:
-        accounts = Account.objects.all()
-        serialize = AccountSecureSerializer(accounts,many=True)
-        return Response({
-            "accounts": serialize.data
-        },status=status.HTTP_200_OK)
+        return get_all_accounts()
     
     elif request.method == POST:
-        request.data['password'] = passwordEncryption(request.data['password'])
-        try:
-            account = Account.objects.create(**request.data)
-        except Exception as e:
-            return Response({'message':str(e)},status=status.HTTP_400_BAD_REQUEST)
-        serialize = AccountSerializer(account)
-        return Response(serialize.data,status=status.HTTP_201_CREATED)
+        return create_account(request)
 
 @api_view([GET])
-def get_account(request,account_id):
-    try:
-        account = Account.objects.get(account_id=account_id)
-        serialize = AccountSerializer(account)
-        return Response(serialize.data,status=status.HTTP_200_OK)
-    except:
-        return Response({'message':'Account not found!'},status=status.HTTP_404_NOT_FOUND)
+def one_account(request,account_id):
+    return get_account(account_id)
 
 @api_view([PUT])
 def change_password(request,account_id):

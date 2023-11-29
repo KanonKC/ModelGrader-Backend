@@ -7,6 +7,7 @@ from ..models import *
 from rest_framework import status
 from django.forms.models import model_to_dict
 from ..serializers import *
+from ..controllers import *
 
 @api_view([POST])
 @parser_classes([MultiPartParser,FormParser])
