@@ -12,15 +12,14 @@ from ..controllers.account.get_account import *
 from ..controllers.account.get_all_accounts import *
 
 @api_view([GET,POST])
-def all_accounts(request):
+def all_accounts_view(request):
     if request.method == GET:
         return get_all_accounts()
-    
     elif request.method == POST:
         return create_account(request)
 
 @api_view([GET])
-def one_account(request,account_id):
+def one_account_view(request,account_id):
     return get_account(account_id)
 
 @api_view([PUT])
@@ -48,8 +47,3 @@ def get_daily_submission(request,account_id:int):
     
     return Response({"submissions_by_date": submission_by_date})
 
-# @api_view([GET])
-# def get_passed_submission(request,account_id:int):
-#     submissions = Submission.objects.filter(account_id=account_id,is_passed=True)
-
-#     serialize = SubmissionSerializer(submissions,many=True)

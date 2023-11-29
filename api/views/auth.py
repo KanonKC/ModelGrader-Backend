@@ -17,50 +17,13 @@ from ..controllers.auth.logout import *
 TOKEN_LIFETIME = int(config('TOKEN_LIFETIME_SECOND')) # (Second)
 
 @api_view([POST])
-def login_account(request):
+def login_view(request):
     return login(request)
 
 @api_view([POST])
-def logout(request):
-    try:
-        account = Account.objects.get(account_id=request.data['account_id'])
-        if account.token == request.data['token']:
-            account.token = None
-            account.save()
-            return Response(model_to_dict(account),status=status.HTTP_200_OK)
-        else:
-            return Response({'message':"Invalid token!"},status=status.HTTP_200_OK)
-    except Account.DoesNotExist:
-        return Response({'message':"User doesn't exists!"},status=status.HTTP_404_NOT_FOUND)
+def logout_view(request):
+    return logout(request)
 
 @api_view([PUT])
-def get_authorization(request):
-    try:
-        account = Account.objects.get(account_id=request.data['account_id'])
-        account_dict = model_to_dict(account)
-        if account_dict['token_expire'] >= time() and account_dict['token'] == request.data['token']:
-            return Response({'result':True},status=status.HTTP_200_OK)
-        return Response({'result':False},status=status.HTTP_200_OK)
-    except Account.DoesNotExist:
-        return Response({'result':False},status=status.HTTP_200_OK)
-        # return Response({'message':"User doesn't exists!"},status=status.HTTP_404_NOT_FOUND)
-
-# @api_view([GET])
-# def get_token(request):
-#     try:
-#         account = Account.objects.get(username=request.data['username'])
-#         account_dict = model_to_dict(account)
-
-#         if account_dict['token_expire'] < time():
-#             return Response({'message':"Login timeout!"},status=status.HTTP_200_OK)
-#         elif account_dict['token'] == request.data['token']
-
-#         if passwordEncryption(request.data['password']) == account_dict['password']:
-#             account.token = uuid4().hex
-#             account.token_expire = int(time()+60)
-#             account.save()
-#             return Response(model_to_dict(account),status=status.HTTP_202_ACCEPTED)
-#         else:
-#             return Response({'message':"Incorrect password!"},status=status.HTTP_200_OK)
-#     except Account.DoesNotExist:
-#         return Response({'message':"User doesn't exists!"},status=status.HTTP_404_NOT_FOUND)
+def authorization_view(request):
+    return authorization(request)
