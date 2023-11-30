@@ -123,6 +123,8 @@ class ProgramGrader:
                 output = runtime_result[i].output
                 if forgiveableFormat(runtime_result[i].output) == forgiveableFormat(expected_output[i]):
                     is_passed = True
+                else:
+                    runtime_result[i].runtime_status = "FAILED"
             
             grading_result.append(GradingResult(
                  runtime_result[i].input,

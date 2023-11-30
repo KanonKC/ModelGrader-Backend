@@ -16,7 +16,7 @@ from ..controllers.submission.get_submission_by_quries import *
 from ..controllers.submission.get_submissions_by_account_problem import *
 
 
-@api_view([POST])
+@api_view([POST,GET])
 def account_problem_submission_view(request,problem_id,account_id):
     if request.method == POST:
         return submit_problem(account_id,problem_id,request)
