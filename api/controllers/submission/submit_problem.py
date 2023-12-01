@@ -67,10 +67,7 @@ def submit_problem(account_id:int,problem_id:int,request):
 
     SubmissionTestcase.objects.bulk_create(submission_testcases)
 
-    submission_serialize = SubmissionPoplulateProblemSecureSerializer(submission)
-    testcases_serialize = SubmissionTestcaseSecureSerializer(submission_testcases,many=True)
+    submission.runtime_output = submission_testcases
+    testser = SubmissionPopulateSubmissionTestcaseSecureSerializer(submission)
 
-    return Response({
-        **submission_serialize.data,
-        "runtime_output": testcases_serialize.data
-    },status=status.HTTP_201_CREATED)
+    return Response(testser.data,status=status.HTTP_201_CREATED)
