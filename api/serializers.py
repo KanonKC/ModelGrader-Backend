@@ -43,6 +43,11 @@ class ProblemSerializer(serializers.ModelSerializer):
         model = Problem
         fields = "__all__"
 
+class ProblemSecureSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Problem
+        fields = ['problem_id','title','description','is_active','is_private']
+
 class ProblemPopulateAccountSerializer(serializers.ModelSerializer):
     creator = AccountSecureSerializer()
     class Meta:

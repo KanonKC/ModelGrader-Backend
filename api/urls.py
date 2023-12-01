@@ -12,7 +12,7 @@ urlpatterns = [
     path("accounts/<int:account_id>/daily-submissions",account.get_daily_submission),
     path("accounts/<int:account_id>/password",account.change_password),
 
-    path('accounts/<int:account_id>/problems',problem.create_problem_view),
+    path('accounts/<int:account_id>/problems',problem.all_problems_account_view),
     path('problems',problem.all_problems_view),
     path('problems/<int:problem_id>',problem.one_problem_view),
 
@@ -32,4 +32,5 @@ urlpatterns = [
     path('collections/<int:collection_id>/problems/<str:method>',collection.collection_problems_view),
 
     path('script',script.run_script),
+    path('problems/validate',problem.validation_view),
 ]

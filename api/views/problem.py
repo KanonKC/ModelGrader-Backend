@@ -14,11 +14,16 @@ from ..controllers.problem.delete_problem import *
 from ..controllers.problem.get_problem import *
 from ..controllers.problem.get_all_problems import *
 from ..controllers.problem.remove_bulk_problems import *
+from ..controllers.problem.get_all_problems_by_account import *
+from ..controllers.problem.validate_program import *
 
 # Create your views here.
-@api_view([POST])
-def create_problem_view(request,account_id):
-    return create_problem(account_id,request)
+@api_view([POST,GET])
+def all_problems_account_view(request,account_id):
+    if  request.method == POST:
+        return create_problem(account_id,request)
+    if request.method == GET:
+        return get_all_problems_by_account(account_id)
 
 @api_view([GET,DELETE])
 def all_problems_view(request):
@@ -35,3 +40,8 @@ def one_problem_view(request,problem_id: int):
         return update_problem(problem_id,request)
     elif request.method == DELETE:
         return delete_problem(problem_id)
+    
+@api_view([POST])
+def validation_view(request):
+    if request.method == POST:
+        return validate_program(request)
