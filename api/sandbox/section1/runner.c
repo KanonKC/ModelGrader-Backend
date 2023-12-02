@@ -1,9 +1,1 @@
-#include <stdio.h>
-
-int main() {
-    int x,y;
-    scanf("%d",&x);
-    scanf("%d",&y);
-    printf("%d",x+y);
-    return 0;
-}
+int main(){int x;scanf("%d", &x);printf("%d\n", x*10);return 0;}

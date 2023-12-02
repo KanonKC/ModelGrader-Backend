@@ -43,6 +43,7 @@ class Testcase(models.Model):
     problem = models.ForeignKey(Problem,on_delete=models.CASCADE,db_column="problem_id")
     input = models.CharField(max_length=100000)
     output = models.CharField(max_length=100000)
+    runtime_status = models.CharField(max_length=10)
 
 class Submission(models.Model):
     submission_id = models.AutoField(primary_key=True)

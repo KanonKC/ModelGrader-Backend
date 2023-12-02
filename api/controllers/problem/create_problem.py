@@ -1,7 +1,7 @@
 from api.utility import passwordEncryption
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from api.sandbox.grader import PythonGrader
+from api.sandbox.grader import PythonGrader,RuntimeResult
 from ...constant import GET,POST,PUT,DELETE
 from ...models import *
 from rest_framework import status
@@ -32,7 +32,8 @@ def create_problem(account_id:int,request):
             Testcase(
                 problem = problem,
                 input = unit.input,
-                output = unit.output
+                output = unit.output,
+                runtime_status = unit.runtime_status
         ))
 
     Testcase.objects.bulk_create(testcases_result)
