@@ -36,6 +36,8 @@ class Problem(models.Model):
     is_active = models.BooleanField(default=True,blank=True)
     is_private = models.BooleanField(default=False,blank=True)
     submission_regex = models.CharField(max_length=1000,null=True,blank=True,default=".*")
+    created_date = models.DateTimeField(default=timezone.now)
+    updated_date = models.DateTimeField(default=timezone.now)
     
 
 class Testcase(models.Model):

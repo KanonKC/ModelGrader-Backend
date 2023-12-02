@@ -7,6 +7,7 @@ from ...models import *
 from rest_framework import status
 from django.forms.models import model_to_dict
 from ...serializers import *
+from django.utils import timezone
 
 def update_problem(problem_id:int,request):
     try:
@@ -21,6 +22,8 @@ def update_problem(problem_id:int,request):
     problem.solution = request.data.get("solution",problem.solution)
     problem.time_limit = request.data.get("time_limit",problem.time_limit)  
     problem.is_private = request.data.get("is_private",problem.is_private)
+
+    problem.updated_date = timezone.now()
 
     if 'testcases' in request.data:
         running_result = PythonGrader(problem.solution,request.data['testcases'],1,1.5).generate_output()
