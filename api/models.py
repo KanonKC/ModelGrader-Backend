@@ -51,6 +51,7 @@ class Submission(models.Model):
     submission_id = models.AutoField(primary_key=True)
     problem = models.ForeignKey(Problem,on_delete=models.CASCADE,db_column="problem_id")
     account = models.ForeignKey(Account,on_delete=models.CASCADE,db_column="account_id")
+    language = models.CharField(max_length=15)
     submission_code = models.CharField(max_length=20000)
     is_passed = models.BooleanField()
     date = models.DateTimeField(default=timezone.now)

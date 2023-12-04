@@ -100,14 +100,20 @@ class ProgramGrader:
         pass
         
     def generate_output(self) -> RuntimeResultList:
-        self.setup()
-        self.compile()
-        return RuntimeResultList(self.runtime())
+        try:
+            self.setup()
+            self.compile()
+            return RuntimeResultList(self.runtime())
+        except Exception as e:
+            return RuntimeResultList([RuntimeResult(testcase,None,"ERROR") for testcase in self.testcases])
 
     def grading(self,expected_output:list[str]) -> GradingResultList:
-        self.setup()
-        self.compile()
-        runtime_result = self.runtime()
+        try:
+            self.setup()
+            self.compile()
+            runtime_result = self.runtime()
+        except:
+            runtime_result = [RuntimeResult(testcase,None,"ERROR") for testcase in self.testcases]
 
         if len(runtime_result) != len(expected_output):
             raise Exception("Length of expected output and runtime result is not equal")

@@ -1,7 +1,7 @@
 from api.utility import passwordEncryption
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from api.sandbox.grader import PythonGrader
+from api.sandbox.grader import PythonGrader,Grader,ProgramGrader
 from ...constant import GET,POST,PUT,DELETE
 from ...models import *
 from rest_framework import status
@@ -38,7 +38,8 @@ def submit_problem(account_id:int,problem_id:int,request):
 
         QUEUE[empty_queue] = 1
         # grading_result = grader.grading(empty_queue+1,submission_code,solution_input,solution_output)
-        grading_result = PythonGrader(submission_code,solution_input,empty_queue+1,1.5).grading(solution_output)
+        grader: ProgramGrader = Grader[request.data['language']]
+        grading_result = grader(submission_code,solution_input,empty_queue+1,1.5).grading(solution_output)
         QUEUE[empty_queue] = 0
 
     total_score = sum([i.is_passed for i in grading_result.data if i.is_passed])
@@ -47,6 +48,7 @@ def submit_problem(account_id:int,problem_id:int,request):
     submission = Submission(
         problem = problem,
         account = Account.objects.get(account_id=account_id),
+        language = request.data['language'],
         submission_code = request.data['submission_code'],
         is_passed = grading_result.is_passed,
         score = total_score,
