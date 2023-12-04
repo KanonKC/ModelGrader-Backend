@@ -27,12 +27,12 @@ def add_problems_to_collection(collection:Collection,request):
         )
         collection_problem.save()
         index += 1
-        cp_serialize = CollectionProblemSerializer(collection_problem)
-        populated_problems.append(cp_serialize.data)
+        populated_problems.append(collection_problem)
     
+    problem_serialize = CollectionProblemPopulateProblemSecureSerializer(populated_problems,many=True)
     collection_serialize = CollectionSerializer(collection)
 
     return Response({
         **collection_serialize.data,
-        'problems': populated_problems
+        'problems': problem_serialize.data
     },status=status.HTTP_201_CREATED)

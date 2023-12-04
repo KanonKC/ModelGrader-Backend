@@ -9,8 +9,8 @@ from django.forms.models import model_to_dict
 from ...serializers import *
 
 def create_collection(account_id:int,request):
-    request.data['owner'] = account_id
-
+    
+    request.data['creator'] = account_id
     serialize = CollectionSerializer(data=request.data)
 
     if serialize.is_valid():

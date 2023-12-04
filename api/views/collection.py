@@ -15,11 +15,15 @@ from ..controllers.collection.update_collection import *
 from ..controllers.collection.delete_collection import *
 from ..controllers.collection.add_problems_to_collection import *
 from ..controllers.collection.remove_problems_from_collection import *
+from ..controllers.collection.get_all_collections_by_account import *
 
 
-@api_view([POST])
-def create_collection_view(request,account_id:int):
-    return create_collection(account_id,request)
+@api_view([POST,GET])
+def account_collections_view(request,account_id:int):
+    if request.method == POST:
+        return create_collection(account_id,request)
+    if request.method == GET:
+        return get_all_collections_by_account(account_id)
 
 @api_view([GET])
 def all_collections_view(request):
@@ -36,7 +40,10 @@ def one_collection_view(request,collection_id:int):
 
 @api_view([PUT])
 def collection_problems_view(request,collection_id:int,method:str):
+
+    collection = Collection.objects.get(collection_id=collection_id)
+
     if method == "add":
-        return add_problems_to_collection(collection_id,request)
+        return add_problems_to_collection(collection,request)
     if  method == "remove":
-        return remove_problems_from_collection(collection_id,request)
+        return remove_problems_from_collection(collection,request)

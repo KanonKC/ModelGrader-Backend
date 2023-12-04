@@ -26,7 +26,7 @@ urlpatterns = [
     path('topics/<int:topic_id>/access',topic.account_access),
     path('topics/<int:topic_id>/collections/<str:method>',topic.topic_collections_view),
 
-    path('accounts/<int:account_id>/collections',collection.create_collection_view),
+    path('accounts/<int:account_id>/collections',collection.account_collections_view),
     path('collections',collection.all_collections_view),
     path('collections/<int:collection_id>',collection.one_collection_view),
     path('collections/<int:collection_id>/problems/<str:method>',collection.collection_problems_view),

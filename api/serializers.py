@@ -64,6 +64,12 @@ class CollectionProblemSerializer(serializers.ModelSerializer):
         model = CollectionProblem
         fields = "__all__"
 
+class CollectionProblemPopulateProblemSecureSerializer(serializers.ModelSerializer):
+    problem = ProblemSecureSerializer()
+    class Meta:
+        model = CollectionProblem
+        fields = "__all__"
+
 class CollectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Collection

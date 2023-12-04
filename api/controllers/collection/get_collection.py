@@ -12,16 +12,17 @@ def get_collection(collection_id:int):
     
     collection = Collection.objects.get(collection_id=collection_id)
     # problems = Problem.objects.filter(collectionproblem__collection_id=collection_id)
-    collectionProblems = CollectionProblem.objects.filter(collection=collection)
+    collectionProblems = CollectionProblem.objects.filter(collection=collection).order_by('order')
     
     collection_ser = CollectionSerializer(collection)
-    populated_problems = []
-    for col_prob in collectionProblems:
-        col_prob_serialize = CollectionProblemSerializer(col_prob)
-        prob_serialize = ProblemSerializer(col_prob.problem)
-        populated_problems.append({**col_prob_serialize.data,**prob_serialize.data})
+    collectionProblems_ser = CollectionProblemPopulateProblemSecureSerializer(collectionProblems,many=True)
+    # populated_problems = []
+    # for col_prob in collectionProblems:
+    #     col_prob_serialize = CollectionProblemPopulateProblemSecureSerializer(col_prob)
+    #     # prob_serialize = ProblemSerializer(col_prob.problem)
+    #     populated_problems.append(col_prob_serialize.data)
 
     return Response({
         **collection_ser.data,
-        'problems': sorted(populated_problems,key=lambda problem: problem['order'])
+        'problems': collectionProblems_ser.data
     } ,status=status.HTTP_200_OK)
