@@ -46,7 +46,7 @@ class ProblemSerializer(serializers.ModelSerializer):
 class ProblemSecureSerializer(serializers.ModelSerializer):
     class Meta:
         model = Problem
-        fields = ['problem_id','title','description','is_active','is_private']
+        fields = ['problem_id','title','description','is_active','is_private','updated_date','created_date']
 
 class ProblemPopulateAccountSerializer(serializers.ModelSerializer):
     creator = AccountSecureSerializer()
