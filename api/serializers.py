@@ -43,6 +43,7 @@ class ProblemSerializer(serializers.ModelSerializer):
         model = Problem
         fields = "__all__"
 
+problem_secure_fields = ['problem_id','title','description','is_active','is_private','updated_date','created_date']
 class ProblemSecureSerializer(serializers.ModelSerializer):
     class Meta:
         model = Problem
@@ -131,3 +132,11 @@ class SubmissionPopulateSubmissionTestcaseSecureSerializer(serializers.ModelSeri
     class Meta:
         model = Submission
         fields = ['submission_id','problem','language','submission_code','is_passed','date','score','max_score','passed_ratio','runtime_output']
+
+class ProblemPopulateAccountAndSubmissionPopulateSubmissionTestcasesSecureSerializer(serializers.ModelSerializer):
+    # Add testcases field
+    creator = AccountSecureSerializer()
+    best_submission = SubmissionPopulateSubmissionTestcaseSecureSerializer()
+    class Meta:
+        model = Problem
+        fields = problem_secure_fields + ['best_submission','creator']

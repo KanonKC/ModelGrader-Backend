@@ -16,6 +16,7 @@ from ..controllers.problem.get_all_problems import *
 from ..controllers.problem.remove_bulk_problems import *
 from ..controllers.problem.get_all_problems_by_account import *
 from ..controllers.problem.validate_program import *
+from ..controllers.problem.get_all_problem_with_best_submission import *
 
 # Create your views here.
 @api_view([POST,GET])
@@ -28,7 +29,7 @@ def all_problems_account_view(request,account_id):
 @api_view([GET,DELETE])
 def all_problems_view(request):
     if request.method == GET:
-        return get_all_problems(request)
+        return get_all_problem_with_best_submission(request)
     elif request.method == DELETE:
         return remove_bulk_problems(request)
     

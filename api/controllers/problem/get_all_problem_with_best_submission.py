@@ -9,9 +9,21 @@ from django.forms.models import model_to_dict
 from ...serializers import *
 
 def get_all_problem_with_best_submission(account_id:int):
+
     problems = Problem.objects.all().order_by('-updated_date')
+
+    for problem in problems:
+        best_submission = Submission.objects.filter(problem_id=problem.problem_id).order_by('-score').first()
+        if not (best_submission is None):
+            testcases = SubmissionTestcase.objects.filter(submission_id=best_submission.submission_id)
+
+            best_submission.runtime_output = testcases
+            problem.best_submission = best_submission
+        else:
+            problem.best_submission = None
     
-    pass
+    problem_ser = ProblemPopulateAccountAndSubmissionPopulateSubmissionTestcasesSecureSerializer(problems,many=True)
+    return Response({"problems":problem_ser.data},status=status.HTTP_200_OK)
 
     
     # return Response({"problems":problem_ser.data},status=status.HTTP_200_OK)
