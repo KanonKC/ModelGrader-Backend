@@ -13,7 +13,7 @@ def get_all_problem_with_best_submission(account_id:int):
     problems = Problem.objects.all().order_by('-updated_date')
 
     for problem in problems:
-        best_submission = Submission.objects.filter(problem_id=problem.problem_id).order_by('-score').first()
+        best_submission = Submission.objects.filter(problem_id=problem.problem_id).order_by('-passed_ratio','-submission_id').first()
         if not (best_submission is None):
             testcases = SubmissionTestcase.objects.filter(submission_id=best_submission.submission_id)
 
