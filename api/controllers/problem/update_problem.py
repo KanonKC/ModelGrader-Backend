@@ -31,7 +31,7 @@ def update_problem(problem_id:int,request):
         if not running_result.runnable:
             return Response({'detail': 'Error during editing. Your code may has an error/timeout!'},status=status.HTTP_406_NOT_ACCEPTABLE)
 
-        testcases.delete()
+        # testcases.delete()
         testcase_result = []
         for unit in running_result.data:
             testcase = Testcase(
