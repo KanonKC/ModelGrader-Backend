@@ -10,7 +10,9 @@ from ...serializers import *
 
 def get_all_problems_by_account(account_id:int):
     problems = Problem.objects.filter(creator=account_id).order_by('-updated_date')
-    problem_ser = ProblemSerializer(problems,many=True)
 
-    
+    for problem in problems:
+        problem.testcases = Testcase.objects.filter(problem=problem,deprecated=False)
+
+    problem_ser = ProblemPopulateTestcaseSerializer(problems,many=True)
     return Response({"problems":problem_ser.data},status=status.HTTP_200_OK)

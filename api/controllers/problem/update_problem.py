@@ -14,7 +14,7 @@ def update_problem(problem_id:int,request):
         problem = Problem.objects.get(problem_id=problem_id)
     except Problem.DoesNotExist:
         return Response({'detail': "Problem doesn't exist!"},status=status.HTTP_404_NOT_FOUND)
-    testcases = Testcase.objects.filter(problem_id=problem_id)
+    testcases = Testcase.objects.filter(problem_id=problem_id,deprecated=False)
 
     problem.title = request.data.get("title",problem.title)
     problem.language = request.data.get("language",problem.language)
@@ -30,14 +30,18 @@ def update_problem(problem_id:int,request):
 
         if not running_result.runnable:
             return Response({'detail': 'Error during editing. Your code may has an error/timeout!'},status=status.HTTP_406_NOT_ACCEPTABLE)
+        
+        for testcase in testcases:
+            testcase.deprecated = True
+            testcase.save()
 
-        # testcases.delete()
         testcase_result = []
         for unit in running_result.data:
             testcase = Testcase(
                 problem = problem,
                 input = unit.input,
-                output = unit.output
+                output = unit.output,
+                runtime_status = unit.runtime_status
             )
             testcase.save()
             testcase_result.append(testcase)

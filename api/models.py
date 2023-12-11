@@ -46,6 +46,7 @@ class Testcase(models.Model):
     input = models.CharField(max_length=100000)
     output = models.CharField(max_length=100000)
     runtime_status = models.CharField(max_length=10)
+    deprecated = models.BooleanField(default=False,blank=True)
 
 class Submission(models.Model):
     submission_id = models.AutoField(primary_key=True)

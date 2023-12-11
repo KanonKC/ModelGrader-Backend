@@ -22,7 +22,7 @@ def avaliableQueue():
 def submit_problem(account_id:int,problem_id:int,request):
     global QUEUE
     problem = Problem.objects.get(problem_id=problem_id)
-    testcases = Testcase.objects.filter(problem=problem)
+    testcases = Testcase.objects.filter(problem=problem,deprecated=False)
 
     submission_code = request.data['submission_code']
     solution_input = [model_to_dict(i)['input'] for i in testcases]
