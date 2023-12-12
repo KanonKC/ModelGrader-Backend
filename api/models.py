@@ -44,7 +44,7 @@ class Testcase(models.Model):
     testcase_id = models.AutoField(primary_key=True)
     problem = models.ForeignKey(Problem,on_delete=models.CASCADE,db_column="problem_id")
     input = models.CharField(max_length=100000)
-    output = models.CharField(max_length=100000)
+    output = models.CharField(max_length=100000,null=True)
     runtime_status = models.CharField(max_length=10)
     deprecated = models.BooleanField(default=False,blank=True)
 

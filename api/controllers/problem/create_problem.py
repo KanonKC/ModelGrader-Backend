@@ -13,8 +13,8 @@ def create_problem(account_id:int,request):
     
     running_result = PythonGrader(request.data['solution'],request.data['testcases'],1,1.5).generate_output()
 
-    if not running_result.runnable:
-        return Response({'detail': 'Error during creating. Your code may has an error/timeout!','output': running_result.getResult()},status=status.HTTP_406_NOT_ACCEPTABLE)
+    # if not running_result.runnable:
+    #     return Response({'detail': 'Error during creating. Your code may has an error/timeout!','output': running_result.getResult()},status=status.HTTP_406_NOT_ACCEPTABLE)
         
     problem = Problem(
         language = request.data['language'],

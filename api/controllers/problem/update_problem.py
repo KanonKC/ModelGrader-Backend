@@ -28,8 +28,8 @@ def update_problem(problem_id:int,request):
     if 'testcases' in request.data:
         running_result = PythonGrader(problem.solution,request.data['testcases'],1,1.5).generate_output()
 
-        if not running_result.runnable:
-            return Response({'detail': 'Error during editing. Your code may has an error/timeout!'},status=status.HTTP_406_NOT_ACCEPTABLE)
+        # if not running_result.runnable:
+        #     return Response({'detail': 'Error during editing. Your code may has an error/timeout!'},status=status.HTTP_406_NOT_ACCEPTABLE)
         
         for testcase in testcases:
             testcase.deprecated = True
