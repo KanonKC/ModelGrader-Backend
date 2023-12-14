@@ -1,14 +1,15 @@
 .dist/
 __pycache__
 
-api/sandbox/testcases/*.txt
+api/sandbox/section*/testcases/*.txt
+api/sandbox/section*/runner*
 runner.py
 @/*
 
 env/
 .env
 
-[0-9]*.txt
+# [0-9]*.txt
 
 media/testfile
 media/topic
