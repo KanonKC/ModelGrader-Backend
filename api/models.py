@@ -67,6 +67,8 @@ class Collection(models.Model):
     description = models.CharField(max_length=1000,null=True,blank=True,default=None)
     is_active = models.BooleanField(default=True,blank=True)
     is_private = models.BooleanField(default=False,blank=True)
+    created_date = models.DateTimeField(default=timezone.now)
+    updated_date = models.DateTimeField(default=timezone.now)
 
 class Topic(models.Model):
     topic_id = models.AutoField(primary_key=True)

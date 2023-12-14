@@ -12,6 +12,8 @@ def update_collection(collection_id:int,request):
     collection = Collection.objects.get(collection_id=collection_id)
     collection_ser = CollectionSerializer(collection,data=request.data,partial=True)
     if collection_ser.is_valid():
+        collection.updated_date = timezone.now()
+        collection_ser = CollectionSerializer(collection,data=request.data,partial=True)
         collection_ser.save()
         return Response(collection_ser.data,status=status.HTTP_200_OK)
     else:

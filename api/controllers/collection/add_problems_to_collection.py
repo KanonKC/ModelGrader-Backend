@@ -28,7 +28,7 @@ def add_problems_to_collection(collection:Collection,request):
         collection_problem.save()
         index += 1
         populated_problems.append(collection_problem)
-    
+    collection.updated_date = timezone.now()
     problem_serialize = CollectionProblemPopulateProblemSecureSerializer(populated_problems,many=True)
     collection_serialize = CollectionSerializer(collection)
 

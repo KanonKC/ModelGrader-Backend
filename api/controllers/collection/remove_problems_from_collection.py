@@ -10,4 +10,5 @@ from ...serializers import *
 
 def remove_problems_from_collection(collection:Collection,request):
     CollectionProblem.objects.filter(collection=collection,problem_id__in=request.data['problem_ids']).delete()
+    collection.updated_date = timezone.now()
     return Response(status=status.HTTP_204_NO_CONTENT)
