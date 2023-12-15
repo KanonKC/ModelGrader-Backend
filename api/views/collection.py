@@ -16,6 +16,7 @@ from ..controllers.collection.delete_collection import *
 from ..controllers.collection.add_problems_to_collection import *
 from ..controllers.collection.remove_problems_from_collection import *
 from ..controllers.collection.get_all_collections_by_account import *
+from ..controllers.collection.update_problems_to_collection import *
 
 
 @api_view([POST,GET])
@@ -47,3 +48,5 @@ def collection_problems_view(request,collection_id:int,method:str):
         return add_problems_to_collection(collection,request)
     if  method == "remove":
         return remove_problems_from_collection(collection,request)
+    if method == "update":
+        return update_problems_to_collection(collection,request)

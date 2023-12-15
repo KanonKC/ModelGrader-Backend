@@ -9,7 +9,7 @@ from django.forms.models import model_to_dict
 from ...serializers import *
 
 def get_all_collections_by_account(account_id:int):
-    collections = Collection.objects.filter(creator=account_id)
+    collections = Collection.objects.filter(creator=account_id).order_by('-updated_date')
     problemCollections = CollectionProblem.objects.filter(collection__in=collections)
 
     populated_collections = []

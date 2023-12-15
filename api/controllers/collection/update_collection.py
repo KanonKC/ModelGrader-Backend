@@ -10,11 +10,14 @@ from ...serializers import *
 
 def update_collection(collection_id:int,request):
     collection = Collection.objects.get(collection_id=collection_id)
-    collection_ser = CollectionSerializer(collection,data=request.data,partial=True)
-    if collection_ser.is_valid():
-        collection.updated_date = timezone.now()
-        collection_ser = CollectionSerializer(collection,data=request.data,partial=True)
-        collection_ser.save()
-        return Response(collection_ser.data,status=status.HTTP_200_OK)
-    else:
-        return Response(collection_ser.errors,status=status.HTTP_400_BAD_REQUEST)
+
+    collection.name = request.data.get('name',collection.name)
+    collection.description = request.data.get('description',collection.description)
+    collection.is_private = request.data.get('is_private',collection.is_private)
+    collection.is_active = request.data.get('is_active',collection.is_active)
+    collection.updated_date = timezone.now()
+
+    collection.save()
+    collection_ser = CollectionSerializer(collection)
+
+    return Response(collection_ser.data,status=status.HTTP_200_OK)
