@@ -25,6 +25,7 @@ class TopicSerializer(serializers.ModelSerializer):
         instance.image_url = validate_data.get('image_url',instance.image_url)
         instance.is_active = validate_data.get('is_active',instance.is_active)
         instance.is_private = validate_data.get('is_private',instance.is_private)
+        instance.updated_date = timezone.now()
         instance.save()
         return instance
     
@@ -59,6 +60,8 @@ class TopicCollectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = TopicCollection
         fields = "__all__"
+
+
 
 class CollectionProblemSerializer(serializers.ModelSerializer):
     class Meta:
@@ -160,3 +163,14 @@ class ProblemPopulateAccountAndSubmissionPopulateSubmissionTestcasesSecureSerial
     class Meta:
         model = Problem
         fields = problem_secure_fields + ['best_submission','creator']
+
+class TopicCollectionPopulateCollectionSerializer(serializers.ModelSerializer):
+    collection = CollectionSerializer()
+    class Meta:
+        model = TopicCollection
+        fields = "__all__"
+class TopicPopulateTopicCollectionPopulateCollectionSerializer(serializers.ModelSerializer):
+    collections = TopicCollectionPopulateCollectionSerializer(many=True)
+    class Meta:
+        model = Topic
+        fields = ['topic_id','name','description','image_url','is_active','is_private','created_date','updated_date','creator','collections']

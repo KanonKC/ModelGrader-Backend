@@ -15,11 +15,15 @@ from ..controllers.topic.update_topic import *
 from ..controllers.topic.delete_topic import *
 from ..controllers.topic.add_collections_to_topic import *
 from ..controllers.topic.remove_collections_from_topic import *
+from ..controllers.topic.get_all_topics_by_account import *
 
-@api_view([POST])
+@api_view([POST,GET])
 @parser_classes([MultiPartParser,FormParser])
-def create_topic_view(request,account_id :int):
-    return create_topic(account_id,request)
+def all_topics_account_view(request,account_id :int):
+    if request.method == POST:
+        return create_topic(account_id,request)
+    elif request.method == GET:
+        return get_all_topics_by_account(account_id,request)
 
 @api_view([GET])
 def all_topics_view(request):

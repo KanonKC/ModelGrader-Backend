@@ -78,6 +78,8 @@ class Topic(models.Model):
     image_url = models.ImageField(upload_to='topic/',null=True,blank=True,default=None)
     is_active = models.BooleanField(default=True,blank=True)
     is_private = models.BooleanField(default=False,blank=True)
+    created_date = models.DateTimeField(default=timezone.now)
+    updated_date = models.DateTimeField(default=timezone.now)
 
 class TopicCollection(models.Model):
     topic = models.ForeignKey(Topic,on_delete=models.CASCADE,db_column="topic_id")

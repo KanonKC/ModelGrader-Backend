@@ -20,7 +20,7 @@ urlpatterns = [
     path('submissions',submission.all_submission_view),
     path("accounts/<int:account_id>/problems/<int:problem_id>/submissions",submission.account_problem_submission_view),
 
-    path('accounts/<int:account_id>/topics',topic.create_topic_view),
+    path('accounts/<int:account_id>/topics',topic.all_topics_account_view),
     path('topics',topic.all_topics_view),
     path('topics/<int:topic_id>',topic.one_topic_view),
     path('topics/<int:topic_id>/access',topic.account_access),
