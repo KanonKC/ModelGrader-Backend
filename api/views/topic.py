@@ -26,6 +26,15 @@ def all_topics_account_view(request,account_id :int):
     elif request.method == GET:
         return get_all_topics_by_account(account_id,request)
 
+@api_view([GET,PUT,DELETE])
+def one_topic_account_view(request,topic_id:int):
+    if request.method == GET:
+        return get_topic(topic_id)
+    elif request.method == PUT:
+        return update_topic(topic_id,request)
+    elif request.method == DELETE:
+        return delete_topic(topic_id)
+
 @api_view([GET])
 def all_topics_view(request):
     return get_all_topics(request)

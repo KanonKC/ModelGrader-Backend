@@ -20,11 +20,20 @@ from ..controllers.collection.update_problems_to_collection import *
 
 
 @api_view([POST,GET])
-def account_collections_view(request,account_id:int):
+def all_collections_account_view(request,account_id:int):
     if request.method == POST:
         return create_collection(account_id,request)
     if request.method == GET:
         return get_all_collections_by_account(account_id)
+
+@api_view([GET,PUT,DELETE])
+def one_collection_account_view(request,collection_id:int):
+    if request.method == GET:
+        return get_collection(collection_id)
+    if request.method == PUT:
+        return update_collection(collection_id,request)
+    if request.method == DELETE:
+        return delete_collection(collection_id)
 
 @api_view([GET])
 def all_collections_view(request):

@@ -13,24 +13,30 @@ urlpatterns = [
     path("accounts/<int:account_id>/password",account.change_password),
 
     path('accounts/<int:account_id>/problems',problem.all_problems_account_view),
-    path('problems',problem.all_problems_view),
-    path('problems/<int:problem_id>',problem.one_problem_view),
-
-    # path('problems/<int:problem_id>/<int:account_id>',submission.submit_problem_view),
-    path('submissions',submission.all_submission_view),
+    path('accounts/<int:account_id>/problems/<int:problem_id>',problem.one_problem_account_view),
     path("accounts/<int:account_id>/problems/<int:problem_id>/submissions",submission.account_problem_submission_view),
 
+    path('accounts/<int:account_id>/collections',collection.all_collections_account_view),
+    path('accounts/<int:account_id>/collections/<int:collection_id>',collection.one_collection_account_view),
+    
     path('accounts/<int:account_id>/topics',topic.all_topics_account_view),
+    path('accounts/<int:account_id>/topics/<int:topic_id>',topic.one_topic_account_view),
+
+    path('problems',problem.all_problems_view),
+    path('problems/validate',problem.validation_view),
+    path('problems/<int:problem_id>',problem.one_problem_view),
+
+    path('collections',collection.all_collections_view),
+    path('collections/<int:collection_id>',collection.one_collection_view),
+    path('collections/<int:collection_id>/problems/<str:method>',collection.collection_problems_view),
+
     path('topics',topic.all_topics_view),
     path('topics/<int:topic_id>',topic.one_topic_view),
     path('topics/<int:topic_id>/access',topic.account_access),
     path('topics/<int:topic_id>/collections/<str:method>',topic.topic_collections_view),
 
-    path('accounts/<int:account_id>/collections',collection.account_collections_view),
-    path('collections',collection.all_collections_view),
-    path('collections/<int:collection_id>',collection.one_collection_view),
-    path('collections/<int:collection_id>/problems/<str:method>',collection.collection_problems_view),
+    path('submissions',submission.all_submission_view),
+
 
     path('script',script.run_script),
-    path('problems/validate',problem.validation_view),
 ]

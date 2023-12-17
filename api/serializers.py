@@ -68,6 +68,12 @@ class CollectionProblemSerializer(serializers.ModelSerializer):
         model = CollectionProblem
         fields = "__all__"
 
+class CollectionProblemPopulateProblemSerializer(serializers.ModelSerializer):
+    problem = ProblemSerializer()
+    class Meta:
+        model = CollectionProblem
+        fields = "__all__"
+
 class CollectionProblemPopulateProblemSecureSerializer(serializers.ModelSerializer):
     problem = ProblemSecureSerializer()
     class Meta:
@@ -169,8 +175,22 @@ class TopicCollectionPopulateCollectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = TopicCollection
         fields = "__all__"
+
+class TopicCollectionPopulateCollectionProblemPopulateProblemSerializer(serializers.ModelSerializer):
+    collection = CollectionProblemPopulateProblemSerializer()
+    class Meta:
+        model = TopicCollection
+        fields = "__all__"
+
 class TopicPopulateTopicCollectionPopulateCollectionSerializer(serializers.ModelSerializer):
     collections = TopicCollectionPopulateCollectionSerializer(many=True)
     class Meta:
         model = Topic
         fields = ['topic_id','name','description','image_url','is_active','is_private','created_date','updated_date','creator','collections']
+
+
+class TopicPopulateTopicCollectionPopulateCollectionProblemPopulateProblemSerializer(serializers.ModelSerializer):
+    collections = CollectionProblemPopulateProblemSerializer(many=True)
+    class Meta:
+        model = Topic
+        fields = ['topic_id','name','description','image_url','is_active','is_private','created_date','updated_date','collections']

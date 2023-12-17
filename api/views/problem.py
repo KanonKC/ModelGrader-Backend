@@ -26,6 +26,15 @@ def all_problems_account_view(request,account_id):
     if request.method == GET:
         return get_all_problems_by_account(account_id)
 
+@api_view([GET,PUT,DELETE])
+def one_problem_account_view(problem_id:int,request):
+    if request.method == GET:
+        return get_problem(problem_id)
+    elif request.method == PUT:
+        return update_problem(problem_id,request)
+    elif request.method == DELETE:
+        return delete_problem(problem_id)
+
 @api_view([GET,DELETE])
 def all_problems_view(request):
     if request.method == GET:
