@@ -16,6 +16,7 @@ from ..controllers.topic.delete_topic import *
 from ..controllers.topic.add_collections_to_topic import *
 from ..controllers.topic.remove_collections_from_topic import *
 from ..controllers.topic.get_all_topics_by_account import *
+from ..controllers.topic.update_collections_to_topic import *
 
 @api_view([POST,GET])
 @parser_classes([MultiPartParser,FormParser])
@@ -40,10 +41,15 @@ def one_topic_view(request,topic_id:int):
 
 @api_view([PUT])
 def topic_collections_view(request,topic_id:int,method:str):
+
+    topic = Topic.objects.get(topic_id=topic_id)
+
     if method == "add":
         return add_collections_to_topic(topic_id,request)
     elif method == "remove":
         return remove_collections_from_topic(topic_id,request)
+    elif method == "update":
+        return update_collections_to_topic(topic,request)
 
 @api_view([POST,PUT])
 def account_access(request,topic_id:int):

@@ -9,7 +9,7 @@ from django.forms.models import model_to_dict
 from ...serializers import *
 
 def get_all_topics_by_account(account_id:int,request):
-    topics = Topic.objects.filter(creator_id=account_id)
+    topics = Topic.objects.filter(creator_id=account_id).order_by('-updated_date')
     topicCollections = TopicCollection.objects.filter(topic__in=topics)
 
     populated_topics = []
