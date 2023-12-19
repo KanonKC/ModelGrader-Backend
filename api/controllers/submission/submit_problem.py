@@ -19,10 +19,11 @@ def avaliableQueue():
             return i
     return -1
 
-def submit_problem(account_id:int,problem_id:int,request):
+def submit_problem_function(account_id:int,problem_id:int,topic_id:int,request):
     global QUEUE
     problem = Problem.objects.get(problem_id=problem_id)
     testcases = Testcase.objects.filter(problem=problem,deprecated=False)
+    account = Account.objects.get(account_id=account_id)
 
     submission_code = request.data['submission_code']
     solution_input = [model_to_dict(i)['input'] for i in testcases]
@@ -47,7 +48,7 @@ def submit_problem(account_id:int,problem_id:int,request):
 
     submission = Submission(
         problem = problem,
-        account = Account.objects.get(account_id=account_id),
+        account = account,
         language = request.data['language'],
         submission_code = request.data['submission_code'],
         is_passed = grading_result.is_passed,
@@ -55,8 +56,34 @@ def submit_problem(account_id:int,problem_id:int,request):
         max_score = max_score,
         passed_ratio = total_score/max_score
     )
+
+    if topic_id:
+        submission.topic = Topic.objects.get(topic_id=topic_id)
+
     submission.save()
 
+    # Best Submission
+    try:
+        best_submission = None
+        if topic_id:
+            best_submission = BestSubmission.objects.get(problem=problem,account=account,topic=Topic.objects.get(topic_id=topic_id))
+        else:
+            best_submission = BestSubmission.objects.get(problem=problem,account=account)
+    except:
+        best_submission = BestSubmission(
+            problem = problem,
+            account = account,
+            topic = Topic.objects.get(topic_id=topic_id) if topic_id else None,
+            submission = submission
+        )
+        best_submission.save()        
+    else:
+        if submission.passed_ratio >= best_submission.submission.passed_ratio:
+            best_submission.submission = submission
+            best_submission.save()
+
+    # End Best Submission
+            
     submission_testcases = []
     for i in range(len(grading_result.data)):
         submission_testcases.append(SubmissionTestcase(
@@ -73,3 +100,6 @@ def submit_problem(account_id:int,problem_id:int,request):
     testser = SubmissionPopulateSubmissionTestcaseSecureSerializer(submission)
 
     return Response(testser.data,status=status.HTTP_201_CREATED)
+
+def submit_problem(account_id:int,problem_id:int,request):
+    return submit_problem_function(account_id,problem_id,None,request)

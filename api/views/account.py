@@ -19,7 +19,7 @@ def all_accounts_view(request):
         return create_account(request)
 
 @api_view([GET])
-def one_account_view(request,account_id):
+def one_creator_view(request,account_id):
     return get_account(account_id)
 
 @api_view([PUT])

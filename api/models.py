@@ -48,18 +48,6 @@ class Testcase(models.Model):
     runtime_status = models.CharField(max_length=10)
     deprecated = models.BooleanField(default=False,blank=True)
 
-class Submission(models.Model):
-    submission_id = models.AutoField(primary_key=True)
-    problem = models.ForeignKey(Problem,on_delete=models.CASCADE,db_column="problem_id")
-    account = models.ForeignKey(Account,on_delete=models.CASCADE,db_column="account_id")
-    language = models.CharField(max_length=15)
-    submission_code = models.CharField(max_length=20000)
-    is_passed = models.BooleanField()
-    date = models.DateTimeField(default=timezone.now)
-    score = models.IntegerField(default=0)
-    max_score = models.IntegerField(default=0)
-    passed_ratio = models.FloatField(default=0)
-
 class Collection(models.Model):
     collection_id = models.AutoField(primary_key=True)
     creator = models.ForeignKey(Account,on_delete=models.CASCADE,db_column="creator_id")
@@ -100,6 +88,19 @@ class TopicAccountAccess(models.Model):
     topic = models.ForeignKey(Topic,on_delete=models.CASCADE,db_column="topic_id")
     account = models.ForeignKey(Account,on_delete=models.CASCADE,db_column="account_id")
 
+class Submission(models.Model):
+    submission_id = models.AutoField(primary_key=True)
+    problem = models.ForeignKey(Problem,on_delete=models.CASCADE,db_column="problem_id")
+    topic = models.ForeignKey(Topic,on_delete=models.CASCADE,db_column="topic_id",null=True)
+    account = models.ForeignKey(Account,on_delete=models.CASCADE,db_column="account_id")
+    language = models.CharField(max_length=15)
+    submission_code = models.CharField(max_length=20000)
+    is_passed = models.BooleanField()
+    date = models.DateTimeField(default=timezone.now)
+    score = models.IntegerField(default=0)
+    max_score = models.IntegerField(default=0)
+    passed_ratio = models.FloatField(default=0)
+
 class SubmissionTestcase(models.Model):
     submission_testcase_id = models.AutoField(primary_key=True)
     submission = models.ForeignKey(Submission,on_delete=models.CASCADE,db_column="submission_id")
@@ -107,3 +108,10 @@ class SubmissionTestcase(models.Model):
     output = models.CharField(max_length=100000,blank=True,null=True)
     is_passed = models.BooleanField(default=False,blank=True)
     runtime_status = models.CharField(max_length=10)
+
+class BestSubmission(models.Model):
+    best_submission_id = models.AutoField(primary_key=True)
+    problem = models.ForeignKey(Problem,on_delete=models.CASCADE,db_column="problem_id")
+    topic = models.ForeignKey(Topic,on_delete=models.CASCADE,db_column="topic_id",null=True)
+    account = models.ForeignKey(Account,on_delete=models.CASCADE,db_column="account_id")
+    submission = models.ForeignKey(Submission,on_delete=models.CASCADE,db_column="submission_id")

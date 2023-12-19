@@ -20,14 +20,14 @@ from ..controllers.problem.get_all_problem_with_best_submission import *
 
 # Create your views here.
 @api_view([POST,GET])
-def all_problems_account_view(request,account_id):
+def all_problems_creator_view(request,account_id):
     if  request.method == POST:
         return create_problem(account_id,request)
     if request.method == GET:
         return get_all_problems_by_account(account_id)
 
 @api_view([GET,PUT,DELETE])
-def one_problem_account_view(problem_id:int,request):
+def one_problem_creator_view(problem_id:int,request):
     if request.method == GET:
         return get_problem(problem_id)
     elif request.method == PUT:

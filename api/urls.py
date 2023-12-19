@@ -8,19 +8,20 @@ urlpatterns = [
     path('token',auth.authorization_view),
 
     path("accounts",account.all_accounts_view),
-    path("accounts/<int:account_id>",account.one_account_view),
+    path("accounts/<int:account_id>",account.one_creator_view),
     path("accounts/<int:account_id>/daily-submissions",account.get_daily_submission),
     path("accounts/<int:account_id>/password",account.change_password),
 
-    path('accounts/<int:account_id>/problems',problem.all_problems_account_view),
-    path('accounts/<int:account_id>/problems/<int:problem_id>',problem.one_problem_account_view),
+    path('accounts/<int:account_id>/problems',problem.all_problems_creator_view),
+    path('accounts/<int:account_id>/problems/<int:problem_id>',problem.one_problem_creator_view),
     path("accounts/<int:account_id>/problems/<int:problem_id>/submissions",submission.account_problem_submission_view),
+    path("accounts/<int:account_id>/topics/<int:topic_id>/problems/<int:problem_id>/submissions",submission.topic_account_problem_submission_view),
 
-    path('accounts/<int:account_id>/collections',collection.all_collections_account_view),
-    path('accounts/<int:account_id>/collections/<int:collection_id>',collection.one_collection_account_view),
+    path('accounts/<int:account_id>/collections',collection.all_collections_creator_view),
+    path('accounts/<int:account_id>/collections/<int:collection_id>',collection.one_collection_creator_view),
     
-    path('accounts/<int:account_id>/topics',topic.all_topics_account_view),
-    path('accounts/<int:account_id>/topics/<int:topic_id>',topic.one_topic_account_view),
+    path('accounts/<int:account_id>/topics',topic.all_topics_creator_view),
+    path('accounts/<int:account_id>/topics/<int:topic_id>',topic.one_topic_creator_view),
 
     path('problems',problem.all_problems_view),
     path('problems/validate',problem.validation_view),

@@ -14,6 +14,7 @@ from ..utility import regexMatching
 from ..controllers.submission.submit_problem import *
 from ..controllers.submission.get_submission_by_quries import *
 from ..controllers.submission.get_submissions_by_account_problem import *
+from ..controllers.submission.submit_problem_on_topic import *
 
 
 @api_view([POST,GET])
@@ -26,6 +27,9 @@ def account_problem_submission_view(request,problem_id,account_id):
 @api_view([GET])
 def all_submission_view(request):
     return get_submission_by_quries(request)
+
+def topic_account_problem_submission_view(request,topic_id,account_id,problem_id):
+    return submit_problem_on_topic(account_id,problem_id,topic_id,request)
 
 # @api_view([GET])
 # def submission_account_problem_view(request,account_id:int,problem_id:int):

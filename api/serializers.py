@@ -170,6 +170,11 @@ class ProblemPopulateAccountAndSubmissionPopulateSubmissionTestcasesSecureSerial
         model = Problem
         fields = problem_secure_fields + ['best_submission','creator']
 
+class ProblemPopulatSubmissionPopulateSubmissionTestcasesSecureSerializer(serializers.ModelSerializer):
+    best_submission = SubmissionPopulateSubmissionTestcaseSecureSerializer()
+    class Meta:
+        model = Problem
+        fields = problem_secure_fields + ['best_submission']
 class TopicCollectionPopulateCollectionSerializer(serializers.ModelSerializer):
     collection = CollectionSerializer()
     class Meta:
@@ -194,3 +199,26 @@ class TopicPopulateTopicCollectionPopulateCollectionProblemPopulateProblemSerial
     class Meta:
         model = Topic
         fields = ['topic_id','name','description','image_url','is_active','is_private','created_date','updated_date','collections']
+
+class CollectionProblemPopulateProblemPopulateAccountAndSubmissionPopulateSubmissionTestcasesSecureSerializer(serializers.ModelSerializer):
+    problem = ProblemPopulateAccountAndSubmissionPopulateSubmissionTestcasesSecureSerializer()
+    class Meta:
+        model = CollectionProblem
+        fields = "__all__"
+class CollectionPopulateCollectionProblemPopulateProblemPopulateAccountAndSubmissionPopulateSubmissionTestcasesSecureSerializer(serializers.ModelSerializer):
+    problems = CollectionProblemPopulateProblemPopulateAccountAndSubmissionPopulateSubmissionTestcasesSecureSerializer(many=True)
+    class Meta:
+        model = Collection
+        fields = "__all__"
+
+class TopicCollectionPopulateCollectionPopulateCollectionProblemPopulateProblemPopulateAccountAndSubmissionPopulateSubmissionTestcasesSecureSerializer(serializers.ModelSerializer):
+    collection = CollectionPopulateCollectionProblemPopulateProblemPopulateAccountAndSubmissionPopulateSubmissionTestcasesSecureSerializer()
+    class Meta:
+        model = TopicCollection
+        fields = "__all__"
+
+class TopicPopulateTopicCollectionPopulateCollectionPopulateCollectionProblemPopulateProblemPopulateAccountAndSubmissionPopulateSubmissionTestcasesSecureSerializer(serializers.ModelSerializer):
+    collections = TopicCollectionPopulateCollectionPopulateCollectionProblemPopulateProblemPopulateAccountAndSubmissionPopulateSubmissionTestcasesSecureSerializer(many=True)
+    class Meta:
+        model = Topic
+        fields = ['topic_id','name','description','image_url','created_date','updated_date','collections']

@@ -17,17 +17,18 @@ from ..controllers.topic.add_collections_to_topic import *
 from ..controllers.topic.remove_collections_from_topic import *
 from ..controllers.topic.get_all_topics_by_account import *
 from ..controllers.topic.update_collections_to_topic import *
+from ..controllers.topic.get_topic_public import *
 
 @api_view([POST,GET])
 @parser_classes([MultiPartParser,FormParser])
-def all_topics_account_view(request,account_id :int):
+def all_topics_creator_view(request,account_id :int):
     if request.method == POST:
         return create_topic(account_id,request)
     elif request.method == GET:
         return get_all_topics_by_account(account_id,request)
 
 @api_view([GET,PUT,DELETE])
-def one_topic_account_view(request,topic_id:int):
+def one_topic_creator_view(request,account_id:int,topic_id:int):
     if request.method == GET:
         return get_topic(topic_id)
     elif request.method == PUT:
@@ -42,7 +43,7 @@ def all_topics_view(request):
 @api_view([GET,PUT,DELETE])
 def one_topic_view(request,topic_id:int):
     if request.method == GET:
-        return get_topic(topic_id)
+        return get_topic_public(topic_id,request)
     elif request.method == PUT:
         return update_topic(topic_id,request)
     elif request.method == DELETE:
