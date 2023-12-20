@@ -23,6 +23,7 @@ def get_topic_public(topic_id:int,request):
             try:
                 best_submission = BestSubmission.objects.get(problem=cp.problem,account=account,topic=topic)
                 best_submission = best_submission.submission
+                best_submission.runtime_output = SubmissionTestcase.objects.filter(submission=best_submission)
             except:
                 best_submission = None
             cp.problem.best_submission = best_submission

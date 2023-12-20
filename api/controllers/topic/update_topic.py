@@ -15,5 +15,6 @@ def update_topic(topic_id:int,request):
     if topic_ser.is_valid():
         topic_ser.save()
         return Response(topic_ser.data,status=status.HTTP_200_OK)
+    print(topic_ser.errors)
     return Response(topic_ser.errors,status=status.HTTP_400_BAD_REQUEST)
     
