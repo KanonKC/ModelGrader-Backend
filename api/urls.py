@@ -26,6 +26,7 @@ urlpatterns = [
     path('problems',problem.all_problems_view),
     path('problems/validate',problem.validation_view),
     path('problems/<int:problem_id>',problem.one_problem_view),
+    path('topics/<int:topic_id>/problems/<int:problem_id>/accounts/<int:account_id>',problem.problem_in_topic_account_view),
 
     path('collections',collection.all_collections_view),
     path('collections/<int:collection_id>',collection.one_collection_view),

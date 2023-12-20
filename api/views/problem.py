@@ -17,6 +17,7 @@ from ..controllers.problem.remove_bulk_problems import *
 from ..controllers.problem.get_all_problems_by_account import *
 from ..controllers.problem.validate_program import *
 from ..controllers.problem.get_all_problem_with_best_submission import *
+from ..controllers.problem.get_problem_in_topic_with_best_submission import *
 
 # Create your views here.
 @api_view([POST,GET])
@@ -55,3 +56,8 @@ def one_problem_view(request,problem_id: int):
 def validation_view(request):
     if request.method == POST:
         return validate_program(request)
+    
+@api_view([GET])
+def problem_in_topic_account_view(request,account_id:int,topic_id:int,problem_id:int):
+    if request.method == GET:
+        return get_problem_in_topic_with_best_submission(account_id,topic_id,problem_id)
