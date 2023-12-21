@@ -22,17 +22,37 @@ from ..serializers import *
 #         print(f"({count}/{total})")
 #     return Response({'message': 'Success!'},status=status.HTTP_201_CREATED)
 
+# @api_view([POST])
+# def run_script(request):
+#     submissionTestcases = SubmissionTestcase.objects.all()
+
+#     total = len(submissionTestcases)
+#     count = 0
+#     for testcase in submissionTestcases:
+#         if testcase.runtime_status == "OK" and (not testcase.is_passed):
+#             testcase.runtime_status = "FAILED"
+#             testcase.save()
+#         count += 1
+    
+#         print(f"({count}/{total})")
+#     return Response({'message': 'Success!'},status=status.HTTP_201_CREATED)
+
+# @api_view([POST])
+# def run_script(request):
+#     topics = Topic.objects.all()
+#     for topic in topics:
+#         if len(topic.description) == 0:
+#             topic.description = f'[{{"id": "1","type": ELEMENT_PARAGRAPH,"children": [{{ "text": "" }}]}}]'
+#             topic.save()
+#         elif topic.description[0] != '[':
+#             topic.description = f'[{{"id": "1","type": ELEMENT_PARAGRAPH,"children": [{{ "text": "{topic.description}" }}]}}]'
+#             topic.save()
+#     return Response({'message': 'Success!'},status=status.HTTP_201_CREATED)
+
 @api_view([POST])
 def run_script(request):
-    submissionTestcases = SubmissionTestcase.objects.all()
-
-    total = len(submissionTestcases)
-    count = 0
-    for testcase in submissionTestcases:
-        if testcase.runtime_status == "OK" and (not testcase.is_passed):
-            testcase.runtime_status = "FAILED"
-            testcase.save()
-        count += 1
-    
-        print(f"({count}/{total})")
+    collections = Collection.objects.all()
+    for collection in collections:
+        collection.description = '[{"id":"1","type":"p","children":[{"text":"Just course"}]}]'
+        collection.save()
     return Response({'message': 'Success!'},status=status.HTTP_201_CREATED)
