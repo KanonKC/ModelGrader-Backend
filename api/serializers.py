@@ -160,7 +160,15 @@ class SubmissionPopulateSubmissionTestcaseSecureSerializer(serializers.ModelSeri
     runtime_output = SubmissionTestcaseSecureSerializer(many=True)
     class Meta:
         model = Submission
-        fields = ['submission_id','account','problem','language','submission_code','is_passed','date','score','max_score','passed_ratio','runtime_output']
+        fields = ['submission_id','account','problem','topic','language','submission_code','is_passed','date','score','max_score','passed_ratio','runtime_output']
+
+class SubmissionPopulateSubmissionTestcaseAndProblemSecureSerializer(serializers.ModelSerializer):
+    # Add testcases field
+    runtime_output = SubmissionTestcaseSecureSerializer(many=True)
+    problem = ProblemSecureSerializer()
+    class Meta:
+        model = Submission
+        fields = ['submission_id','account','problem','topic','language','submission_code','is_passed','date','score','max_score','passed_ratio','runtime_output']
 
 class ProblemPopulateAccountAndSubmissionPopulateSubmissionTestcasesSecureSerializer(serializers.ModelSerializer):
     # Add testcases field

@@ -9,7 +9,7 @@ from django.forms.models import model_to_dict
 from ...serializers import *
 
 def get_submission_by_quries(request):
-    submission = Submission.objects.all()
+    submissions = Submission.objects.all()
     
     # Query params
     problem_id = int(request.query_params.get("problem_id", 0))
@@ -18,28 +18,36 @@ def get_submission_by_quries(request):
     passed = int(request.query_params.get("passed", -1))
     sort_score = int(request.query_params.get("sort_score", 0))
     sort_date = int(request.query_params.get("sort_date", 0))
+    start = int(request.query_params.get("start", -1))
+    end = int(request.query_params.get("end", -1))
 
     if problem_id != 0:
-        submission = submission.filter(problem_id=problem_id)
+        submissions = submissions.filter(problem_id=problem_id)
     if account_id != 0:
-        submission = submission.filter(account_id=account_id)
+        submissions = submissions.filter(account_id=account_id)
     if topic_id != 0:
-        submission = submission.filter(problem__topic_id=topic_id)
+        submissions = submissions.filter(problem__topic_id=topic_id)
 
     if passed == 0:
-        submission = submission.filter(is_passed=False)
+        submissions = submissions.filter(is_passed=False)
     elif passed == 1:
-        submission = submission.filter(is_passed=True)
+        submissions = submissions.filter(is_passed=True)
 
     if sort_score == -1:
-        submission = submission.order_by('passed_ratio')
+        submissions = submissions.order_by('passed_ratio')
     elif sort_score == 1:
-        submission = submission.order_by('-passed_ratio')
+        submissions = submissions.order_by('-passed_ratio')
 
     if sort_date == -1:
-        submission = submission.order_by('date')
+        submissions = submissions.order_by('date')
     elif sort_date == 1:
-        submission = submission.order_by('-date') 
+        submissions = submissions.order_by('-date')
+
+    if start != -1 and end != -1:
+        submissions = submissions[start:end]
+
+    for submission in submissions:
+        submission.runtime_output = SubmissionTestcase.objects.filter(submission=submission)
         
-    serialize = SubmissionPoplulateProblemSerializer(submission,many=True)
+    serialize = SubmissionPopulateSubmissionTestcaseAndProblemSecureSerializer(submissions,many=True)
     return Response({"submissions": serialize.data},status=status.HTTP_200_OK)

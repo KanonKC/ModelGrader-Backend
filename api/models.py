@@ -115,3 +115,24 @@ class BestSubmission(models.Model):
     topic = models.ForeignKey(Topic,on_delete=models.CASCADE,db_column="topic_id",null=True)
     account = models.ForeignKey(Account,on_delete=models.CASCADE,db_column="account_id")
     submission = models.ForeignKey(Submission,on_delete=models.CASCADE,db_column="submission_id")
+
+class Group(models.Model):
+    group_id = models.AutoField(primary_key=True)
+    creator = models.ForeignKey(Account,on_delete=models.CASCADE,db_column="creator_id")
+    name = models.CharField(max_length=100)
+    description = models.CharField(max_length=100000,null=True,blank=True,default=None)
+
+class TopicGroupPermission(models.Model):
+    topic = models.ForeignKey(Topic,on_delete=models.CASCADE,db_column="topic_id")
+    group = models.ForeignKey(Group,on_delete=models.CASCADE,db_column="group_id")
+    permission_access = models.BooleanField(default=False,blank=True)
+    # สามารถเข้าถึง Course นี้ได้ โดยสามารถดูโจทย์ ส่งโจทย์ได้
+
+    permission_view_problems = models.BooleanField(default=False,blank=True)
+    # เข้าถึงโจทย์เชิงลึกแบบดู Testcases ได้
+    permission_manage_collections = models.BooleanField(default=False,blank=True)
+    # จัดการเพิ่ม/ลบ โจทย์ออกจาก Collection ได้
+    permission_manage_topic = models.BooleanField(default=False,blank=True)
+    # สามารถแก้ไข
+    permission_manage_members = models.BooleanField(default=False,blank=True)
+    
