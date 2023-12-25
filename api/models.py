@@ -122,17 +122,24 @@ class Group(models.Model):
     name = models.CharField(max_length=100)
     description = models.CharField(max_length=100000,null=True,blank=True,default=None)
 
-class TopicGroupPermission(models.Model):
-    topic = models.ForeignKey(Topic,on_delete=models.CASCADE,db_column="topic_id")
+class GroupMember(models.Model):
+    group_member_id = models.AutoField(primary_key=True)
     group = models.ForeignKey(Group,on_delete=models.CASCADE,db_column="group_id")
-    permission_access = models.BooleanField(default=False,blank=True)
-    # สามารถเข้าถึง Course นี้ได้ โดยสามารถดูโจทย์ ส่งโจทย์ได้
+    account = models.ForeignKey(Account,on_delete=models.CASCADE,db_column="account_id")
+    created_date = models.DateTimeField(default=timezone.now)
+    updated_date = models.DateTimeField(default=timezone.now)
 
-    permission_view_problems = models.BooleanField(default=False,blank=True)
-    # เข้าถึงโจทย์เชิงลึกแบบดู Testcases ได้
-    permission_manage_collections = models.BooleanField(default=False,blank=True)
-    # จัดการเพิ่ม/ลบ โจทย์ออกจาก Collection ได้
-    permission_manage_topic = models.BooleanField(default=False,blank=True)
-    # สามารถแก้ไข
-    permission_manage_members = models.BooleanField(default=False,blank=True)
+# class TopicGroupPermission(models.Model):
+#     topic = models.ForeignKey(Topic,on_delete=models.CASCADE,db_column="topic_id")
+#     group = models.ForeignKey(Group,on_delete=models.CASCADE,db_column="group_id")
+#     permission_access = models.BooleanField(default=False,blank=True)
+#     # สามารถเข้าถึง Course นี้ได้ โดยสามารถดูโจทย์ ส่งโจทย์ได้
+
+#     permission_view_problems = models.BooleanField(default=False,blank=True)
+#     # เข้าถึงโจทย์เชิงลึกแบบดู Testcases ได้
+#     permission_manage_collections = models.BooleanField(default=False,blank=True)
+#     # จัดการเพิ่ม/ลบ โจทย์ออกจาก Collection ได้
+#     permission_manage_topic = models.BooleanField(default=False,blank=True)
+#     # สามารถแก้ไข
+#     permission_manage_members = models.BooleanField(default=False,blank=True)
     
