@@ -121,13 +121,15 @@ class Group(models.Model):
     creator = models.ForeignKey(Account,on_delete=models.CASCADE,db_column="creator_id")
     name = models.CharField(max_length=100)
     description = models.CharField(max_length=100000,null=True,blank=True,default=None)
+    color = models.CharField(max_length=10,null=True,blank=True,default=None)
+    created_date = models.DateTimeField(default=timezone.now)
+    updated_date = models.DateTimeField(default=timezone.now)
 
 class GroupMember(models.Model):
     group_member_id = models.AutoField(primary_key=True)
     group = models.ForeignKey(Group,on_delete=models.CASCADE,db_column="group_id")
     account = models.ForeignKey(Account,on_delete=models.CASCADE,db_column="account_id")
     created_date = models.DateTimeField(default=timezone.now)
-    updated_date = models.DateTimeField(default=timezone.now)
 
 # class TopicGroupPermission(models.Model):
 #     topic = models.ForeignKey(Topic,on_delete=models.CASCADE,db_column="topic_id")

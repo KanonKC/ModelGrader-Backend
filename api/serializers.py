@@ -230,3 +230,8 @@ class TopicPopulateTopicCollectionPopulateCollectionPopulateCollectionProblemPop
     class Meta:
         model = Topic
         fields = ['topic_id','name','description','image_url','created_date','updated_date','collections']
+
+class GroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Group
+        fields = "__all__"
