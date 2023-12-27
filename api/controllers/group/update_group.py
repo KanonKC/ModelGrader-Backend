@@ -7,14 +7,17 @@ from ...models import *
 from rest_framework import status
 from django.forms.models import model_to_dict
 from ...serializers import *
+from datetime import datetime
 
 def update_group(group:Group,request):
     
-    group.name = request.data.get('name',group.name)
-    group.description = request.data.get('description',group.description)
-    group.color = request.data.get('color',group.color)
-
-    group.save()
-    serialize = GroupSerializer(group)
-
-    return Response(serialize.data,status=status.HTTP_200_OK)
+    serializer = GroupSerializer(group,data={
+        **request.data,
+        'updated_date': datetime.now()
+    },partial=True)
+    
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data,status=status.HTTP_200_OK)
+    else:
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)

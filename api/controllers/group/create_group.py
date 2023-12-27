@@ -9,15 +9,14 @@ from django.forms.models import model_to_dict
 from ...serializers import *
 
 def create_group(account:Account,request):
+    
+    serialize = GroupSerializer(data={
+        'creator':account.account_id,
+        **request.data
+    })
 
-    group = Group(
-        creator=account,
-        name=request.data['name'],
-        description=request.data['description'] if 'description' in request.data else None,
-        color=request.data['color'] if 'color' in request.data else None,
-    )
-
-    group.save()
-    serialize = GroupSerializer(group)
-
-    return Response(serialize.data,status=status.HTTP_201_CREATED)
+    if serialize.is_valid():
+        serialize.save()
+        return Response(serialize.data,status=status.HTTP_201_CREATED)
+    else:
+        return Response(serialize.errors,status=status.HTTP_400_BAD_REQUEST)

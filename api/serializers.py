@@ -235,3 +235,19 @@ class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
         fields = "__all__"
+
+class GroupMemberSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GroupMember
+        fields = "__all__"
+class GroupMemberPopulateAccountSecureSerializer(serializers.ModelSerializer):
+    account = AccountSecureSerializer()
+    class Meta:
+        model = GroupMember
+        fields = "__all__"
+
+class GroupPopulateGroupMemberPopulateAccountSecureSerializer(serializers.ModelSerializer):
+    members = GroupMemberPopulateAccountSecureSerializer(many=True)
+    class Meta:
+        model = Group
+        fields = ['group_id','name','description','color','created_date','updated_date','creator','members']

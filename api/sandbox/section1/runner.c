@@ -1,5 +1,1 @@
-#include <stdio.h>
-
-int main() {
-    printf("Hello World!\n");
-}
+n = int(input('N: '));print(2/)

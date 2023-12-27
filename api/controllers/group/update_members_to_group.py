@@ -20,3 +20,7 @@ def update_members_to_group(group:Group,request):
         ))
 
     GroupMember.objects.bulk_create(group_members)
+    group.members = group_members
+
+    serialize = GroupPopulateGroupMemberPopulateAccountSecureSerializer(group)
+    return Response(serialize.data,status=status.HTTP_200_OK)
