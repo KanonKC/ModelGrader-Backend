@@ -13,7 +13,7 @@ def update_group(group:Group,request):
     
     serializer = GroupSerializer(group,data={
         **request.data,
-        'updated_date': datetime.now()
+        'updated_date': timezone.now()
     },partial=True)
     
     if serializer.is_valid():
