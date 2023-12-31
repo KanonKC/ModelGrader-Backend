@@ -12,20 +12,20 @@ def get_submission_by_quries(request):
     submissions = Submission.objects.all()
     
     # Query params
-    problem_id = int(request.query_params.get("problem_id", 0))
-    account_id = int(request.query_params.get("account_id", 0))
-    topic_id = int(request.query_params.get("topic_id", 0))
+    problem_id = str(request.query_params.get("problem_id", ""))
+    account_id = str(request.query_params.get("account_id", ""))
+    topic_id = str(request.query_params.get("topic_id", ""))
     passed = int(request.query_params.get("passed", -1))
     sort_score = int(request.query_params.get("sort_score", 0))
     sort_date = int(request.query_params.get("sort_date", 0))
     start = int(request.query_params.get("start", -1))
     end = int(request.query_params.get("end", -1))
 
-    if problem_id != 0:
+    if problem_id != "":
         submissions = submissions.filter(problem_id=problem_id)
-    if account_id != 0:
+    if account_id != "":
         submissions = submissions.filter(account_id=account_id)
-    if topic_id != 0:
+    if topic_id != "":
         submissions = submissions.filter(problem__topic_id=topic_id)
 
     if passed == 0:

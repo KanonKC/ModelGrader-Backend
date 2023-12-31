@@ -9,6 +9,8 @@ from django.forms.models import model_to_dict
 from ...serializers import *
 
 def update_groups_permission_to_topic(topic:Topic,request):
+
+    TopicGroupPermission.objects.filter(topic=topic).delete()
     
     topic_group_permissions = []
     for group_request in request.data['groups']:
