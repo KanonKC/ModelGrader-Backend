@@ -251,3 +251,14 @@ class GroupPopulateGroupMemberPopulateAccountSecureSerializer(serializers.ModelS
     class Meta:
         model = Group
         fields = ['group_id','name','description','color','created_date','updated_date','creator','members']
+
+class TopicGroupPermissionsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TopicGroupPermission
+        fields = "__all__"
+
+class TopicPopulateTopicGroupPermissionsSerializer(serializers.ModelSerializer):
+    group_permissions = TopicGroupPermissionsSerializer(many=True)
+    class Meta:
+        model = Topic
+        fields = ['topic_id','name','description','image_url','is_active','is_private','created_date','updated_date','creator','group_permissions']

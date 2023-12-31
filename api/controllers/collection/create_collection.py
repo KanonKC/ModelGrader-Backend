@@ -8,7 +8,7 @@ from rest_framework import status
 from django.forms.models import model_to_dict
 from ...serializers import *
 
-def create_collection(account_id:int,request):
+def create_collection(account_id:str,request):
     
     request.data['creator'] = account_id
     serialize = CollectionSerializer(data=request.data)

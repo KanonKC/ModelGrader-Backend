@@ -8,7 +8,7 @@ from rest_framework import status
 from django.forms.models import model_to_dict
 from ...serializers import *
 
-def get_collection(collection_id:int):
+def get_collection(collection_id:str):
     
     collection = Collection.objects.get(collection_id=collection_id)
     # problems = Problem.objects.filter(collectionproblem__collection_id=collection_id)

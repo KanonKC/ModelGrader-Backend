@@ -8,7 +8,7 @@ from rest_framework import status
 from django.forms.models import model_to_dict
 from ...serializers import *
 
-def update_topic(topic_id:int,request):
+def update_topic(topic_id:str,request):
     topic = Topic.objects.get(topic_id=topic_id)
     
     topic_ser = TopicSerializer(topic,data=request.data,partial=True)

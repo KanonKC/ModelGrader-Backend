@@ -8,7 +8,7 @@ from rest_framework import status
 from django.forms.models import model_to_dict
 from ...serializers import *
 
-def get_problem(problem_id:int):
+def get_problem(problem_id:str):
     try:
         problem = Problem.objects.get(problem_id=problem_id)
     except Problem.DoesNotExist:

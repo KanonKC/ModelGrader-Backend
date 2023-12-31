@@ -11,5 +11,5 @@ from ...utility import regexMatching
 from time import sleep
 from .submit_problem import *
 
-def submit_problem_on_topic(account_id:int,problem_id:int,topic_id:int,request):
+def submit_problem_on_topic(account_id:str,problem_id:str,topic_id:str,request):
     return submit_problem_function(account_id,problem_id,topic_id,request)

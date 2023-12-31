@@ -15,7 +15,7 @@ from ..controllers.group.get_group import get_group
 from ..controllers.group.get_all_groups_by_account import get_all_groups_by_account
 
 @api_view([POST,GET])
-def all_groups_creator_view(request,account_id:int):
+def all_groups_creator_view(request,account_id:str):
     account = Account.objects.get(account_id=account_id)
     if request.method == POST:
         return create_group(account,request)
@@ -23,7 +23,7 @@ def all_groups_creator_view(request,account_id:int):
         return get_all_groups_by_account(account,request)
 
 @api_view([PUT,DELETE,GET])
-def one_group_view(request,group_id:int):
+def one_group_view(request,group_id:str):
     group = Group.objects.get(group_id=group_id)
     if request.method == PUT:
         return update_group(group,request)
@@ -33,7 +33,7 @@ def one_group_view(request,group_id:int):
         return get_group(group,request)
     
 @api_view([PUT])
-def group_members_view(request,group_id:int):
+def group_members_view(request,group_id:str):
     group = Group.objects.get(group_id=group_id)
     if request.method == PUT:
         return update_members_to_group(group,request)

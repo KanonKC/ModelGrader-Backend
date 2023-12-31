@@ -8,7 +8,7 @@ from rest_framework import status
 from django.forms.models import model_to_dict
 from ...serializers import *
 
-def get_topic_public(topic_id:int,request):
+def get_topic_public(topic_id:str,request):
 
     account_id = request.query_params.get('account_id',None)
 

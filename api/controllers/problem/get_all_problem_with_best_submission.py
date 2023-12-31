@@ -8,7 +8,7 @@ from rest_framework import status
 from django.forms.models import model_to_dict
 from ...serializers import *
 
-def get_all_problem_with_best_submission(account_id:int):
+def get_all_problem_with_best_submission(account_id:str):
 
     problems = Problem.objects.all().order_by('-updated_date')
 

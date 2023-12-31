@@ -8,7 +8,7 @@ from rest_framework import status
 from django.forms.models import model_to_dict
 from ...serializers import *
 
-def delete_topic(topic_id:int):
+def delete_topic(topic_id:str):
     topic = Topic.objects.get(topic_id=topic_id)
     topic.delete()
     return Response(status=status.HTTP_204_NO_CONTENT)

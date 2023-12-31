@@ -20,14 +20,14 @@ from ..controllers.collection.update_problems_to_collection import *
 
 
 @api_view([POST,GET])
-def all_collections_creator_view(request,account_id:int):
+def all_collections_creator_view(request,account_id:str):
     if request.method == POST:
         return create_collection(account_id,request)
     if request.method == GET:
         return get_all_collections_by_account(account_id)
 
 @api_view([GET,PUT,DELETE])
-def one_collection_creator_view(request,collection_id:int):
+def one_collection_creator_view(request,collection_id:str):
     if request.method == GET:
         return get_collection(collection_id)
     if request.method == PUT:
@@ -40,7 +40,7 @@ def all_collections_view(request):
     return get_all_collections(request)
 
 @api_view([GET,PUT,DELETE])
-def one_collection_view(request,collection_id:int):
+def one_collection_view(request,collection_id:str):
     if request.method == GET:
         return get_collection(collection_id)
     if request.method == PUT:
@@ -49,7 +49,7 @@ def one_collection_view(request,collection_id:int):
         return delete_collection(collection_id)
 
 @api_view([PUT])
-def collection_problems_view(request,collection_id:int,method:str):
+def collection_problems_view(request,collection_id:str,method:str):
 
     collection = Collection.objects.get(collection_id=collection_id)
 

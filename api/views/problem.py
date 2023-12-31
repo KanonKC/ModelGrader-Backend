@@ -28,7 +28,7 @@ def all_problems_creator_view(request,account_id):
         return get_all_problems_by_account(account_id)
 
 @api_view([GET,PUT,DELETE])
-def one_problem_creator_view(problem_id:int,request):
+def one_problem_creator_view(problem_id:str,request):
     if request.method == GET:
         return get_problem(problem_id)
     elif request.method == PUT:
@@ -58,6 +58,6 @@ def validation_view(request):
         return validate_program(request)
     
 @api_view([GET])
-def problem_in_topic_account_view(request,account_id:int,topic_id:int,problem_id:int):
+def problem_in_topic_account_view(request,account_id:str,topic_id:str,problem_id:str):
     if request.method == GET:
         return get_problem_in_topic_with_best_submission(account_id,topic_id,problem_id)

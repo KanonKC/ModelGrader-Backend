@@ -8,7 +8,7 @@ from rest_framework import status
 from django.forms.models import model_to_dict
 from ...serializers import *
 
-def get_all_topics_by_account(account_id:int,request):
+def get_all_topics_by_account(account_id:str,request):
     topics = Topic.objects.filter(creator_id=account_id).order_by('-updated_date')
     topicCollections = TopicCollection.objects.filter(topic__in=topics)
 

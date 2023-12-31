@@ -8,7 +8,7 @@ from rest_framework import status
 from django.forms.models import model_to_dict
 from ...serializers import *
 
-def get_all_problems_by_account(account_id:int):
+def get_all_problems_by_account(account_id:str):
     problems = Problem.objects.filter(creator=account_id).order_by('-updated_date')
 
     for problem in problems:
