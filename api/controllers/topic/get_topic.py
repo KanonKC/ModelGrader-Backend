@@ -11,7 +11,8 @@ from ...serializers import *
 def get_topic(topic_id:str):
     topic = Topic.objects.get(topic_id=topic_id)
     topic.collections = TopicCollection.objects.filter(topic_id=topic_id)
-    serialize = TopicPopulateTopicCollectionPopulateCollectionSerializer(topic)
+    topic.group_permissions = TopicGroupPermission.objects.filter(topic=topic)
+    serialize = TopicPopulateTopicCollectionPopulateCollectionAndTopicGroupPermissionPopulateGroupSerializer(topic)
     
     return Response(serialize.data,status=status.HTTP_200_OK)
     

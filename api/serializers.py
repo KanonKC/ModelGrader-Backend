@@ -199,7 +199,8 @@ class TopicPopulateTopicCollectionPopulateCollectionSerializer(serializers.Model
     collections = TopicCollectionPopulateCollectionSerializer(many=True)
     class Meta:
         model = Topic
-        fields = ['topic_id','name','description','image_url','is_active','is_private','created_date','updated_date','creator','collections']
+        fields = "__all__"
+        include = ['collections']
 
 
 class TopicPopulateTopicCollectionPopulateCollectionProblemPopulateProblemSerializer(serializers.ModelSerializer):
@@ -250,9 +251,16 @@ class GroupPopulateGroupMemberPopulateAccountSecureSerializer(serializers.ModelS
     members = GroupMemberPopulateAccountSecureSerializer(many=True)
     class Meta:
         model = Group
-        fields = ['group_id','name','description','color','created_date','updated_date','creator','members']
+        fields = "__all__"
+        include = ['members']
 
 class TopicGroupPermissionsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TopicGroupPermission
+        fields = "__all__"
+
+class TopicGroupPermissionPopulateGroupSerializer(serializers.ModelSerializer):
+    group = GroupSerializer()
     class Meta:
         model = TopicGroupPermission
         fields = "__all__"
@@ -261,4 +269,13 @@ class TopicPopulateTopicGroupPermissionsSerializer(serializers.ModelSerializer):
     group_permissions = TopicGroupPermissionsSerializer(many=True)
     class Meta:
         model = Topic
-        fields = ['topic_id','name','description','image_url','is_active','is_private','created_date','updated_date','creator','group_permissions']
+        fields = "__all__"
+        include = ['group_permissions']
+
+class TopicPopulateTopicCollectionPopulateCollectionAndTopicGroupPermissionPopulateGroupSerializer(serializers.ModelSerializer):
+    collections = TopicCollectionPopulateCollectionSerializer(many=True)
+    group_permissions = TopicGroupPermissionPopulateGroupSerializer(many=True)
+    class Meta:
+        model = Topic
+        fields = "__all__"
+        include = ['collections','group_permissions']
