@@ -8,9 +8,8 @@ from rest_framework import status
 from django.forms.models import model_to_dict
 from ...serializers import *
 
-def get_topic(topic_id:str):
-    topic = Topic.objects.get(topic_id=topic_id)
-    topic.collections = TopicCollection.objects.filter(topic_id=topic_id)
+def get_topic(topic:Topic):
+    topic.collections = TopicCollection.objects.filter(topic=topic)
     topic.group_permissions = TopicGroupPermission.objects.filter(topic=topic)
     serialize = TopicPopulateTopicCollectionPopulateCollectionAndTopicGroupPermissionPopulateGroupSerializer(topic)
     
