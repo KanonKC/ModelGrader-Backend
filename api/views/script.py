@@ -6,7 +6,14 @@ from ..models import *
 from rest_framework import status
 from django.forms.models import model_to_dict
 from ..serializers import *
+
 from ..controllers.script.generate_submission_score import generate_submission_score
+from ..controllers.script.replace_problems_empty_description import replace_problems_empty_description
+from ..controllers.script.replace_collections_empty_description import replace_collections_empty_description
+# from ..controllers.script.
+# from ..controllers.script.
+# from ..controllers.script.
+
 
 # @api_view([POST])
 # def run_script(request):
@@ -55,5 +62,8 @@ def run_script(request):
     # for collection in collections:
     #     collection.description = '[{"id":"1","type":"p","children":[{"text":"Just course"}]}]'
     #     collection.save()
-    generate_submission_score(request)
+    # generate_submission_score(request)
+    # replace_topic_empty_description(request)
+    # replace_collections_empty_description(request)
+    replace_problems_empty_description(request)
     return Response({'message': 'Success!'},status=status.HTTP_201_CREATED)
