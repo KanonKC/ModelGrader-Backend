@@ -9,9 +9,14 @@ from django.forms.models import model_to_dict
 from ...serializers import *
 
 def get_topic(topic:Topic):
-    topic.collections = TopicCollection.objects.filter(topic=topic)
     topic.group_permissions = TopicGroupPermission.objects.filter(topic=topic)
-    serialize = TopicPopulateTopicCollectionPopulateCollectionAndTopicGroupPermissionPopulateGroupSerializer(topic)
+    
+    topic.collections = TopicCollection.objects.filter(topic=topic)
+
+    for tp in topic.collections:
+        tp.collection.problems = CollectionProblem.objects.filter(collection=tp.collection)
+
+    serialize = TopicPopulateTopicCollectionPopulateCollectionPopulateCollectionProblemPopulateProblemAndTopicGroupPermissionPopulateGroupSerializer(topic)
     
     return Response(serialize.data,status=status.HTTP_200_OK)
     

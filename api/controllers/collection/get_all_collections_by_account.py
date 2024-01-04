@@ -17,7 +17,7 @@ def get_all_collections_by_account(account_id:str):
         con_probs = problemCollections.filter(collection=collection)
         serialize = CollectionSerializer(collection)
         collection_data = serialize.data
-        collection_data['problems'] = CollectionProblemPopulateProblemSecureSerializer(con_probs,many=True).data
+        collection_data['problems'] = CollectionProblemPopulateProblemSerializer(con_probs,many=True).data
 
         populated_collections.append(collection_data)
 
