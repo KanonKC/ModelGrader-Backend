@@ -300,3 +300,23 @@ class TopicPopulateTopicCollectionPopulateCollectionPopulateCollectionProblemPop
         model = Topic
         fields = "__all__"
         include = ['collections','group_permissions']
+
+class CollectionGroupPermissionPopulateGroupSerializer(serializers.ModelSerializer):
+    group = GroupSerializer()
+    class Meta:
+        model = CollectionGroupPermission
+        fields = "__all__"
+class CollectionPopulateCollectionGroupPermissionsPopulateGroupSerializer(serializers.ModelSerializer):
+    group_permissions = CollectionGroupPermissionPopulateGroupSerializer(many=True)
+    class Meta:
+        model = Collection
+        fields = "__all__"
+        include = ['group_permissions']
+
+class CollectionPopulateCollectionProblemsPopulateProblemAndCollectionGroupPermissionsPopulateGroupSerializer(serializers.ModelSerializer):
+    problems = CollectionProblemPopulateProblemSerializer(many=True)
+    group_permissions = CollectionGroupPermissionPopulateGroupSerializer(many=True)
+    class Meta:
+        model = Collection
+        fields = "__all__"
+        include = ['problems','group_permissions']

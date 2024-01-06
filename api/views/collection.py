@@ -17,6 +17,8 @@ from ..controllers.collection.add_problems_to_collection import *
 from ..controllers.collection.remove_problems_from_collection import *
 from ..controllers.collection.get_all_collections_by_account import *
 from ..controllers.collection.update_problems_to_collection import *
+from ..controllers.collection.update_group_permissions_collection import *
+
 
 
 @api_view([POST,GET])
@@ -27,7 +29,7 @@ def all_collections_creator_view(request,account_id:str):
         return get_all_collections_by_account(account_id)
 
 @api_view([GET,PUT,DELETE])
-def one_collection_creator_view(request,collection_id:str):
+def one_collection_creator_view(request,account_id:int,collection_id:str):
     if request.method == GET:
         return get_collection(collection_id)
     if request.method == PUT:
@@ -59,3 +61,9 @@ def collection_problems_view(request,collection_id:str,method:str):
         return remove_problems_from_collection(collection,request)
     if method == "update":
         return update_problems_to_collection(collection,request)
+    
+@api_view([PUT])
+def collection_groups_view(request,account_id:int,collection_id:str):
+    collection = Collection.objects.get(collection_id=collection_id)
+    if request.method == PUT:
+        return update_group_permissions_collection(collection,request)

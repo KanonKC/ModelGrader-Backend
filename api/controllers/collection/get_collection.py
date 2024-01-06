@@ -12,17 +12,13 @@ def get_collection(collection_id:str):
     
     collection = Collection.objects.get(collection_id=collection_id)
     # problems = Problem.objects.filter(collectionproblem__collection_id=collection_id)
-    collectionProblems = CollectionProblem.objects.filter(collection=collection).order_by('order')
+    collection.problems = CollectionProblem.objects.filter(collection=collection).order_by('order')
+    collection.group_permissions = CollectionGroupPermission.objects.filter(collection=collection)
     
-    collection_ser = CollectionSerializer(collection)
-    collectionProblems_ser = CollectionProblemPopulateProblemSecureSerializer(collectionProblems,many=True)
-    # populated_problems = []
-    # for col_prob in collectionProblems:
-    #     col_prob_serialize = CollectionProblemPopulateProblemSecureSerializer(col_prob)
-    #     # prob_serialize = ProblemSerializer(col_prob.problem)
-    #     populated_problems.append(col_prob_serialize.data)
+    # collection_ser = CollectionSerializer(collection)
+    # collectionProblems_ser = CollectionProblemPopulateProblemSecureSerializer(collectionProblems,many=True)
 
-    return Response({
-        **collection_ser.data,
-        'problems': collectionProblems_ser.data
-    } ,status=status.HTTP_200_OK)
+    serializer = CollectionPopulateCollectionProblemsPopulateProblemAndCollectionGroupPermissionsPopulateGroupSerializer(collection)
+    
+
+    return Response(serializer.data ,status=status.HTTP_200_OK)

@@ -19,9 +19,11 @@ urlpatterns = [
 
     path('accounts/<str:account_id>/collections',collection.all_collections_creator_view),
     path('accounts/<str:account_id>/collections/<str:collection_id>',collection.one_collection_creator_view),
+    path('accounts/<str:account_id>/collections/<str:collection_id>/groups',collection.collection_groups_view),
     
     path('accounts/<str:account_id>/topics',topic.all_topics_creator_view),
     path('accounts/<str:account_id>/topics/<str:topic_id>',topic.one_topic_creator_view),
+    path('accounts/<str:account_id>/topics/<str:topic_id>/groups',topic.topic_groups_view),
     
     path('accounts/<str:account_id>/access/topics',topic.all_topics_access_view),
 
@@ -40,7 +42,6 @@ urlpatterns = [
     path('topics/<str:topic_id>',topic.one_topic_view),
     path('topics/<str:topic_id>/access',topic.account_access),
     path('topics/<str:topic_id>/collections/<str:method>',topic.topic_collections_view),
-    path('topics/<str:topic_id>/groups',topic.topic_groups_view),
 
     path('groups/<str:group_id>',group.one_group_view),
     path('groups/<str:group_id>/members',group.group_members_view),

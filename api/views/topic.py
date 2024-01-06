@@ -96,7 +96,7 @@ def account_access(request,topic_id:str):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 @api_view([PUT])
-def topic_groups_view(request,topic_id:str):
+def topic_groups_view(request,account_id:int,topic_id:str):
     topic = Topic.objects.get(topic_id=topic_id)
     return update_groups_permission_to_topic(topic,request)
 
