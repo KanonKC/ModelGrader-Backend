@@ -9,6 +9,8 @@ from django.forms.models import model_to_dict
 from ...serializers import *
 
 def create_group(account:Account,request):
+
+    # print(request.headers["Authorization"])
     
     serialize = GroupSerializer(data={
         'creator':account.account_id,

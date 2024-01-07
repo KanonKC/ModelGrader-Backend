@@ -22,7 +22,7 @@ def get_all_topics_by_account(account:Account,request):
     personalSerialize = TopicPopulateTopicCollectionPopulateCollectionSerializer(populatedPersonalTopics,many=True)
 
     # print(GroupMember.objects.all().values_list("group",flat=True))
-    manageableTopics = Topic.objects.filter(topicgrouppermission__permission_manage_topics=True,topicgrouppermission__group__in=GroupMember.objects.all().values_list("group",flat=True)).order_by('-updated_date')
+    manageableTopics = Topic.objects.filter(topicgrouppermission__permission_manage_topics=True,topicgrouppermission__group__in=GroupMember.objects.filter(account=account).values_list("group",flat=True)).order_by('-updated_date')
     populatedmanageableTopics = populated_collections(manageableTopics)
     manageableSerialize = TopicPopulateTopicCollectionPopulateCollectionSerializer(populatedmanageableTopics,many=True)
 

@@ -10,6 +10,11 @@ from ...serializers import *
 
 def get_all_groups_by_account(account:Account,request):
 
+    print("GET ALL")
+
+    # Get request headers
+    headers = request.headers
+
     groups = Group.objects.filter(creator=account).order_by('-updated_date')
 
     populate_members = request.GET.get('populate_members',False)

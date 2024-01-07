@@ -8,19 +8,27 @@ from rest_framework import status
 from django.forms.models import model_to_dict
 from ...serializers import *
 
-def get_all_collections_by_account(account_id:str):
-    collections = Collection.objects.filter(creator=account_id).order_by('-updated_date')
+def populated_problems(collections: Collection):
     problemCollections = CollectionProblem.objects.filter(collection__in=collections)
 
     populated_collections = []
     for collection in collections:
-        con_probs = problemCollections.filter(collection=collection)
-        serialize = CollectionSerializer(collection)
-        collection_data = serialize.data
-        collection_data['problems'] = CollectionProblemPopulateProblemSerializer(con_probs,many=True).data
+        collection.problems = problemCollections.filter(collection=collection)
+        populated_collections.append(collection)
 
-        populated_collections.append(collection_data)
+    return populated_collections
+
+def get_all_collections_by_account(account:Account):
+
+    collections = Collection.objects.filter(creator=account).order_by('-updated_date')
+    collections = populated_problems(collections)
+    serialize = CollectionPopulateCollectionProblemsPopulateProblemSerializer(collections,many=True)
+
+    manageableCollections = Collection.objects.filter(collectiongrouppermission__permission_manage_collections=True,collectiongrouppermission__group__in=GroupMember.objects.filter(account=account).values_list("group",flat=True)).order_by('-updated_date')
+    manageableCollections = populated_problems(manageableCollections)
+    manageableSerialize = CollectionPopulateCollectionProblemsPopulateProblemSerializer(manageableCollections,many=True)
 
     return Response({
-        'collections': populated_collections
+        'collections': serialize.data,
+        'manageable_collections': manageableSerialize.data
     },status=status.HTTP_200_OK)

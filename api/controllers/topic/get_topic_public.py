@@ -14,10 +14,16 @@ def get_topic_public(topic_id:str,request):
 
     topic = Topic.objects.get(topic_id=topic_id)
     account = Account.objects.get(account_id=account_id)
-    topicCollections = TopicCollection.objects.filter(topic=topic)
+    topicCollections = TopicCollection.objects.filter(topic=topic,collection__in=CollectionGroupPermission.objects.filter(group__in=GroupMember.objects.filter(account=account).values_list("group",flat=True),permission_view_collections=True).values_list("collection",flat=True))
 
     for tp in topicCollections:
         # tp.collection.problems = CollectionProblem.objects.filter(collection=tp.collection)
+        
+        # viewPermission = CollectionGroupPermission.objects.filter(collection=tp.collection,group__in=GroupMember.objects.filter(account=account).values_list("group",flat=True),permission_view_collections=True)
+        # print(len(viewPermission))
+        # if len(viewPermission) == 0:
+        #     tp.collection.problems = []
+        #     continue
         collectionProblems = CollectionProblem.objects.filter(collection=tp.collection)
         for cp in collectionProblems:
             try:

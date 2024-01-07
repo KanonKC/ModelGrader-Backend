@@ -320,3 +320,10 @@ class CollectionPopulateCollectionProblemsPopulateProblemAndCollectionGroupPermi
         model = Collection
         fields = "__all__"
         include = ['problems','group_permissions']
+
+class CollectionPopulateCollectionProblemsPopulateProblemSerializer(serializers.ModelSerializer):
+    problems = CollectionProblemPopulateProblemSerializer(many=True)
+    class Meta:
+        model = Collection
+        fields = "__all__"
+        include = ['problems']
