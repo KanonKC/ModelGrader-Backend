@@ -327,3 +327,17 @@ class CollectionPopulateCollectionProblemsPopulateProblemSerializer(serializers.
         model = Collection
         fields = "__all__"
         include = ['problems']
+
+class TopicCollectionPopulateCollectionPopulateCollectionProblemsPopulateProblemAndCollectionGroupPermissionsPopulateGroupSerializer(serializers.ModelSerializer):
+    collection = CollectionPopulateCollectionProblemsPopulateProblemAndCollectionGroupPermissionsPopulateGroupSerializer()
+    class Meta:
+        model = TopicCollection
+        fields = "__all__"
+class TopicPopulateTopicCollectionPopulateCollectionPopulateCollectionProblemsPopulateProblemAndCollectionGroupPermissionsPopulateGroupAndTopicGroupPermissionPopulateGroupSerializer(serializers.ModelSerializer):
+    collections = TopicCollectionPopulateCollectionPopulateCollectionProblemsPopulateProblemAndCollectionGroupPermissionsPopulateGroupSerializer(many=True)
+    group_permissions = TopicGroupPermissionPopulateGroupSerializer(many=True)
+
+    class Meta:
+        model = Topic
+        fields = "__all__"
+        include = ['collections','group_permissions']

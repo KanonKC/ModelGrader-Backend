@@ -12,6 +12,8 @@ def update_group_permissions_collection(collection:Collection,request):
 
     CollectionGroupPermission.objects.filter(collection=collection).delete()
 
+    print(request.data['groups'])
+
     collection_group_permissions = []
     for collection_request in request.data['groups']:
         group = Group.objects.get(group_id=collection_request['group_id'])

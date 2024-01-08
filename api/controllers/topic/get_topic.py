@@ -15,8 +15,9 @@ def get_topic(topic:Topic):
 
     for tp in topic.collections:
         tp.collection.problems = CollectionProblem.objects.filter(collection=tp.collection)
+        tp.collection.group_permissions = CollectionGroupPermission.objects.filter(collection=tp.collection)
 
-    serialize = TopicPopulateTopicCollectionPopulateCollectionPopulateCollectionProblemPopulateProblemAndTopicGroupPermissionPopulateGroupSerializer(topic)
+    serialize = TopicPopulateTopicCollectionPopulateCollectionPopulateCollectionProblemsPopulateProblemAndCollectionGroupPermissionsPopulateGroupAndTopicGroupPermissionPopulateGroupSerializer(topic)
     
     return Response(serialize.data,status=status.HTTP_200_OK)
     
