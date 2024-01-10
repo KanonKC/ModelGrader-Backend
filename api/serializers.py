@@ -56,6 +56,8 @@ class ProblemPopulateAccountSerializer(serializers.ModelSerializer):
         model = Problem
         fields = "__all__"
 
+
+
 class TopicCollectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = TopicCollection
@@ -341,3 +343,18 @@ class TopicPopulateTopicCollectionPopulateCollectionPopulateCollectionProblemsPo
         model = Topic
         fields = "__all__"
         include = ['collections','group_permissions']
+
+class ProblemGroupPermissionsPopulateGroupSerializer(serializers.ModelSerializer):
+    group = GroupSerializer()
+    class Meta:
+        model = ProblemGroupPermission
+        fields = "__all__"
+
+class ProblemPopulateAccountAndTestcasesAndProblemGroupPermissionsPopulateGroupSerializer(serializers.ModelSerializer):
+    creator = AccountSecureSerializer()
+    group_permissions = ProblemGroupPermissionsPopulateGroupSerializer(many=True)
+    testcases = TestcaseSerializer(many=True)
+    class Meta:
+        model = Problem
+        fields = "__all__"
+        include = ['creator','group_permissions','testcases']

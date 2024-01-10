@@ -28,9 +28,10 @@ def all_problems_creator_view(request,account_id):
         return get_all_problems_by_account(account_id)
 
 @api_view([GET,PUT,DELETE])
-def one_problem_creator_view(problem_id:str,request):
+def one_problem_creator_view(request,problem_id:str,account_id:str):
+    problem = Problem.objects.get(problem_id=problem_id)
     if request.method == GET:
-        return get_problem(problem_id)
+        return get_problem(problem)
     elif request.method == PUT:
         return update_problem(problem_id,request)
     elif request.method == DELETE:
