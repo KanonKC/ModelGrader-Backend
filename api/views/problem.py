@@ -18,6 +18,7 @@ from ..controllers.problem.get_all_problems_by_account import *
 from ..controllers.problem.validate_program import *
 from ..controllers.problem.get_all_problem_with_best_submission import *
 from ..controllers.problem.get_problem_in_topic_with_best_submission import *
+from ..controllers.problem.update_group_permission_to_problem import *
 
 # Create your views here.
 @api_view([POST,GET])
@@ -62,3 +63,9 @@ def validation_view(request):
 def problem_in_topic_account_view(request,account_id:str,topic_id:str,problem_id:str):
     if request.method == GET:
         return get_problem_in_topic_with_best_submission(account_id,topic_id,problem_id)
+    
+@api_view([PUT])
+def problem_group_view(request,account_id:int,problem_id:int):
+    problem = Problem.objects.get(problem_id=problem_id)
+    if request.method == PUT:
+        return update_group_permission_to_problem(problem,request)

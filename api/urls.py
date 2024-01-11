@@ -14,6 +14,7 @@ urlpatterns = [
 
     path('accounts/<str:account_id>/problems',problem.all_problems_creator_view),
     path('accounts/<str:account_id>/problems/<str:problem_id>',problem.one_problem_creator_view),
+    path('accounts/<str:account_id>/problems/<str:problem_id>/groups',problem.problem_group_view),
     path("accounts/<str:account_id>/problems/<str:problem_id>/submissions",submission.account_problem_submission_view),
     path("accounts/<str:account_id>/topics/<str:topic_id>/problems/<str:problem_id>/submissions",submission.topic_account_problem_submission_view),
 
