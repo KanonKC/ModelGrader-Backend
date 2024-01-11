@@ -30,8 +30,9 @@ def all_collections_creator_view(request,account_id:str):
 
 @api_view([GET,PUT,DELETE])
 def one_collection_creator_view(request,account_id:int,collection_id:str):
+    collection = Collection.objects.get(collection_id=collection_id)
     if request.method == GET:
-        return get_collection(collection_id)
+        return get_collection(collection)
     if request.method == PUT:
         return update_collection(collection_id,request)
     if request.method == DELETE:

@@ -11,7 +11,7 @@ from ...serializers import *
 def get_topic(topic:Topic):
     topic.group_permissions = TopicGroupPermission.objects.filter(topic=topic)
     
-    topic.collections = TopicCollection.objects.filter(topic=topic)
+    topic.collections = TopicCollection.objects.filter(topic=topic).order_by('order')
 
     for tp in topic.collections:
         tp.collection.problems = CollectionProblem.objects.filter(collection=tp.collection)

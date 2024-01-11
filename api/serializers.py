@@ -323,6 +323,8 @@ class CollectionPopulateCollectionProblemsPopulateProblemAndCollectionGroupPermi
         fields = "__all__"
         include = ['problems','group_permissions']
 
+
+
 class CollectionPopulateCollectionProblemsPopulateProblemSerializer(serializers.ModelSerializer):
     problems = CollectionProblemPopulateProblemSerializer(many=True)
     class Meta:
@@ -358,3 +360,17 @@ class ProblemPopulateAccountAndTestcasesAndProblemGroupPermissionsPopulateGroupS
         model = Problem
         fields = "__all__"
         include = ['creator','group_permissions','testcases']
+
+
+class CollectionProblemsPopulateProblemPopulateAccountAndTestcasesAndProblemGroupPermissionsPopulateGroupSerializer(serializers.ModelSerializer):
+    problem = ProblemPopulateAccountAndTestcasesAndProblemGroupPermissionsPopulateGroupSerializer()
+    class Meta:
+        model = CollectionProblem
+        fields = "__all__"
+class CollectionPopulateCollectionProblemsPopulateProblemPopulateAccountAndTestcasesAndProblemGroupPermissionsPopulateGroupAndCollectionGroupPermissionsPopulateGroupSerializer(serializers.ModelSerializer):
+    problems = CollectionProblemsPopulateProblemPopulateAccountAndTestcasesAndProblemGroupPermissionsPopulateGroupSerializer(many=True)
+    group_permissions = CollectionGroupPermissionPopulateGroupSerializer(many=True)
+    class Meta:
+        model = Collection
+        fields = "__all__"
+        include = ['problems','group_permissions']

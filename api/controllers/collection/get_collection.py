@@ -8,17 +8,16 @@ from rest_framework import status
 from django.forms.models import model_to_dict
 from ...serializers import *
 
-def get_collection(collection_id:str):
+def get_collection(collection:Collection):
     
-    collection = Collection.objects.get(collection_id=collection_id)
-    # problems = Problem.objects.filter(collectionproblem__collection_id=collection_id)
     collection.problems = CollectionProblem.objects.filter(collection=collection).order_by('order')
     collection.group_permissions = CollectionGroupPermission.objects.filter(collection=collection)
-    
-    # collection_ser = CollectionSerializer(collection)
-    # collectionProblems_ser = CollectionProblemPopulateProblemSecureSerializer(collectionProblems,many=True)
 
-    serializer = CollectionPopulateCollectionProblemsPopulateProblemAndCollectionGroupPermissionsPopulateGroupSerializer(collection)
+    for cp in collection.problems:
+        cp.problem.testcases = Testcase.objects.filter(problem=cp.problem,deprecated=False)
+        cp.problem.group_permissions = ProblemGroupPermission.objects.filter(problem=cp.problem)
+
+    serializer = CollectionPopulateCollectionProblemsPopulateProblemPopulateAccountAndTestcasesAndProblemGroupPermissionsPopulateGroupAndCollectionGroupPermissionsPopulateGroupSerializer(collection)
     
 
     return Response(serializer.data ,status=status.HTTP_200_OK)
