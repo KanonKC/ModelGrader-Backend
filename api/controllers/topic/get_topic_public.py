@@ -24,7 +24,8 @@ def get_topic_public(topic_id:str,request):
         # if len(viewPermission) == 0:
         #     tp.collection.problems = []
         #     continue
-        collectionProblems = CollectionProblem.objects.filter(collection=tp.collection)
+        collectionProblems = CollectionProblem.objects.filter(collection=tp.collection,problem__in=ProblemGroupPermission.objects.filter(group__in=GroupMember.objects.filter(account=account).values_list("group",flat=True),permission_view_problems=True).values_list("problem",flat=True))
+
         for cp in collectionProblems:
             try:
                 best_submission = BestSubmission.objects.get(problem=cp.problem,account=account,topic=topic)
