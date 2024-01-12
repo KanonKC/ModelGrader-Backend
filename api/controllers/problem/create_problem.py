@@ -22,7 +22,8 @@ def create_problem(account_id:str,request):
         title = request.data['title'],
         description = request.data['description'],
         solution = request.data['solution'],
-        time_limit = request.data['time_limit']
+        time_limit = request.data['time_limit'],
+        allowed_languages = request.data['allowed_languages'],
     )
     problem.save()
 

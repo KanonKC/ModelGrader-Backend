@@ -48,13 +48,20 @@ problem_secure_fields = ['problem_id','title','description','is_active','is_priv
 class ProblemSecureSerializer(serializers.ModelSerializer):
     class Meta:
         model = Problem
-        fields = ['problem_id','title','description','is_active','is_private','updated_date','created_date']
+        exclude = ['solution','submission_regex','is_private','is_active','sharing']
 
 class ProblemPopulateAccountSerializer(serializers.ModelSerializer):
     creator = AccountSecureSerializer()
     class Meta:
         model = Problem
         fields = "__all__"
+
+
+class ProblemPopulateAccountSecureSerializer(serializers.ModelSerializer):
+    creator = AccountSecureSerializer()
+    class Meta:
+        model = Problem
+        exclude = ['solution','submission_regex','is_private','is_active','sharing']
 
 
 
@@ -140,11 +147,11 @@ class ProblemPopulateTestcaseSerializer(serializers.ModelSerializer):
             'testcases'
         ]
 
-class ProblemPopulateAccountSecureSerializer(serializers.ModelSerializer):
-    creator = AccountSecureSerializer()
-    class Meta:
-        model = Problem
-        fields = ['problem_id','title','description','creator']
+# class ProblemPopulateAccountSecureSerializer(serializers.ModelSerializer):
+#     creator = AccountSecureSerializer()
+#     class Meta:
+#         model = Problem
+#         fields = ['problem_id','title','description','creator']
 
 class SubmissionPoplulateProblemSecureSerializer(serializers.ModelSerializer):
     problem = ProblemPopulateAccountSecureSerializer()

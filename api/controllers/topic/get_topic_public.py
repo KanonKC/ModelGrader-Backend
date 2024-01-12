@@ -7,6 +7,7 @@ from ...models import *
 from rest_framework import status
 from django.forms.models import model_to_dict
 from ...serializers import *
+from django.db.models import Q
 
 def get_topic_public(topic_id:str,request):
 
@@ -14,7 +15,17 @@ def get_topic_public(topic_id:str,request):
 
     topic = Topic.objects.get(topic_id=topic_id)
     account = Account.objects.get(account_id=account_id)
-    topicCollections = TopicCollection.objects.filter(topic=topic,collection__in=CollectionGroupPermission.objects.filter(group__in=GroupMember.objects.filter(account=account).values_list("group",flat=True),permission_view_collections=True).values_list("collection",flat=True))
+
+    
+    topicCollections = TopicCollection.objects.filter(
+        topic=topic,
+        collection__in=
+            CollectionGroupPermission.objects.filter(
+                Q(group__in=GroupMember.objects.filter(account=account).values_list("group",flat=True)) &
+                (
+                    Q(permission_view_collections=True) | Q(permission_manage_collections=True)
+                )
+            ).values_list("collection",flat=True))
 
     for tp in topicCollections:
         # tp.collection.problems = CollectionProblem.objects.filter(collection=tp.collection)
@@ -24,7 +35,13 @@ def get_topic_public(topic_id:str,request):
         # if len(viewPermission) == 0:
         #     tp.collection.problems = []
         #     continue
-        collectionProblems = CollectionProblem.objects.filter(collection=tp.collection,problem__in=ProblemGroupPermission.objects.filter(group__in=GroupMember.objects.filter(account=account).values_list("group",flat=True),permission_view_problems=True).values_list("problem",flat=True))
+        collectionProblems = CollectionProblem.objects.filter(
+            collection=tp.collection,
+            problem__in=ProblemGroupPermission.objects.filter(
+                Q(group__in=GroupMember.objects.filter(account=account).values_list("group",flat=True)) &
+                (Q(permission_view_problems=True) |
+                Q(permission_manage_problems=True))
+            ).values_list("problem",flat=True))
 
         for cp in collectionProblems:
             try:

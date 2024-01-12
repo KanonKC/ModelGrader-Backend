@@ -19,6 +19,8 @@ from ..controllers.problem.validate_program import *
 from ..controllers.problem.get_all_problem_with_best_submission import *
 from ..controllers.problem.get_problem_in_topic_with_best_submission import *
 from ..controllers.problem.update_group_permission_to_problem import *
+from ..controllers.problem.get_problem_public import *
+
 
 # Create your views here.
 @api_view([POST,GET])
@@ -34,9 +36,9 @@ def one_problem_creator_view(request,problem_id:str,account_id:str):
     if request.method == GET:
         return get_problem(problem)
     elif request.method == PUT:
-        return update_problem(problem_id,request)
+        return update_problem(problem,request)
     elif request.method == DELETE:
-        return delete_problem(problem_id)
+        return delete_problem(problem)
 
 @api_view([GET,DELETE])
 def all_problems_view(request):
@@ -47,8 +49,9 @@ def all_problems_view(request):
     
 @api_view([GET,PUT,DELETE])
 def one_problem_view(request,problem_id: int):
+    problem = Problem.objects.get(problem_id=problem_id)
     if request.method == GET:
-        return get_problem(problem_id)
+        return get_problem_public(problem)
     elif request.method == PUT:
         return update_problem(problem_id,request)
     elif request.method == DELETE:

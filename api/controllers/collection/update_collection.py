@@ -8,8 +8,7 @@ from rest_framework import status
 from django.forms.models import model_to_dict
 from ...serializers import *
 
-def update_collection(collection_id:str,request):
-    collection = Collection.objects.get(collection_id=collection_id)
+def update_collection(collection:Collection,request):
 
     collection.name = request.data.get('name',collection.name)
     collection.description = request.data.get('description',collection.description)

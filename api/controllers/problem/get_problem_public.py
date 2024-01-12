@@ -8,6 +8,7 @@ from rest_framework import status
 from django.forms.models import model_to_dict
 from ...serializers import *
 
-def delete_topic(topic:Topic):
-    topic.delete()
-    return Response(status=status.HTTP_204_NO_CONTENT)
+def get_problem_public(problem:Problem):
+    serialize = ProblemPopulateAccountSecureSerializer(problem)
+    return Response(serialize.data,status=status.HTTP_200_OK)
+    

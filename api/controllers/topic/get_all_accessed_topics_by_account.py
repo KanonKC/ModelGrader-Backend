@@ -7,10 +7,11 @@ from ...models import *
 from rest_framework import status
 from django.forms.models import model_to_dict
 from ...serializers import *
+from django.db.models import Q
 
 def get_all_accessed_topics_by_account(account:Account):
     groups = [gm.group for gm in GroupMember.objects.filter(account=account)]
-    accessedTopics = TopicGroupPermission.objects.filter(group__in=groups,permission_view_topics=True).distinct()
+    accessedTopics = TopicGroupPermission.objects.filter(Q(group__in=groups) & (Q(permission_view_topics=True) | Q(permission_manage_topics=True))).distinct()
     topics = [at.topic for at in accessedTopics]
 
     serialize = TopicSerializer(topics,many=True)
