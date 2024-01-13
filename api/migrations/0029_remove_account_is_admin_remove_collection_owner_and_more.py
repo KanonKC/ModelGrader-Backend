@@ -30,19 +30,19 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='collection',
             name='creator',
-            field=models.ForeignKey(db_column='creator_id', default=1, on_delete=django.db.models.deletion.CASCADE, to='api.account'),
+            field=models.ForeignKey(db_column='creator_id', default=4, on_delete=django.db.models.deletion.CASCADE, to='api.account'),
             preserve_default=False,
         ),
         migrations.AddField(
             model_name='problem',
             name='creator',
-            field=models.ForeignKey(db_column='creator_id', default=1, on_delete=django.db.models.deletion.CASCADE, to='api.account'),
+            field=models.ForeignKey(db_column='creator_id', default=4, on_delete=django.db.models.deletion.CASCADE, to='api.account'),
             preserve_default=False,
         ),
         migrations.AddField(
             model_name='topic',
             name='creator',
-            field=models.ForeignKey(db_column='creator_id', default=1, on_delete=django.db.models.deletion.CASCADE, to='api.account'),
+            field=models.ForeignKey(db_column='creator_id', default=4, on_delete=django.db.models.deletion.CASCADE, to='api.account'),
             preserve_default=False,
         ),
     ]

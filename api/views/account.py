@@ -31,7 +31,7 @@ def change_password(request,account_id):
     return Response({'message':"Your password has been changed"})
 
 @api_view([GET])
-def get_daily_submission(request,account_id:int):
+def get_daily_submission(request,account_id:str):
     submissions = Submission.objects.filter(account_id=account_id)
     serializes = SubmissionSerializer(submissions,many=True)
 

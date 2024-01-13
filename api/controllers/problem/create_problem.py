@@ -8,7 +8,7 @@ from rest_framework import status
 from django.forms.models import model_to_dict
 from ...serializers import *
 
-def create_problem(account_id:int,request):
+def create_problem(account_id:str,request):
     account = Account.objects.get(account_id=account_id)
     
     running_result = PythonGrader(request.data['solution'],request.data['testcases'],1,1.5).generate_output()
@@ -22,7 +22,8 @@ def create_problem(account_id:int,request):
         title = request.data['title'],
         description = request.data['description'],
         solution = request.data['solution'],
-        time_limit = request.data['time_limit']
+        time_limit = request.data['time_limit'],
+        allowed_languages = request.data['allowed_languages'],
     )
     problem.save()
 

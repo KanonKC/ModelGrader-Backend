@@ -8,7 +8,7 @@ from rest_framework import status
 from django.forms.models import model_to_dict
 from ...serializers import *
 
-def add_collections_to_topic(topic_id:int,request):
+def add_collections_to_topic(topic_id:str,request):
     topic = Topic.objects.get(topic_id=topic_id)
     populated_collections = []
         

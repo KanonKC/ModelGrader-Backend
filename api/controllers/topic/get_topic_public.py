@@ -7,18 +7,42 @@ from ...models import *
 from rest_framework import status
 from django.forms.models import model_to_dict
 from ...serializers import *
+from django.db.models import Q
 
-def get_topic_public(topic_id:int,request):
+def get_topic_public(topic_id:str,request):
 
     account_id = request.query_params.get('account_id',None)
 
     topic = Topic.objects.get(topic_id=topic_id)
     account = Account.objects.get(account_id=account_id)
-    topicCollections = TopicCollection.objects.filter(topic=topic)
+
+    
+    topicCollections = TopicCollection.objects.filter(
+        topic=topic,
+        collection__in=
+            CollectionGroupPermission.objects.filter(
+                Q(group__in=GroupMember.objects.filter(account=account).values_list("group",flat=True)) &
+                (
+                    Q(permission_view_collections=True) | Q(permission_manage_collections=True)
+                )
+            ).values_list("collection",flat=True))
 
     for tp in topicCollections:
         # tp.collection.problems = CollectionProblem.objects.filter(collection=tp.collection)
-        collectionProblems = CollectionProblem.objects.filter(collection=tp.collection)
+        
+        # viewPermission = CollectionGroupPermission.objects.filter(collection=tp.collection,group__in=GroupMember.objects.filter(account=account).values_list("group",flat=True),permission_view_collections=True)
+        # print(len(viewPermission))
+        # if len(viewPermission) == 0:
+        #     tp.collection.problems = []
+        #     continue
+        collectionProblems = CollectionProblem.objects.filter(
+            collection=tp.collection,
+            problem__in=ProblemGroupPermission.objects.filter(
+                Q(group__in=GroupMember.objects.filter(account=account).values_list("group",flat=True)) &
+                (Q(permission_view_problems=True) |
+                Q(permission_manage_problems=True))
+            ).values_list("problem",flat=True))
+
         for cp in collectionProblems:
             try:
                 best_submission = BestSubmission.objects.get(problem=cp.problem,account=account,topic=topic)

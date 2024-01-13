@@ -6,7 +6,7 @@ from ..models import *
 from rest_framework import status
 from django.forms.models import model_to_dict
 from ..serializers import *
-
+from ..controllers.script.generate_submission_score import generate_submission_score
 
 # @api_view([POST])
 # def run_script(request):
@@ -51,8 +51,9 @@ from ..serializers import *
 
 @api_view([POST])
 def run_script(request):
-    collections = Collection.objects.all()
-    for collection in collections:
-        collection.description = '[{"id":"1","type":"p","children":[{"text":"Just course"}]}]'
-        collection.save()
+    # collections = Collection.objects.all()
+    # for collection in collections:
+    #     collection.description = '[{"id":"1","type":"p","children":[{"text":"Just course"}]}]'
+    #     collection.save()
+    generate_submission_score(request)
     return Response({'message': 'Success!'},status=status.HTTP_201_CREATED)

@@ -48,13 +48,22 @@ problem_secure_fields = ['problem_id','title','description','is_active','is_priv
 class ProblemSecureSerializer(serializers.ModelSerializer):
     class Meta:
         model = Problem
-        fields = ['problem_id','title','description','is_active','is_private','updated_date','created_date']
+        exclude = ['solution','submission_regex','is_private','is_active','sharing']
 
 class ProblemPopulateAccountSerializer(serializers.ModelSerializer):
     creator = AccountSecureSerializer()
     class Meta:
         model = Problem
         fields = "__all__"
+
+
+class ProblemPopulateAccountSecureSerializer(serializers.ModelSerializer):
+    creator = AccountSecureSerializer()
+    class Meta:
+        model = Problem
+        exclude = ['solution','submission_regex','is_private','is_active','sharing']
+
+
 
 class TopicCollectionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -138,11 +147,11 @@ class ProblemPopulateTestcaseSerializer(serializers.ModelSerializer):
             'testcases'
         ]
 
-class ProblemPopulateAccountSecureSerializer(serializers.ModelSerializer):
-    creator = AccountSecureSerializer()
-    class Meta:
-        model = Problem
-        fields = ['problem_id','title','description','creator']
+# class ProblemPopulateAccountSecureSerializer(serializers.ModelSerializer):
+#     creator = AccountSecureSerializer()
+#     class Meta:
+#         model = Problem
+#         fields = ['problem_id','title','description','creator']
 
 class SubmissionPoplulateProblemSecureSerializer(serializers.ModelSerializer):
     problem = ProblemPopulateAccountSecureSerializer()
@@ -199,7 +208,8 @@ class TopicPopulateTopicCollectionPopulateCollectionSerializer(serializers.Model
     collections = TopicCollectionPopulateCollectionSerializer(many=True)
     class Meta:
         model = Topic
-        fields = ['topic_id','name','description','image_url','is_active','is_private','created_date','updated_date','creator','collections']
+        fields = "__all__"
+        include = ['collections']
 
 
 class TopicPopulateTopicCollectionPopulateCollectionProblemPopulateProblemSerializer(serializers.ModelSerializer):
@@ -250,4 +260,124 @@ class GroupPopulateGroupMemberPopulateAccountSecureSerializer(serializers.ModelS
     members = GroupMemberPopulateAccountSecureSerializer(many=True)
     class Meta:
         model = Group
-        fields = ['group_id','name','description','color','created_date','updated_date','creator','members']
+        fields = "__all__"
+        include = ['members']
+
+class TopicGroupPermissionsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TopicGroupPermission
+        fields = "__all__"
+
+class TopicGroupPermissionPopulateGroupSerializer(serializers.ModelSerializer):
+    group = GroupSerializer()
+    class Meta:
+        model = TopicGroupPermission
+        fields = "__all__"
+
+class TopicPopulateTopicGroupPermissionsSerializer(serializers.ModelSerializer):
+    group_permissions = TopicGroupPermissionsSerializer(many=True)
+    class Meta:
+        model = Topic
+        fields = "__all__"
+        include = ['group_permissions']
+
+class TopicPopulateTopicCollectionPopulateCollectionAndTopicGroupPermissionPopulateGroupSerializer(serializers.ModelSerializer):
+    collections = TopicCollectionPopulateCollectionSerializer(many=True)
+    group_permissions = TopicGroupPermissionPopulateGroupSerializer(many=True)
+    class Meta:
+        model = Topic
+        fields = "__all__"
+        include = ['collections','group_permissions']
+
+class CollectionPopulateCollectionProblemPopulateProblemSerializer(serializers.ModelSerializer):
+    problems = CollectionProblemPopulateProblemSerializer(many=True)
+    class Meta:
+        model = Collection
+        fields = "__all__"
+
+class TopicCollectionPopulateCollectionPopulateCollectionProblemPopulateProblemSerializer(serializers.ModelSerializer):
+    collection = CollectionPopulateCollectionProblemPopulateProblemSerializer()
+    class Meta:
+        model = TopicCollection
+        fields = "__all__"
+
+class TopicPopulateTopicCollectionPopulateCollectionPopulateCollectionProblemPopulateProblemAndTopicGroupPermissionPopulateGroupSerializer(serializers.ModelSerializer):
+    collections = TopicCollectionPopulateCollectionPopulateCollectionProblemPopulateProblemSerializer(many=True)
+    group_permissions = TopicGroupPermissionPopulateGroupSerializer(many=True)
+
+    class Meta:
+        model = Topic
+        fields = "__all__"
+        include = ['collections','group_permissions']
+
+class CollectionGroupPermissionPopulateGroupSerializer(serializers.ModelSerializer):
+    group = GroupSerializer()
+    class Meta:
+        model = CollectionGroupPermission
+        fields = "__all__"
+class CollectionPopulateCollectionGroupPermissionsPopulateGroupSerializer(serializers.ModelSerializer):
+    group_permissions = CollectionGroupPermissionPopulateGroupSerializer(many=True)
+    class Meta:
+        model = Collection
+        fields = "__all__"
+        include = ['group_permissions']
+
+class CollectionPopulateCollectionProblemsPopulateProblemAndCollectionGroupPermissionsPopulateGroupSerializer(serializers.ModelSerializer):
+    problems = CollectionProblemPopulateProblemSerializer(many=True)
+    group_permissions = CollectionGroupPermissionPopulateGroupSerializer(many=True)
+    class Meta:
+        model = Collection
+        fields = "__all__"
+        include = ['problems','group_permissions']
+
+
+
+class CollectionPopulateCollectionProblemsPopulateProblemSerializer(serializers.ModelSerializer):
+    problems = CollectionProblemPopulateProblemSerializer(many=True)
+    class Meta:
+        model = Collection
+        fields = "__all__"
+        include = ['problems']
+
+class TopicCollectionPopulateCollectionPopulateCollectionProblemsPopulateProblemAndCollectionGroupPermissionsPopulateGroupSerializer(serializers.ModelSerializer):
+    collection = CollectionPopulateCollectionProblemsPopulateProblemAndCollectionGroupPermissionsPopulateGroupSerializer()
+    class Meta:
+        model = TopicCollection
+        fields = "__all__"
+class TopicPopulateTopicCollectionPopulateCollectionPopulateCollectionProblemsPopulateProblemAndCollectionGroupPermissionsPopulateGroupAndTopicGroupPermissionPopulateGroupSerializer(serializers.ModelSerializer):
+    collections = TopicCollectionPopulateCollectionPopulateCollectionProblemsPopulateProblemAndCollectionGroupPermissionsPopulateGroupSerializer(many=True)
+    group_permissions = TopicGroupPermissionPopulateGroupSerializer(many=True)
+
+    class Meta:
+        model = Topic
+        fields = "__all__"
+        include = ['collections','group_permissions']
+
+class ProblemGroupPermissionsPopulateGroupSerializer(serializers.ModelSerializer):
+    group = GroupSerializer()
+    class Meta:
+        model = ProblemGroupPermission
+        fields = "__all__"
+
+class ProblemPopulateAccountAndTestcasesAndProblemGroupPermissionsPopulateGroupSerializer(serializers.ModelSerializer):
+    creator = AccountSecureSerializer()
+    group_permissions = ProblemGroupPermissionsPopulateGroupSerializer(many=True)
+    testcases = TestcaseSerializer(many=True)
+    class Meta:
+        model = Problem
+        fields = "__all__"
+        include = ['creator','group_permissions','testcases']
+
+
+class CollectionProblemsPopulateProblemPopulateAccountAndTestcasesAndProblemGroupPermissionsPopulateGroupSerializer(serializers.ModelSerializer):
+    problem = ProblemPopulateAccountAndTestcasesAndProblemGroupPermissionsPopulateGroupSerializer()
+    class Meta:
+        model = CollectionProblem
+        fields = "__all__"
+class CollectionPopulateCollectionProblemsPopulateProblemPopulateAccountAndTestcasesAndProblemGroupPermissionsPopulateGroupAndCollectionGroupPermissionsPopulateGroupSerializer(serializers.ModelSerializer):
+    problems = CollectionProblemsPopulateProblemPopulateAccountAndTestcasesAndProblemGroupPermissionsPopulateGroupSerializer(many=True)
+    group_permissions = CollectionGroupPermissionPopulateGroupSerializer(many=True)
+    class Meta:
+        model = Collection
+        fields = "__all__"
+        include = ['problems','group_permissions']

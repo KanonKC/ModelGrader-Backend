@@ -8,10 +8,16 @@ from rest_framework import status
 from django.forms.models import model_to_dict
 from ...serializers import *
 
-def get_topic(topic_id:int):
-    topic = Topic.objects.get(topic_id=topic_id)
-    topic.collections = TopicCollection.objects.filter(topic_id=topic_id)
-    serialize = TopicPopulateTopicCollectionPopulateCollectionSerializer(topic)
+def get_topic(topic:Topic):
+    topic.group_permissions = TopicGroupPermission.objects.filter(topic=topic)
+    
+    topic.collections = TopicCollection.objects.filter(topic=topic).order_by('order')
+
+    for tp in topic.collections:
+        tp.collection.problems = CollectionProblem.objects.filter(collection=tp.collection)
+        tp.collection.group_permissions = CollectionGroupPermission.objects.filter(collection=tp.collection)
+
+    serialize = TopicPopulateTopicCollectionPopulateCollectionPopulateCollectionProblemsPopulateProblemAndCollectionGroupPermissionsPopulateGroupAndTopicGroupPermissionPopulateGroupSerializer(topic)
     
     return Response(serialize.data,status=status.HTTP_200_OK)
     

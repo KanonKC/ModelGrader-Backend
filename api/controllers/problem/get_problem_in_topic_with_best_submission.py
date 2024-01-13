@@ -8,7 +8,7 @@ from rest_framework import status
 from django.forms.models import model_to_dict
 from ...serializers import *
 
-def get_problem_in_topic_with_best_submission(account_id:int,topic_id:int,problem:int):
+def get_problem_in_topic_with_best_submission(account_id:str,topic_id:str,problem:int):
 
     account = Account.objects.get(account_id=account_id)
     problem = Problem.objects.get(problem_id=problem)

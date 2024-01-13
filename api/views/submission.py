@@ -37,5 +37,5 @@ def topic_account_problem_submission_view(request,topic_id,account_id,problem_id
         return get_submissions_by_account_problem_in_topic(account_id,problem_id,topic_id)
 
 # @api_view([GET])
-# def submission_account_problem_view(request,account_id:int,problem_id:int):
+# def submission_account_problem_view(request,account_id:str,problem_id:str):
 #     return get_submissions_by_account_problem(account_id,problem_id)

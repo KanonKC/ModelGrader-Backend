@@ -13,13 +13,13 @@ def get_all_problems(request):
 
     get_private = int(request.query_params.get("private",0))
     get_deactive = int(request.query_params.get("deactive",0))
-    account_id = int(request.query_params.get("account_id",0))
+    account_id = str(request.query_params.get("account_id",""))
     
     if not get_private:
         problem = problem.filter(is_private=False)
     if not get_deactive:
         problem = problem.filter(is_active=True)
-    if account_id != 0:
+    if account_id != "":
         problem = problem.filter(creator_id=account_id)
 
     problem = problem.order_by('-problem_id')

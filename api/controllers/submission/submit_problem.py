@@ -19,7 +19,7 @@ def avaliableQueue():
             return i
     return -1
 
-def submit_problem_function(account_id:int,problem_id:int,topic_id:int,request):
+def submit_problem_function(account_id:str,problem_id:str,topic_id:str,request):
     global QUEUE
     problem = Problem.objects.get(problem_id=problem_id)
     testcases = Testcase.objects.filter(problem=problem,deprecated=False)
@@ -101,5 +101,5 @@ def submit_problem_function(account_id:int,problem_id:int,topic_id:int,request):
 
     return Response(testser.data,status=status.HTTP_201_CREATED)
 
-def submit_problem(account_id:int,problem_id:int,request):
+def submit_problem(account_id:str,problem_id:str,request):
     return submit_problem_function(account_id,problem_id,None,request)

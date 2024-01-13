@@ -8,15 +8,15 @@ from rest_framework import status
 from django.forms.models import model_to_dict
 from ...serializers import *
 
-def get_submissions_by_account_problem(account_id:int,problem_id:int):
+def get_submissions_by_account_problem(account_id:str,problem_id:str):
     submissions = Submission.objects.filter(account=account_id,problem=problem_id)
 
     if submissions.count() == 0:
         return Response({"best_submission": None,"submissions": []},status=status.HTTP_204_NO_CONTENT)
 
-    submissions = submissions.order_by('-submission_id')
+    submissions = submissions.order_by('-date')
     
-    best_submission_id = submissions.order_by('-passed_ratio','-submission_id').first().submission_id
+    best_submission_id = submissions.order_by('-passed_ratio','-date').first().submission_id
 
     best_submission = None
     result = []

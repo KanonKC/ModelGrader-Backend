@@ -8,7 +8,7 @@ from rest_framework import status
 from django.forms.models import model_to_dict
 from ...serializers import *
 
-def get_account(account_id:int):
+def get_account(account_id:str):
     try:
         account = Account.objects.get(account_id=account_id)
         serialize = AccountSerializer(account)
