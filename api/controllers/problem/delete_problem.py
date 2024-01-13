@@ -13,7 +13,7 @@ def delete_problem(problem:Problem):
     #     problem = Problem.objects.get(problem_id=problem_id)
     # except Problem.DoesNotExist:
     #     return Response({'detail': "Problem doesn't exist!"},status=status.HTTP_404_NOT_FOUND)
-    testcases = Testcase.objects.filter(problem_id=problem_id)
+    testcases = Testcase.objects.filter(problem=problem)
 
     problem.delete()
     testcases.delete()
