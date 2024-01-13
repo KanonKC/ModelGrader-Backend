@@ -7,33 +7,20 @@ from ..models import *
 from rest_framework import status
 from django.forms.models import model_to_dict
 from ..serializers import *
+from ..controllers.account.create_account import *
+from ..controllers.account.get_account import *
+from ..controllers.account.get_all_accounts import *
 
 @api_view([GET,POST])
-def account_collection(request):
+def all_accounts_view(request):
     if request.method == GET:
-        accounts = Account.objects.all()
-        serialize = AccountSecureSerializer(accounts,many=True)
-        return Response({
-            "accounts": serialize.data
-        },status=status.HTTP_200_OK)
-    
+        return get_all_accounts()
     elif request.method == POST:
-        request.data['password'] = passwordEncryption(request.data['password'])
-        try:
-            account = Account.objects.create(**request.data)
-        except Exception as e:
-            return Response({'message':str(e)},status=status.HTTP_400_BAD_REQUEST)
-        serialize = AccountSerializer(account)
-        return Response(serialize.data,status=status.HTTP_201_CREATED)
+        return create_account(request)
 
 @api_view([GET])
-def get_account(request,account_id):
-    try:
-        account = Account.objects.get(account_id=account_id)
-        serialize = AccountSerializer(account)
-        return Response(serialize.data,status=status.HTTP_200_OK)
-    except:
-        return Response({'message':'Account not found!'},status=status.HTTP_404_NOT_FOUND)
+def one_creator_view(request,account_id):
+    return get_account(account_id)
 
 @api_view([PUT])
 def change_password(request,account_id):
@@ -44,7 +31,7 @@ def change_password(request,account_id):
     return Response({'message':"Your password has been changed"})
 
 @api_view([GET])
-def get_daily_submission(request,account_id:int):
+def get_daily_submission(request,account_id:str):
     submissions = Submission.objects.filter(account_id=account_id)
     serializes = SubmissionSerializer(submissions,many=True)
 
@@ -60,8 +47,3 @@ def get_daily_submission(request,account_id:int):
     
     return Response({"submissions_by_date": submission_by_date})
 
-# @api_view([GET])
-# def get_passed_submission(request,account_id:int):
-#     submissions = Submission.objects.filter(account_id=account_id,is_passed=True)
-
-#     serialize = SubmissionSerializer(submissions,many=True)
