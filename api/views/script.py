@@ -55,5 +55,9 @@ def run_script(request):
     # for collection in collections:
     #     collection.description = '[{"id":"1","type":"p","children":[{"text":"Just course"}]}]'
     #     collection.save()
-    generate_submission_score(request)
+    # generate_submission_score(request)
+    problems = Problem.objects.all()
+    for problem in problems:
+        problem.allowed_languages = "python,c,cpp"
+        problem.save()
     return Response({'message': 'Success!'},status=status.HTTP_201_CREATED)
