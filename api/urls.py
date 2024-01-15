@@ -15,7 +15,7 @@ urlpatterns = [
     path('accounts/<str:account_id>/problems',problem.all_problems_creator_view),
     path('accounts/<str:account_id>/problems/<str:problem_id>',problem.one_problem_creator_view),
     path('accounts/<str:account_id>/problems/<str:problem_id>/groups',problem.problem_group_view),
-    path("accounts/<str:account_id>/problems/<str:problem_id>/submissions",submission.account_problem_submission_view),
+    path("accounts/<str:account_id>/problems/<str:problem_id>/submissions",submission.creator_problem_submissions_view),
     path("accounts/<str:account_id>/topics/<str:topic_id>/problems/<str:problem_id>/submissions",submission.topic_account_problem_submission_view),
 
     path('accounts/<str:account_id>/collections',collection.all_collections_creator_view),
@@ -33,6 +33,7 @@ urlpatterns = [
     path('problems',problem.all_problems_view),
     path('problems/validate',problem.validation_view),
     path('problems/<str:problem_id>',problem.one_problem_view),
+    path("problems/<str:problem_id>/accounts/<str:account_id>/submissions",submission.account_problem_submission_view),
     path('topics/<str:topic_id>/problems/<str:problem_id>/accounts/<str:account_id>',problem.problem_in_topic_account_view),
 
     path('collections',collection.all_collections_view),

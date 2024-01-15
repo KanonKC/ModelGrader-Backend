@@ -16,6 +16,7 @@ from ..controllers.submission.get_submission_by_quries import *
 from ..controllers.submission.get_submissions_by_account_problem import *
 from ..controllers.submission.submit_problem_on_topic import *
 from ..controllers.submission.get_submissions_by_account_problem_in_topic import *
+from ..controllers.submission.get_all_submissions_by_creator_problem import *
 
 
 @api_view([POST,GET])
@@ -24,6 +25,11 @@ def account_problem_submission_view(request,problem_id,account_id):
         return submit_problem(account_id,problem_id,request)
     if request.method == GET:
         return get_submissions_by_account_problem(account_id,problem_id)
+
+@api_view([GET])
+def creator_problem_submissions_view(request,account_id,problem_id):
+    problem = Problem.objects.get(problem_id=problem_id)
+    return get_all_submissions_by_creator_problem(problem)
 
 @api_view([GET])
 def all_submission_view(request):
