@@ -172,13 +172,19 @@ class ProblemPopulateAccountAndSubmissionPopulateSubmissionTestcasesSecureSerial
     best_submission = SubmissionPopulateSubmissionTestcaseSecureSerializer()
     class Meta:
         model = Problem
-        fields = problem_secure_fields + ['best_submission','creator']
+        # fields = problem_secure_fields + ['best_submission','creator']
+        fields = "__all__"
+        include = ['best_submission','creator']
+        exlude = ['solution','submission_regex','is_private','is_active','sharing']
 
 class ProblemPopulatSubmissionPopulateSubmissionTestcasesSecureSerializer(serializers.ModelSerializer):
     best_submission = SubmissionPopulateSubmissionTestcaseSecureSerializer()
     class Meta:
         model = Problem
-        fields = problem_secure_fields + ['best_submission']
+        # fields = problem_secure_fields + ['best_submission']
+        fields = "__all__"
+        include = ['best_submission','creator']
+        exlude = ['solution','submission_regex','is_private','is_active','sharing']
 class TopicCollectionPopulateCollectionSerializer(serializers.ModelSerializer):
     collection = CollectionSerializer()
     class Meta:
@@ -368,3 +374,11 @@ class CollectionPopulateCollectionProblemsPopulateProblemPopulateAccountAndTestc
         model = Collection
         fields = "__all__"
         include = ['problems','group_permissions']
+
+class SubmissionPopulateSubmissionTestcaseAndAccountSerializer(serializers.ModelSerializer):
+    runtime_output = SubmissionTestcaseSerializer(many=True)
+    account = AccountSecureSerializer()
+    class Meta:
+        model = Submission
+        fields = "__all__"
+        include = ['runtime_output']
