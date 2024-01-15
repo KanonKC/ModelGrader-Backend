@@ -131,21 +131,8 @@ class ProblemPopulateTestcaseSerializer(serializers.ModelSerializer):
     testcases = TestcaseSerializer(many=True)
     class Meta:
         model = Problem
-        fields = [
-            'problem_id',
-            'language',
-            'title',
-            'description',
-            'solution',
-            'time_limit',
-            'is_active',
-            'is_private',
-            'submission_regex',
-            'created_date',
-            'updated_date',
-            'creator',
-            'testcases'
-        ]
+        fields = "__all__"
+        include = ['testcases']
 
 # class ProblemPopulateAccountSecureSerializer(serializers.ModelSerializer):
 #     creator = AccountSecureSerializer()

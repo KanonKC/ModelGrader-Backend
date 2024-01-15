@@ -28,7 +28,7 @@ def all_problems_creator_view(request,account_id):
     if  request.method == POST:
         return create_problem(account_id,request)
     if request.method == GET:
-        return get_all_problems_by_account(account_id)
+        return get_all_problems_by_account(account_id,request)
 
 @api_view([GET,PUT,DELETE])
 def one_problem_creator_view(request,problem_id:str,account_id:str):
