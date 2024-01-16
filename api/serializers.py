@@ -70,6 +70,10 @@ class TopicCollectionSerializer(serializers.ModelSerializer):
         model = TopicCollection
         fields = "__all__"
 
+class TopicSecureSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Topic
+        exclude = ['sharing','is_active','is_private']
 
 
 class CollectionProblemSerializer(serializers.ModelSerializer):
@@ -128,6 +132,7 @@ class TestcaseSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 class ProblemPopulateTestcaseSerializer(serializers.ModelSerializer):
+    creator = AccountSecureSerializer()
     testcases = TestcaseSerializer(many=True)
     class Meta:
         model = Problem
@@ -162,6 +167,7 @@ class SubmissionPopulateSubmissionTestcaseAndProblemSecureSerializer(serializers
     # Add testcases field
     runtime_output = SubmissionTestcaseSecureSerializer(many=True)
     problem = ProblemSecureSerializer()
+    topic = TopicSecureSerializer()
     class Meta:
         model = Submission
         fields = ['submission_id','account','problem','topic','language','submission_code','is_passed','date','score','max_score','passed_ratio','runtime_output']
@@ -378,6 +384,7 @@ class CollectionPopulateCollectionProblemsPopulateProblemPopulateAccountAndTestc
 class SubmissionPopulateSubmissionTestcaseAndAccountSerializer(serializers.ModelSerializer):
     runtime_output = SubmissionTestcaseSerializer(many=True)
     account = AccountSecureSerializer()
+    topic = TopicSecureSerializer()
     class Meta:
         model = Submission
         fields = "__all__"
