@@ -44,6 +44,7 @@ class Problem(models.Model):
     updated_date = models.DateTimeField(default=timezone.now)
     sharing = models.BooleanField(default=False,blank=True)
     allowed_languages = models.CharField(max_length=1000,blank=True,default="")
+    difficulty = models.IntegerField(default=0,blank=True)
 
 class Testcase(models.Model):
     testcase_id = models.CharField(primary_key=True,blank=True,default=generate_uuid4_hex,max_length=32)
@@ -170,6 +171,14 @@ class TopicGroupPermission(models.Model):
     permission_manage_topics = models.BooleanField(default=False,blank=True)
     permission_view_topics = models.BooleanField(default=False,blank=True)
     permission_view_topics_log = models.BooleanField(default=False,blank=True)
+
+class VisitedLog(models.Model):
+    visited_log_id = models.CharField(primary_key=True,blank=True,default=generate_uuid4_hex,max_length=32)
+    account = models.ForeignKey(Account,on_delete=models.CASCADE,db_column="account_id")
+    topic = models.ForeignKey(Topic,on_delete=models.CASCADE,db_column="topic_id",null=True)
+    collection = models.ForeignKey(Collection,on_delete=models.CASCADE,db_column="collection_id",null=True)
+    problem = models.ForeignKey(Problem,on_delete=models.CASCADE,db_column="problem_id",null=True)
+    date = models.DateTimeField(default=timezone.now)
 
 # class TopicGroupPermission(models.Model):
 #     topic = models.ForeignKey(Topic,on_delete=models.CASCADE,db_column="topic_id")

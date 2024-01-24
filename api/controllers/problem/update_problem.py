@@ -9,7 +9,7 @@ from django.forms.models import model_to_dict
 from ...serializers import *
 from django.utils import timezone
 
-def update_problem(problem:Problem,request):
+def update_problem(problem:Problem,account:Account,request):
     # try:
     #     problem = Problem.objects.get(problem_id=problem_id)
     # except Problem.DoesNotExist:

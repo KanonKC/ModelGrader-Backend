@@ -389,3 +389,8 @@ class SubmissionPopulateSubmissionTestcaseAndAccountSerializer(serializers.Model
         model = Submission
         fields = "__all__"
         include = ['runtime_output']
+
+class VisitedLogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VisitedLog
+        fields = "__all__"

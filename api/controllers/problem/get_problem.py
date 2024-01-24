@@ -7,8 +7,9 @@ from ...models import *
 from rest_framework import status
 from django.forms.models import model_to_dict
 from ...serializers import *
+from ..visited_log import *
 
-def get_problem(problem:Problem):
+def get_problem(problem:Problem,account:Account):
     # try:
     #     problem = Problem.objects.get(problem_id=problem_id)
     # except Problem.DoesNotExist:
@@ -21,7 +22,7 @@ def get_problem(problem:Problem):
     problem.group_permissions = ProblemGroupPermission.objects.filter(problem=problem)
 
     serialize = ProblemPopulateAccountAndTestcasesAndProblemGroupPermissionsPopulateGroupSerializer(problem)
-
+    record_visited_problem(problem,account)
 
     return Response(serialize.data,status=status.HTTP_200_OK)
     
