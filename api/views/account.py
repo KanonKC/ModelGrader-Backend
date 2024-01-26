@@ -14,7 +14,7 @@ from ..controllers.account.get_all_accounts import *
 @api_view([GET,POST])
 def all_accounts_view(request):
     if request.method == GET:
-        return get_all_accounts()
+        return get_all_accounts(request)
     elif request.method == POST:
         return create_account(request)
 

@@ -1,3 +1,4 @@
+import pandas as pd
 from api.utility import passwordEncryption
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -7,6 +8,9 @@ from rest_framework import status
 from django.forms.models import model_to_dict
 from ..serializers import *
 from ..controllers.script.generate_submission_score import generate_submission_score
+from ..difficulty_predictor.preprocess import *
+from ..difficulty_predictor.predictor import *
+from ..controllers.problem.update_problem_difficulty import update_problem_difficulty
 
 # @api_view([POST])
 # def run_script(request):
@@ -49,15 +53,23 @@ from ..controllers.script.generate_submission_score import generate_submission_s
 #             topic.save()
 #     return Response({'message': 'Success!'},status=status.HTTP_201_CREATED)
 
+# @api_view([POST])
+# def run_script(request):
+#     # collections = Collection.objects.all()
+#     # for collection in collections:
+#     #     collection.description = '[{"id":"1","type":"p","children":[{"text":"Just course"}]}]'
+#     #     collection.save()
+#     # generate_submission_score(request)
+#     problems = Problem.objects.all()
+#     for problem in problems:
+#         problem.allowed_languages = "python,c,cpp"
+#         problem.save()
+#     return Response({'message': 'Success!'},status=status.HTTP_201_CREATED)
+
 @api_view([POST])
 def run_script(request):
-    # collections = Collection.objects.all()
-    # for collection in collections:
-    #     collection.description = '[{"id":"1","type":"p","children":[{"text":"Just course"}]}]'
-    #     collection.save()
-    # generate_submission_score(request)
     problems = Problem.objects.all()
     for problem in problems:
-        problem.allowed_languages = "python,c,cpp"
-        problem.save()
+        update_problem_difficulty(problem)
+
     return Response({'message': 'Success!'},status=status.HTTP_201_CREATED)

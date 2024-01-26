@@ -7,9 +7,21 @@ from ...models import *
 from rest_framework import status
 from django.forms.models import model_to_dict
 from ...serializers import *
+from django.db.models import Q
 
-def get_all_accounts():
+
+def get_all_accounts(request):
+
+    # get search query
+    search = request.GET.get('search','')
+
     accounts = Account.objects.all()
+
+    if search != '':
+        accounts = accounts.filter(
+            Q(username__icontains=search) | Q(account_id__icontains=search) | Q(email__icontains=search)
+        ).distinct()
+
     serialize = AccountSecureSerializer(accounts,many=True)
     return Response({
         "accounts": serialize.data
