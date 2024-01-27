@@ -42,8 +42,13 @@ def one_problem_creator_view(request,problem_id:str,account_id:str):
 
 @api_view([GET,DELETE])
 def all_problems_view(request):
+    account_id = request.GET.get("account_id",None)
+    try:
+        account = Account.objects.get(account_id=account_id)
+    except:
+        account = None
     if request.method == GET:
-        return get_all_problem_with_best_submission(request)
+        return get_all_problem_with_best_submission(account)
     elif request.method == DELETE:
         return remove_bulk_problems(request)
     

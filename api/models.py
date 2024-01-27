@@ -44,6 +44,7 @@ class Problem(models.Model):
     updated_date = models.DateTimeField(default=timezone.now)
     sharing = models.BooleanField(default=False,blank=True)
     allowed_languages = models.CharField(max_length=1000,blank=True,default="")
+    difficulty = models.IntegerField(default=0,blank=True)
 
 class Testcase(models.Model):
     testcase_id = models.CharField(primary_key=True,blank=True,default=generate_uuid4_hex,max_length=32)

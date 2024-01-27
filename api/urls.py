@@ -46,7 +46,7 @@ urlpatterns = [
     path('topics/<str:topic_id>/collections/<str:method>',topic.topic_collections_view),
 
     path('groups/<str:group_id>',group.one_group_view),
-    path('groups/<str:group_id>/members',group.group_members_view),
+    path('groups/<str:group_id>/members/<str:method>',group.group_members_view),
 
     path('submissions',submission.all_submission_view),
 

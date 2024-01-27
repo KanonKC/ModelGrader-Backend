@@ -9,6 +9,7 @@ from django.forms.models import model_to_dict
 from ...serializers import *
 from ...utility import regexMatching
 from time import sleep
+from ..problem.update_problem_difficulty import *
 
 QUEUE = [0,0,0,0,0,0,0,0,0,0]
 
@@ -98,6 +99,8 @@ def submit_problem_function(account_id:str,problem_id:str,topic_id:str,request):
 
     submission.runtime_output = submission_testcases
     testser = SubmissionPopulateSubmissionTestcaseSecureSerializer(submission)
+
+    update_problem_difficulty(problem)
 
     return Response(testser.data,status=status.HTTP_201_CREATED)
 
