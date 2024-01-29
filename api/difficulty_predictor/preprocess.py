@@ -1,7 +1,15 @@
-import pandas as pd
-pd.options.mode.chained_assignment = None
+try:
+    import pandas as pd
+    pd.options.mode.chained_assignment = None
+    success = True
+except:
+    success = False
 
 def modelgrader_preprocessor(submission_df):
+
+    if not success:
+        return [-1,-1]
+
     submission_df = submission_df[['account_id', 'problem_id','is_passed','language','date','submission_code','passed_ratio']]
 
     # Change submission_code to string
