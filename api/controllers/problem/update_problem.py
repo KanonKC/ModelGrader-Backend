@@ -1,7 +1,7 @@
 from api.utility import passwordEncryption
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from api.sandbox.grader import PythonGrader
+from api.sandbox.grader import Grader
 from ...constant import GET,POST,PUT,DELETE
 from ...models import *
 from rest_framework import status
@@ -27,7 +27,7 @@ def update_problem(problem:Problem,request):
     problem.updated_date = timezone.now()
 
     if 'testcases' in request.data:
-        running_result = PythonGrader(problem.solution,request.data['testcases'],1,1.5).generate_output()
+        running_result = Grader[request.data['language']](problem.solution,request.data['testcases'],1,1.5).generate_output()
 
         # if not running_result.runnable:
         #     return Response({'detail': 'Error during editing. Your code may has an error/timeout!'},status=status.HTTP_406_NOT_ACCEPTABLE)
@@ -53,7 +53,7 @@ def update_problem(problem:Problem,request):
     if 'solution' in request.data:
         testcases = Testcase.objects.filter(problem=problem,deprecated=False)
         program_input = [i.input for i in testcases]
-        running_result = PythonGrader(problem.solution,program_input,1,1.5).generate_output()
+        running_result = Grader[request.data['language']](problem.solution,program_input,1,1.5).generate_output()
 
         if not running_result.runnable:
             return Response({'detail': 'Error during editing. Your code may has an error/timeout!'},status=status.HTTP_406_NOT_ACCEPTABLE)

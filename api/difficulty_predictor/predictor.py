@@ -2,7 +2,7 @@ import pickle
 
 # Read sav
 
-with open('./api/difficulty_predictor/difficulty_predictor.sav', 'rb') as f:
+with open('./api/difficulty_predictor/difficulty_predictor_667.sav', 'rb') as f:
     difficulty = pickle.load(f)
 
 # Predict some model

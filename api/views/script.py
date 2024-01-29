@@ -66,10 +66,20 @@ from ..controllers.problem.update_problem_difficulty import update_problem_diffi
 #         problem.save()
 #     return Response({'message': 'Success!'},status=status.HTTP_201_CREATED)
 
+# @api_view([POST])
+# def run_script(request):
+#     problems = Problem.objects.all()
+#     for problem in problems:
+#         update_problem_difficulty(problem)
+
+#     return Response({'message': 'Success!'},status=status.HTTP_201_CREATED)
+
 @api_view([POST])
 def run_script(request):
     problems = Problem.objects.all()
     for problem in problems:
-        update_problem_difficulty(problem)
+        if problem.language == "py":
+            problem.language = "python"
+            problem.save()
 
     return Response({'message': 'Success!'},status=status.HTTP_201_CREATED)
