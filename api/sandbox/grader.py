@@ -229,52 +229,52 @@ Grader:list[ProgramGrader] = {
     "cpp": CppGrader
 }
 
-adder = '''
-x = int(input("x: "))
-y = int(input("y: "))
-print(x-y)
-'''
+# adder = '''
+# x = int(input("x: "))
+# y = int(input("y: "))
+# print(x-y)
+# '''
 
-adderC = r'''
-#include <stdio.h>
+# adderC = r'''
+# #include <stdio.h>
 
-int main() {
-    int a,b;
-    scanf("%d",&a);
-    scanf("%d",&b);
-    printf("%d\n",a-b);
-    return 0;
-}
-'''
+# int main() {
+#     int a,b;
+#     scanf("%d",&a);
+#     scanf("%d",&b);
+#     printf("%d\n",a-b);
+#     return 0;
+# }
+# '''
 
-adderCpp = r'''
-#include <iostream>
-using namespace std;
+# adderCpp = r'''
+# #include <iostream>
+# using namespace std;
 
-int main() {
-    int a,b;
-    cin >> a;
-    cin >> b;
+# int main() {
+#     int a,b;
+#     cin >> a;
+#     cin >> b;
 
-    cout << a - b << "\n";    
-}
-'''
+#     cout << a - b << "\n";    
+# }
+# '''
 
-test = [
-'''1
-2
-''',
-'''52
-18
-''',
-'''9
--5
-'''
-]
+# test = [
+# '''1
+# 2
+# ''',
+# '''52
+# 18
+# ''',
+# '''9
+# -5
+# '''
+# ]
 
-pyresult = ["x: y: -1\r\n","x: y: 34\r\n","x: y: 14\r\n"]
-cresult = ["-1\r\n","34\r\n","14\r\n"]
+# pyresult = ["x: y: -1\r\n","x: y: 34\r\n","x: y: 14\r\n"]
+# cresult = ["-1\r\n","34\r\n","14\r\n"]
 
-grader = Grader['python']
-result = grader(adder,test,1,1.5).grading(pyresult)
+# grader = Grader['python']
+# result = grader(adder,test,1,1.5).grading(pyresult)
 # print(result.getResult())
