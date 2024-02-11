@@ -7,11 +7,21 @@ from ...models import *
 from rest_framework import status
 from django.forms.models import model_to_dict
 from ...serializers import *
-import pandas as pd
 from ...difficulty_predictor.preprocess import *
 from ...difficulty_predictor.predictor import *
 
+try:
+    import pandas as pd
+    pd.options.mode.chained_assignment = None
+    success = True
+except:
+    success = False
+
 def update_problem_difficulty(problem:Problem):
+
+    if not success:
+        return
+
     submissions = Submission.objects.filter(problem=problem)
 
     if submissions.count() < 10:

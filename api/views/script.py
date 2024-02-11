@@ -1,4 +1,3 @@
-import pandas as pd
 from api.utility import passwordEncryption
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
