@@ -20,6 +20,7 @@ from ..controllers.problem.get_all_problem_with_best_submission import *
 from ..controllers.problem.get_problem_in_topic_with_best_submission import *
 from ..controllers.problem.update_group_permission_to_problem import *
 from ..controllers.problem.get_problem_public import *
+from ..controllers.problem.import_elabsheet_problem import *
 
 
 # Create your views here.
@@ -77,3 +78,14 @@ def problem_group_view(request,account_id:int,problem_id:int):
     problem = Problem.objects.get(problem_id=problem_id)
     if request.method == PUT:
         return update_group_permission_to_problem(problem,request)
+    
+# @api_view([POST])
+# def import_elabsheet_problem_view(request):
+#     if request.method == POST:
+#         print(request)
+
+@api_view([PUT])
+def import_pdf_view(request,problem_id:int):
+    problem = Problem.objects.get(problem_id=problem_id)
+    if request.method == PUT:
+        return import_elabsheet_problem(request, problem)

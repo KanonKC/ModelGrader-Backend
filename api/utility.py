@@ -12,6 +12,9 @@ def formParser(querydict):
 def uploadTopic(instance,filename):
     return f"topics/{filename}"
 
+def uploadProblemImportPDF(instance,filename):
+    return f"import-pdfs/{filename}"
+
 def regexMatching(regex:str,code:str)->bool:
     code = ";".join([i.strip() for i in code.split("\n") if i != ""])
     return re.search(regex, code)

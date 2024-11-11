@@ -33,6 +33,7 @@ urlpatterns = [
     path('problems',problem.all_problems_view),
     path('problems/validate',problem.validation_view),
     path('problems/<str:problem_id>',problem.one_problem_view),
+    path('problems/<str:problem_id>/import/pdf',problem.import_pdf_view),
     path("problems/<str:problem_id>/accounts/<str:account_id>/submissions",submission.account_problem_submission_view),
     path('topics/<str:topic_id>/problems/<str:problem_id>/accounts/<str:account_id>',problem.problem_in_topic_account_view),
 
