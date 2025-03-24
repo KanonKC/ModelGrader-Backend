@@ -13,4 +13,4 @@ except:
 def predict(avg_first_passed_total_attempts,avg_first_passed_time_used):
     if not difficulty:
         return 0
-    return int(difficulty.predict([[avg_first_passed_total_attempts,avg_first_passed_time_used]])[0])
+    return 0 # int(difficulty.predict([[avg_first_passed_total_attempts,avg_first_passed_time_used]])[0])

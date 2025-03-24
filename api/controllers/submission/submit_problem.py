@@ -105,4 +105,8 @@ def submit_problem_function(account_id:str,problem_id:str,topic_id:str,request):
     return Response(testser.data,status=status.HTTP_201_CREATED)
 
 def submit_problem(account_id:str,problem_id:str,request):
-    return submit_problem_function(account_id,problem_id,None,request)
+    try:
+        return submit_problem_function(account_id,problem_id,None,request)
+    except Exception as e:
+        print(e)
+        return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -22,7 +22,11 @@ from ..controllers.submission.get_all_submissions_by_creator_problem import *
 @api_view([POST,GET])
 def account_problem_submission_view(request,problem_id,account_id):
     if request.method == POST:
-        return submit_problem(account_id,problem_id,request)
+        try:
+            return submit_problem(account_id,problem_id,request)
+        except Exception as e:
+            print(e)
+            return Response({"error":str(e)},status=status.HTTP_400_BAD_REQUEST)
     if request.method == GET:
         return get_submissions_by_account_problem(account_id,problem_id)
 

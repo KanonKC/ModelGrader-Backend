@@ -161,7 +161,7 @@ class PythonGrader(ProgramGrader):
                     'r'
                 ),stderr=subprocess.DEVNULL,timeout=float(self.timeout))
                 result.append(RuntimeResult(self.testcases[i],runner.decode(),"OK"))
-            except subprocess.CalledProcessError:
+            except subprocess.CalledProcessError as e:
                 result.append(RuntimeResult(self.testcases[i],None,"ERROR"))
             except subprocess.TimeoutExpired:
                 result.append(RuntimeResult(self.testcases[i],None,"TIMEOUT"))

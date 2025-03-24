@@ -49,6 +49,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://192.168.0.5:3000",
     "http://192.168.0.11:5173",
     "http://192.168.68.194:5173",
+    "https://grader.kanonkc.com",
     FRONEND_URL
 ]
 
