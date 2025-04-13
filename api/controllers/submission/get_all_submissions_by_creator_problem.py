@@ -8,13 +8,22 @@ from rest_framework import status
 from django.forms.models import model_to_dict
 from ...serializers import *
 
-def get_all_submissions_by_creator_problem(problem:Problem):
+def get_all_submissions_by_creator_problem(problem:Problem, request):
+
+    start = int(request.query_params.get("start",0))
+    end = int(request.query_params.get("end",-1))
+    # query = request.query_params.get("query","")
+    if end == -1: end = None
+
     submissions = Submission.objects.filter(problem=problem)
+    total = submissions.count()
+
 
     if submissions.count() == 0:
         return Response({"submissions": []},status=status.HTTP_204_NO_CONTENT)
 
     submissions = submissions.order_by('-date')
+    submissions = submissions[start:end]
     
     result = []
     
@@ -23,6 +32,15 @@ def get_all_submissions_by_creator_problem(problem:Problem):
         submission.runtime_output = submission_testcases
         result.append(submission)
 
-    submissions_serializer = SubmissionPopulateSubmissionTestcaseAndAccountSerializer(result,many=True)
+    problem.testcases = Testcase.objects.filter(problem=problem,deprecated=False)
 
-    return Response({"submissions": submissions_serializer.data},status=status.HTTP_200_OK)
+    submissions_serializer = SubmissionPopulateSubmissionTestcaseAndAccountSerializer(result,many=True)
+    problem_serializer = ProblemPopulateTestcaseSerializer(problem)
+
+    return Response({
+        "problem": problem_serializer.data,
+        "submissions": submissions_serializer.data,
+        "start": start,
+        "end": end,
+        "total": total,
+    },status=status.HTTP_200_OK)
