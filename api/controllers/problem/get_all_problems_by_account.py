@@ -12,16 +12,21 @@ def get_all_problems_by_account(account:Account,request):
 
     start = int(request.query_params.get("start",0))
     end = int(request.query_params.get("end",-1))
+    query = request.query_params.get("query","")
     if end == -1: end = None
 
-    personalProblems = Problem.objects.filter(creator=account).order_by('-updated_date')
+    personalProblems = Problem.objects.filter(creator=account, title__icontains=query).order_by('-updated_date')
     maxPersonal = len(personalProblems)
     if start < maxPersonal and start < maxPersonal:
         personalProblems = personalProblems[start:end]
     for problem in personalProblems:
         problem.testcases = Testcase.objects.filter(problem=problem,deprecated=False)
 
-    manageableProblems = Problem.objects.filter(problemgrouppermission__permission_manage_problems=True,problemgrouppermission__group__in=GroupMember.objects.filter(account=account).values_list("group",flat=True)).order_by('-updated_date')
+    manageableProblems = Problem.objects.filter(
+        problemgrouppermission__permission_manage_problems=True,
+        problemgrouppermission__group__in=GroupMember.objects.filter(account=account).values_list("group",flat=True),
+        title__icontains=query
+    ).order_by('-updated_date')
     maxManageable = len(manageableProblems)
     if start < maxManageable and start < maxManageable:
         manageableProblems = manageableProblems[start:end]
@@ -29,8 +34,8 @@ def get_all_problems_by_account(account:Account,request):
         problem.testcases = Testcase.objects.filter(problem=problem,deprecated=False)
 
     # problem_ser = ProblemPopulateTestcaseSerializer(problems,many=True)
-    personalSerialize = ProblemPopulateTestcaseSerializer(personalProblems,many=True)
-    manageableSerialize = ProblemPopulateTestcaseSerializer(manageableProblems,many=True)
+    personalSerialize = ProblemPopulatePartialTestcaseSerializer(personalProblems,many=True)
+    manageableSerialize = ProblemPopulatePartialTestcaseSerializer(manageableProblems,many=True)
 
     return Response({
         "start":start,

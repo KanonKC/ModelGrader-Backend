@@ -131,6 +131,18 @@ class TestcaseSerializer(serializers.ModelSerializer):
         model = Testcase
         fields = "__all__"
 
+class TestcasePartialSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Testcase
+        fields = ['testcase_id','runtime_status']
+class ProblemPopulatePartialTestcaseSerializer(serializers.ModelSerializer):
+    creator = AccountSecureSerializer()
+    testcases = TestcasePartialSerializer(many=True)
+    class Meta:
+        model = Problem
+        fields = "__all__"
+        # fields = ['problem_id','title','creator','testcases']
+        include = ['testcases']
 class ProblemPopulateTestcaseSerializer(serializers.ModelSerializer):
     creator = AccountSecureSerializer()
     testcases = TestcaseSerializer(many=True)
