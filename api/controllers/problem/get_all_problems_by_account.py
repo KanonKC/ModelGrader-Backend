@@ -29,8 +29,8 @@ def get_all_problems_by_account(account:Account,request):
         problem.testcases = Testcase.objects.filter(problem=problem,deprecated=False)
 
     # problem_ser = ProblemPopulateTestcaseSerializer(problems,many=True)
-    personalSerialize = ProblemPopulateTestcaseSerializer(personalProblems,many=True)
-    manageableSerialize = ProblemPopulateTestcaseSerializer(manageableProblems,many=True)
+    personalSerialize = ProblemPopulatePartialTestcaseSerializer(personalProblems,many=True)
+    manageableSerialize = ProblemPopulatePartialTestcaseSerializer(manageableProblems,many=True)
 
     return Response({
         "start":start,
