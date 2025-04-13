@@ -29,7 +29,7 @@ def account_problem_submission_view(request,problem_id,account_id):
 @api_view([GET])
 def creator_problem_submissions_view(request,account_id,problem_id):
     problem = Problem.objects.get(problem_id=problem_id)
-    return get_all_submissions_by_creator_problem(problem)
+    return get_all_submissions_by_creator_problem(problem, request)
 
 @api_view([GET])
 def all_submission_view(request):
