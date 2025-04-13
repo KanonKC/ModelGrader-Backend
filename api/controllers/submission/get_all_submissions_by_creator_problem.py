@@ -32,9 +32,13 @@ def get_all_submissions_by_creator_problem(problem:Problem, request):
         submission.runtime_output = submission_testcases
         result.append(submission)
 
+    problem.testcases = Testcase.objects.filter(problem=problem,deprecated=False)
+
     submissions_serializer = SubmissionPopulateSubmissionTestcaseAndAccountSerializer(result,many=True)
+    problem_serializer = ProblemPopulateTestcaseSerializer(problem)
 
     return Response({
+        "problem": problem_serializer.data,
         "submissions": submissions_serializer.data,
         "start": start,
         "end": end,
