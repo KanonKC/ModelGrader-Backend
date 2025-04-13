@@ -141,6 +141,7 @@ class ProblemPopulatePartialTestcaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Problem
         fields = "__all__"
+        # fields = ['problem_id','title','creator','testcases']
         include = ['testcases']
 class ProblemPopulateTestcaseSerializer(serializers.ModelSerializer):
     creator = AccountSecureSerializer()
