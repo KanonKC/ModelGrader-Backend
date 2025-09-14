@@ -1,5 +1,4 @@
 from django.urls import path
-from .views import account,auth, script
 from .controllers import problem_controller, collection_controller, topic_controller, group_controller, submission_controller
 from api.controllers import account_controller,auth_controller
 
@@ -60,5 +59,4 @@ urlpatterns = [
     # path('v1/problems/<str:problem_id>/pdf',problem_controller.get_problem_pdf),
     # path('v1/problems', problem_controller.create_problem),
 
-    path('script',script.run_script),
 ]
