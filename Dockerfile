@@ -15,9 +15,6 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 # copy whole project to your docker home directory. 
 COPY . .  
 
-# make entrypoint script executable
-RUN chmod +x entrypoint.sh
-
 # port where the Django app runs  
 EXPOSE 8000
 
