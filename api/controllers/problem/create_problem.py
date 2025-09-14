@@ -2,6 +2,7 @@ from api.utility import passwordEncryption
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from api.sandbox.grader import PythonGrader,RuntimeResult
+from api.wrappers.auth_wrapper import authentication_required
 from ...constant import GET,POST,PUT,DELETE
 from ...models import *
 from rest_framework import status

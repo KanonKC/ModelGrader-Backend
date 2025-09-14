@@ -25,6 +25,7 @@ from ..controllers.problem.import_elabsheet_problem import *
 
 # Create your views here.
 @api_view([POST,GET])
+@authentication_required
 def all_problems_creator_view(request,account_id):
     if  request.method == POST:
         return create_problem(account_id,request)
@@ -32,6 +33,7 @@ def all_problems_creator_view(request,account_id):
         return get_all_problems_by_account(account_id,request)
 
 @api_view([GET,PUT,DELETE])
+@authentication_required
 def one_problem_creator_view(request,problem_id:str,account_id:str):
     problem = Problem.objects.get(problem_id=problem_id)
     if request.method == GET:
@@ -42,6 +44,7 @@ def one_problem_creator_view(request,problem_id:str,account_id:str):
         return delete_problem(problem)
 
 @api_view([GET,DELETE])
+@authentication_required
 def all_problems_view(request):
     account_id = request.GET.get("account_id",None)
     try:
@@ -64,16 +67,19 @@ def one_problem_view(request,problem_id: int):
         return delete_problem(problem_id)
     
 @api_view([POST])
+@authentication_required
 def validation_view(request):
     if request.method == POST:
         return validate_program(request)
     
 @api_view([GET])
+@authentication_required
 def problem_in_topic_account_view(request,account_id:str,topic_id:str,problem_id:str):
     if request.method == GET:
         return get_problem_in_topic_with_best_submission(account_id,topic_id,problem_id)
     
 @api_view([PUT])
+@authentication_required
 def problem_group_view(request,account_id:int,problem_id:int):
     problem = Problem.objects.get(problem_id=problem_id)
     if request.method == PUT:
@@ -85,6 +91,7 @@ def problem_group_view(request,account_id:int,problem_id:int):
 #         print(request)
 
 @api_view([PUT])
+@authentication_required
 def import_pdf_view(request,problem_id:int):
     problem = Problem.objects.get(problem_id=problem_id)
     if request.method == PUT:

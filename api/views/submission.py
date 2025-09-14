@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 
 from api.serializers import *
+from api.wrappers.auth_wrapper import authentication_required
 from ..constant import GET,POST,PUT,DELETE
 from ..models import *
 from rest_framework import status
@@ -20,6 +21,7 @@ from ..controllers.submission.get_all_submissions_by_creator_problem import *
 
 
 @api_view([POST,GET])
+@authentication_required
 def account_problem_submission_view(request,problem_id,account_id):
     if request.method == POST:
         try:
@@ -31,15 +33,18 @@ def account_problem_submission_view(request,problem_id,account_id):
         return get_submissions_by_account_problem(account_id,problem_id)
 
 @api_view([GET])
+@authentication_required
 def creator_problem_submissions_view(request,account_id,problem_id):
     problem = Problem.objects.get(problem_id=problem_id)
     return get_all_submissions_by_creator_problem(problem, request)
 
 @api_view([GET])
+@authentication_required
 def all_submission_view(request):
     return get_submission_by_quries(request)
 
 @api_view([POST,GET])
+@authentication_required
 def topic_account_problem_submission_view(request,topic_id,account_id,problem_id):
     if request.method == POST:
         return submit_problem_on_topic(account_id,problem_id,topic_id,request)

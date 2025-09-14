@@ -2,6 +2,7 @@ from api.utility import passwordEncryption
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from api.sandbox.grader import PythonGrader
+from api.wrappers.auth_wrapper import authentication_required
 from ..constant import GET,POST,PUT,DELETE
 from ..models import *
 from rest_framework import status
@@ -19,10 +20,12 @@ def all_accounts_view(request):
         return create_account(request)
 
 @api_view([GET])
+@authentication_required
 def one_creator_view(request,account_id):
     return get_account(account_id)
 
 @api_view([PUT])
+@authentication_required
 def change_password(request,account_id):
     account = Account.objects.get(account_id=account_id)
     account.password = passwordEncryption(request.data['password'])
@@ -31,6 +34,7 @@ def change_password(request,account_id):
     return Response({'message':"Your password has been changed"})
 
 @api_view([GET])
+@authentication_required
 def get_daily_submission(request,account_id:str):
     submissions = Submission.objects.filter(account_id=account_id)
     serializes = SubmissionSerializer(submissions,many=True)

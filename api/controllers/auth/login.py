@@ -17,10 +17,9 @@ def login(request):
     try:
         account = Account.objects.get(username=request.data['username'])
         account_dict = model_to_dict(account)
-
         if passwordEncryption(request.data['password']) == account_dict['password']:
             account.token = uuid4().hex
-            account.token_expire = int(time()+TOKEN_LIFETIME)
+            account.token_expire = int(time() + TOKEN_LIFETIME)
             account.save()
             return Response(model_to_dict(account),status=status.HTTP_202_ACCEPTED)
         else:

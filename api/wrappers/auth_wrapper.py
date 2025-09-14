@@ -10,5 +10,5 @@ def authentication_required(function):
         is_verify = verify_token(token)
         if not is_verify:
             raise InvalidTokenError()
-        return function(request, token=token, *args, **kwargs)
+        return function(request, *args, **kwargs)
     return wrapper

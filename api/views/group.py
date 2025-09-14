@@ -2,6 +2,7 @@ from api.utility import passwordEncryption
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from api.sandbox.grader import PythonGrader
+from api.wrappers.auth_wrapper import authentication_required
 from ..constant import GET,POST,PUT,DELETE
 from ..models import *
 from rest_framework import status
@@ -16,6 +17,7 @@ from ..controllers.group.add_members_to_group import add_members_to_group
 from ..controllers.group.get_all_groups_by_account import get_all_groups_by_account
 
 @api_view([POST,GET])
+@authentication_required
 def all_groups_creator_view(request,account_id:str):
     account = Account.objects.get(account_id=account_id)
     if request.method == POST:
@@ -24,6 +26,7 @@ def all_groups_creator_view(request,account_id:str):
         return get_all_groups_by_account(account,request)
 
 @api_view([PUT,DELETE,GET])
+@authentication_required
 def one_group_view(request,group_id:str):
     group = Group.objects.get(group_id=group_id)
     if request.method == PUT:
@@ -34,6 +37,7 @@ def one_group_view(request,group_id:str):
         return get_group(group,request)
     
 @api_view([PUT])
+@authentication_required
 def group_members_view(request,group_id:str,method:str):
     group = Group.objects.get(group_id=group_id)
     if method == 'update':
