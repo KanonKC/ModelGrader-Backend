@@ -2,6 +2,8 @@ from statistics import mode
 from rest_framework.response import Response
 from rest_framework.decorators import api_view,parser_classes
 from rest_framework.parsers import MultiPartParser, FormParser
+
+from api.wrappers.auth_wrapper import authentication_required
 from ..constant import GET,POST,PUT,DELETE
 from ..models import *
 from rest_framework import status
@@ -24,6 +26,7 @@ from ..permissions.topic import *
 
 @api_view([POST,GET])
 @parser_classes([MultiPartParser,FormParser])
+@authentication_required
 def all_topics_creator_view(request,account_id :int):
     account = Account.objects.get(account_id=account_id)
     if request.method == POST:
@@ -32,6 +35,7 @@ def all_topics_creator_view(request,account_id :int):
         return get_all_topics_by_account(account,request)
 
 @api_view([GET,PUT,DELETE])
+@authentication_required
 def one_topic_creator_view(request,account_id:str,topic_id:str):
     topic = Topic.objects.get(topic_id=topic_id)
     account = Account.objects.get(account_id=account_id)
@@ -45,10 +49,12 @@ def one_topic_creator_view(request,account_id:str,topic_id:str):
         return delete_topic(topic)
 
 @api_view([GET])
+@authentication_required
 def all_topics_view(request):
     return get_all_topics(request)
 
 @api_view([GET,PUT,DELETE])
+@authentication_required
 def one_topic_view(request,topic_id:str):
     if request.method == GET:
         return get_topic_public(topic_id,request)
@@ -58,6 +64,7 @@ def one_topic_view(request,topic_id:str):
         return delete_topic(topic_id)
 
 @api_view([PUT])
+@authentication_required
 def topic_collections_view(request,topic_id:str,method:str):
 
     topic = Topic.objects.get(topic_id=topic_id)
@@ -70,6 +77,7 @@ def topic_collections_view(request,topic_id:str,method:str):
         return update_collections_to_topic(topic,request)
 
 @api_view([POST,PUT])
+@authentication_required
 def account_access(request,topic_id:str):
     topic = Topic.objects.get(topic_id=topic_id)
     target_accounts = Account.objects.filter(account_id__in=request.data['account_ids'])
@@ -96,11 +104,13 @@ def account_access(request,topic_id:str):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 @api_view([PUT])
+@authentication_required
 def topic_groups_view(request,account_id:int,topic_id:str):
     topic = Topic.objects.get(topic_id=topic_id)
     return update_groups_permission_to_topic(topic,request)
 
 @api_view([GET])
+@authentication_required
 def all_topics_access_view(request,account_id:str):
     account = Account.objects.get(account_id=account_id)
     return get_all_accessed_topics_by_account(account)

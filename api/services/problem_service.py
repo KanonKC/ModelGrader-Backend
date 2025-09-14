@@ -1,6 +1,6 @@
 # from ..utility import JSONParser, JSONParserOne, passwordEncryption
 from ..models import *
-from .auth_service import verifyToken, getAccountByToken
+from .auth_service import verify_token, getAccountByToken
 from .permission_service import canManageProblem
 from ..utility import generate_random_string, check_pdf
 from .service_result import ServiceResult
@@ -53,7 +53,7 @@ def upload_pdf(problem_id, file, token):
     500: Internal Server Error
     """
     problem = Problem.objects.get(problem_id=problem_id) if verifyProblem(problem_id) else None
-    if not verifyToken(token):
+    if not verify_token(token):
         raise InvalidTokenError()
     if not problem:
         raise ItemNotFoundError()
@@ -78,7 +78,7 @@ def upload_pdf(problem_id, file, token):
 def get_problem_pdf(problem_id, token):
     try:
         problem = Problem.objects.get(problem_id=problem_id)
-        if not verifyToken(token):
+        if not verify_token(token):
             raise InvalidTokenError()
         if not canManageProblem(token, problem_id):
             raise PermissionDeniedError()
@@ -136,7 +136,7 @@ def update_problem(data, token, problem_id):
     try:
         problem = Problem.objects.get(problem_id=problem_id)
 
-        if not verifyToken(token):
+        if not verify_token(token):
             raise InvalidTokenError()
         
         if not canManageProblem(token, problem_id):
