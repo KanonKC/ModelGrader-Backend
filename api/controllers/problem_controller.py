@@ -31,7 +31,6 @@ def upload_pdf(request, problem_id:str):
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view([GET])
-@authentication_required
 def get_problem_pdf(request, problem_id:str, token):
     """
     Get problem PDF file
@@ -67,7 +66,6 @@ def get_problem(request, problem_id:str, token):
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 @api_view([POST])
-@authentication_required
 def create_problem(request, token):
     """
     create problem
@@ -103,7 +101,6 @@ def update_problem(request, problem_id, token):
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             
 @api_view([GET, PUT])
-@authentication_required
 def get_or_update_problem(request, problem_id, token):
     if request.method == GET:
         return get_problem(request, problem_id, token)
