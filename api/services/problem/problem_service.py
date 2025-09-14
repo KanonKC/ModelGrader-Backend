@@ -14,15 +14,9 @@ except:
     pandas_success = False
 
 def create_problem(account_id: str, request):
-    print("1")
     account = Account.objects.get(account_id=account_id)
-    print("2")
     running_result = PythonGrader(request.data['solution'], request.data['testcases'], 1, 1.5).generate_output()
 
-    # if not running_result.runnable:
-    #     raise BadRequestError('Error during creating. Your code may has an error/timeout!')
-        
-    print("3")
     problem = Problem(
         language=request.data['language'],
         creator=account,
@@ -34,7 +28,6 @@ def create_problem(account_id: str, request):
     )
     problem.save()
 
-    print("4")
     testcases_result = []
     for unit in running_result.data:
         testcases_result.append(
@@ -46,12 +39,9 @@ def create_problem(account_id: str, request):
         ))
 
     Testcase.objects.bulk_create(testcases_result)
-    print("5")
 
-    print("problem_serialize")
     problem_serialize = ProblemSerializer(problem)
     testcases_serialize = TestcaseSerializer(testcases_result, many=True)
-    print("testcases_serialize")
 
     return {**problem_serialize.data, 'testcases': testcases_serialize.data}
 
