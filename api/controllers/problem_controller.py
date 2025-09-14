@@ -1,8 +1,6 @@
 # from ..utility import JSONParser, JSONParserOne, passwordEncryption
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-
-from api.wrappers.auth_wrapper import authentication_required
 from ..constant import PUT, GET, POST
 from rest_framework import status
 from ..utility import extract_bearer_token, ERROR_TYPE_TO_STATUS
