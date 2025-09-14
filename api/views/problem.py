@@ -7,7 +7,7 @@ from ..models import Account, Problem,Testcase
 from rest_framework import status
 from django.forms.models import model_to_dict
 from ..serializers import *
-
+from api.wrappers.auth_wrapper import authentication_required
 from ..controllers.problem.create_problem import *
 from ..controllers.problem.update_problem import *
 from ..controllers.problem.delete_problem import *
