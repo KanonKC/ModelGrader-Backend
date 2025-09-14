@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import account,auth, script,submission,topic,group
-from .controllers import problem_controller, collection_controller
+from .views import account,auth, script,submission
+from .controllers import problem_controller, collection_controller, topic_controller, group_controller
 from api.controllers import account_controller,auth_controller
 
 
@@ -24,13 +24,13 @@ urlpatterns = [
     path('accounts/<str:account_id>/collections/<str:collection_id>',collection_controller.one_collection_creator_view),
     path('accounts/<str:account_id>/collections/<str:collection_id>/groups',collection_controller.collection_groups_view),
     
-    path('accounts/<str:account_id>/topics',topic.all_topics_creator_view),
-    path('accounts/<str:account_id>/topics/<str:topic_id>',topic.one_topic_creator_view),
-    path('accounts/<str:account_id>/topics/<str:topic_id>/groups',topic.topic_groups_view),
+    path('accounts/<str:account_id>/topics',topic_controller.all_topics_creator_view),
+    path('accounts/<str:account_id>/topics/<str:topic_id>',topic_controller.one_topic_creator_view),
+    path('accounts/<str:account_id>/topics/<str:topic_id>/groups',topic_controller.topic_groups_view),
     
-    path('accounts/<str:account_id>/access/topics',topic.all_topics_access_view),
+    path('accounts/<str:account_id>/access/topics',topic_controller.all_topics_access_view),
 
-    path('accounts/<str:account_id>/groups',group.all_groups_creator_view),
+    path('accounts/<str:account_id>/groups',group_controller.all_groups_creator_view),
     
     path('problems',problem_controller.all_problems_view),
     path('problems/list',problem_controller.all_problems_list_view),
@@ -44,13 +44,13 @@ urlpatterns = [
     path('collections/<str:collection_id>',collection_controller.one_collection_view),
     path('collections/<str:collection_id>/problems/<str:method>',collection_controller.collection_problems_view),
 
-    path('topics',topic.all_topics_view),
-    path('topics/<str:topic_id>',topic.one_topic_view),
-    path('topics/<str:topic_id>/access',topic.account_access),
-    path('topics/<str:topic_id>/collections/<str:method>',topic.topic_collections_view),
+    path('topics',topic_controller.all_topics_view),
+    path('topics/<str:topic_id>',topic_controller.one_topic_view),
+    path('topics/<str:topic_id>/access',topic_controller.account_access),
+    path('topics/<str:topic_id>/collections/<str:method>',topic_controller.topic_collections_view),
 
-    path('groups/<str:group_id>',group.one_group_view),
-    path('groups/<str:group_id>/members/<str:method>',group.group_members_view),
+    path('groups/<str:group_id>',group_controller.one_group_view),
+    path('groups/<str:group_id>/members/<str:method>',group_controller.group_members_view),
 
     path('submissions',submission.all_submission_view),
 
