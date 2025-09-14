@@ -1,14 +1,8 @@
-from django.forms.models import model_to_dict
 from api.utility import passwordEncryption
-from rest_framework.response import Response
-from rest_framework.decorators import api_view
-from api.sandbox.grader import PythonGrader
-from ..constant import GET, POST, PUT, DELETE
-from ..models import *
-from rest_framework import status
-from ..serializers import *
+from api.models import *
+from api.services.account.serializer import *
 from django.db.models import Q
-from ..errors.common import *
+from api.errors.common import *
 
 def create_account(request):
     request.data['password'] = passwordEncryption(request.data['password'])
@@ -43,18 +37,19 @@ def get_all_accounts(request):
         "accounts": serialize.data
     }
 
-def get_daily_submission(account_id:str):
-    submissions = Submission.objects.filter(account_id=account_id)
-    serializes = SubmissionSerializer(submissions,many=True)
+# TODO: Move this to submission service
+# def get_daily_submission(account_id:str):
+#     submissions = Submission.objects.filter(account_id=account_id)
+#     serializes = SubmissionSerializer(submissions,many=True)
 
-    submission_by_date = {}
+#     submission_by_date = {}
 
-    for submission in serializes.data:
-        [date,] = submission['date'].split("T")
-        if date in submission_by_date:
-            submission_by_date[date]["submissions"].append(submission)
-            submission_by_date[date]["count"] += 1
-        else:
-            submission_by_date[date] = {"count":1, "submissions": [ submission ]}
+#     for submission in serializes.data:
+#         [date,] = submission['date'].split("T")
+#         if date in submission_by_date:
+#             submission_by_date[date]["submissions"].append(submission)
+#             submission_by_date[date]["count"] += 1
+#         else:
+#             submission_by_date[date] = {"count":1, "submissions": [ submission ]}
     
-    return Response({"submissions_by_date": submission_by_date})
+#     return Response({"submissions_by_date": submission_by_date})
