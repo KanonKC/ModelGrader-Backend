@@ -1,12 +1,13 @@
 # from ..utility import JSONParser, JSONParserOne, passwordEncryption
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
+
+from api.wrappers.auth_wrapper import authentication_required
 from ..constant import PUT, GET, POST
 from rest_framework import status
 from ..utility import extract_bearer_token, ERROR_TYPE_TO_STATUS
 from ..services import problem_service
 from ..errors.common import *
-from ..wrappers.validate_token import validate_token
 from django.http import FileResponse
 
 @api_view([PUT])
@@ -30,7 +31,7 @@ def upload_pdf(request, problem_id:str):
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view([GET])
-@validate_token
+@authentication_required
 def get_problem_pdf(request, problem_id:str, token):
     """
     Get problem PDF file
@@ -66,7 +67,7 @@ def get_problem(request, problem_id:str, token):
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 @api_view([POST])
-@validate_token
+@authentication_required
 def create_problem(request, token):
     """
     create problem
@@ -102,7 +103,7 @@ def update_problem(request, problem_id, token):
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             
 @api_view([GET, PUT])
-@validate_token
+@authentication_required
 def get_or_update_problem(request, problem_id, token):
     if request.method == GET:
         return get_problem(request, problem_id, token)

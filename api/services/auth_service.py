@@ -3,7 +3,7 @@ from time import time
 from ..models import Account
 from ..errors.common import *
 
-def verifyToken(token):
+def verify_token(token):
     """
     Check if user has valid token and not expired
     Return: True/False
