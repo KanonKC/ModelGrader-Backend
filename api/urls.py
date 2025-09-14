@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import account,auth, script,submission,topic,collection,group
-from .controllers import problem_controller
+from .views import account,auth, script,submission,topic,group
+from .controllers import problem_controller, collection_controller
 from api.controllers import account_controller,auth_controller
 
 
@@ -20,9 +20,9 @@ urlpatterns = [
     path("accounts/<str:account_id>/problems/<str:problem_id>/submissions",submission.creator_problem_submissions_view),
     path("accounts/<str:account_id>/topics/<str:topic_id>/problems/<str:problem_id>/submissions",submission.topic_account_problem_submission_view),
 
-    path('accounts/<str:account_id>/collections',collection.all_collections_creator_view),
-    path('accounts/<str:account_id>/collections/<str:collection_id>',collection.one_collection_creator_view),
-    path('accounts/<str:account_id>/collections/<str:collection_id>/groups',collection.collection_groups_view),
+    path('accounts/<str:account_id>/collections',collection_controller.all_collections_creator_view),
+    path('accounts/<str:account_id>/collections/<str:collection_id>',collection_controller.one_collection_creator_view),
+    path('accounts/<str:account_id>/collections/<str:collection_id>/groups',collection_controller.collection_groups_view),
     
     path('accounts/<str:account_id>/topics',topic.all_topics_creator_view),
     path('accounts/<str:account_id>/topics/<str:topic_id>',topic.one_topic_creator_view),
@@ -40,9 +40,9 @@ urlpatterns = [
     path("problems/<str:problem_id>/accounts/<str:account_id>/submissions",submission.account_problem_submission_view),
     path('topics/<str:topic_id>/problems/<str:problem_id>/accounts/<str:account_id>',problem_controller.problem_in_topic_account_view),
 
-    path('collections',collection.all_collections_view),
-    path('collections/<str:collection_id>',collection.one_collection_view),
-    path('collections/<str:collection_id>/problems/<str:method>',collection.collection_problems_view),
+    path('collections',collection_controller.all_collections_view),
+    path('collections/<str:collection_id>',collection_controller.one_collection_view),
+    path('collections/<str:collection_id>/problems/<str:method>',collection_controller.collection_problems_view),
 
     path('topics',topic.all_topics_view),
     path('topics/<str:topic_id>',topic.one_topic_view),
