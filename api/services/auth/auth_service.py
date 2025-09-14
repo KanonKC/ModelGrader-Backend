@@ -2,15 +2,14 @@ from django.forms.models import model_to_dict
 from time import time
 
 from api.errors.auth import IncorrectPasswordError
-from ..models import Account
-from ..errors.common import *
+from api.models import Account
+from api.errors.common import *
 from api.utility import passwordEncryption
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from api.sandbox.grader import PythonGrader
-from ..constant import GET, POST, PUT, DELETE
+from api.constant import GET, POST, PUT, DELETE
 from rest_framework import status
-from ..serializers import *
 from decouple import config
 from uuid import uuid4
 

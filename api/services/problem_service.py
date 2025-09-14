@@ -1,14 +1,14 @@
 # from ..utility import JSONParser, JSONParserOne, passwordEncryption
-from ..models import *
-from .auth_service import verify_token, getAccountByToken
-from .permission_service import canManageProblem
-from ..utility import generate_random_string, check_pdf
-from .service_result import ServiceResult
+from api.models import *
+from api.services.auth.auth_service import verify_token, getAccountByToken
+from api.services.permission_service import canManageProblem
+from api.utility import generate_random_string, check_pdf
+from api.services.service_result import ServiceResult
 from django.forms.models import model_to_dict
-from ..errors.common import *
-from ..errors.grader import *
+from api.errors.common import *
+from api.errors.grader import *
 from api.sandbox.grader import Grader
-from ..serializers import *
+from api.serializers import *
 
 def verifyProblem(problem_id):
     try:

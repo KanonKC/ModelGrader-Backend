@@ -9,9 +9,9 @@ urlpatterns = [
     path("logout",auth_controller.logout),
     path('token',auth_controller.authorization),
 
-    path("accounts",account_controller.all_accounts_view),
-    path("accounts/<str:account_id>",account_controller.one_creator_view),
-    path("accounts/<str:account_id>/daily-submissions",account_controller.get_daily_submission),
+    path("accounts",account_controller.all_accounts),
+    path("accounts/<str:account_id>",account_controller.one_creator),
+    # path("accounts/<str:account_id>/daily-submissions",account_controller.get_daily_submission),
     path("accounts/<str:account_id>/password",account_controller.change_password),
 
     path('accounts/<str:account_id>/problems',problem.all_problems_creator_view),
