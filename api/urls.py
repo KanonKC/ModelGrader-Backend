@@ -1,12 +1,13 @@
 from django.urls import path
 from .views import account,auth,problem, script,submission,topic,collection,group
 from .controllers import problem_controller
+from api.controllers import auth_controller
 
 
 urlpatterns = [
-    path("login",auth.login_view),
-    path("logout",auth.logout_view),
-    path('token',auth.authorization_view),
+    path("login",auth_controller.login),
+    path("logout",auth_controller.logout),
+    path('token',auth_controller.authorization),
 
     path("accounts",account.all_accounts_view),
     path("accounts/<str:account_id>",account.one_creator_view),
