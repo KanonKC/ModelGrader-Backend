@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import account,auth, script,submission
-from .controllers import problem_controller, collection_controller, topic_controller, group_controller
+from .views import account,auth, script
+from .controllers import problem_controller, collection_controller, topic_controller, group_controller, submission_controller
 from api.controllers import account_controller,auth_controller
 
 
@@ -17,8 +17,8 @@ urlpatterns = [
     path('accounts/<str:account_id>/problems',problem_controller.all_problems_creator_view),
     path('accounts/<str:account_id>/problems/<str:problem_id>',problem_controller.one_problem_creator_view),
     path('accounts/<str:account_id>/problems/<str:problem_id>/groups',problem_controller.problem_group_view),
-    path("accounts/<str:account_id>/problems/<str:problem_id>/submissions",submission.creator_problem_submissions_view),
-    path("accounts/<str:account_id>/topics/<str:topic_id>/problems/<str:problem_id>/submissions",submission.topic_account_problem_submission_view),
+    path("accounts/<str:account_id>/problems/<str:problem_id>/submissions",submission_controller.creator_problem_submissions_view),
+    path("accounts/<str:account_id>/topics/<str:topic_id>/problems/<str:problem_id>/submissions",submission_controller.topic_account_problem_submission_view),
 
     path('accounts/<str:account_id>/collections',collection_controller.all_collections_creator_view),
     path('accounts/<str:account_id>/collections/<str:collection_id>',collection_controller.one_collection_creator_view),
@@ -37,7 +37,7 @@ urlpatterns = [
     path('problems/validate',problem_controller.validation_view),
     path('problems/<str:problem_id>',problem_controller.one_problem_view),
     path('problems/<str:problem_id>/import/pdf',problem_controller.import_pdf_view),
-    path("problems/<str:problem_id>/accounts/<str:account_id>/submissions",submission.account_problem_submission_view),
+    path("problems/<str:problem_id>/accounts/<str:account_id>/submissions",submission_controller.account_problem_submission_view),
     path('topics/<str:topic_id>/problems/<str:problem_id>/accounts/<str:account_id>',problem_controller.problem_in_topic_account_view),
 
     path('collections',collection_controller.all_collections_view),
@@ -52,7 +52,7 @@ urlpatterns = [
     path('groups/<str:group_id>',group_controller.one_group_view),
     path('groups/<str:group_id>/members/<str:method>',group_controller.group_members_view),
 
-    path('submissions',submission.all_submission_view),
+    path('submissions',submission_controller.all_submission_view),
 
     # New Versions
     # path('v1/problems/<str:problem_id>',problem_controller.get_or_update_problem),

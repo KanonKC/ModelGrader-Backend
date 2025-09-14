@@ -1,6 +1,6 @@
 from api.utility import passwordEncryption
 from api.models import *
-from api.services.account.serializer import *
+from api.services.account.serializers import *
 from django.db.models import Q
 from api.errors.common import *
 
