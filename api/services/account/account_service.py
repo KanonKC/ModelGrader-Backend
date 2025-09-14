@@ -1,18 +1,34 @@
+from api.repositories.account_repository import AccountRepository
 from api.utility import passwordEncryption
 from api.models import *
 from api.services.account.serializers import *
 from django.db.models import Q
 from api.errors.common import *
+from abc import ABC, abstractmethod
 
-class AccountService:
+class AccountService(ABC):
 
-    def __init__(self):
+    @abstractmethod
+    def create_account(self, request):
         pass
+    
+    @abstractmethod
+    def get_account(self, account_id: str):
+        pass
+    
+    @abstractmethod
+    def get_all_accounts(self, request):
+        pass
+
+class AccountServiceImpl(AccountService):
+
+    def __init__(self, account_repo: AccountRepository):
+        self.account_repo = account_repo
 
     def create_account(self, request):
         request.data['password'] = passwordEncryption(request.data['password'])
         try:
-            account = Account.objects.create(**request.data)
+            account = self.account_repo.create(request.data)
         except Exception as e:
             raise InternalServerError(e)
         serialize = AccountSerializer(account)
@@ -20,7 +36,7 @@ class AccountService:
 
     def get_account(self, account_id: str):
         try:
-            account = Account.objects.get(account_id=account_id)
+            account = self.account_repo.get(account_id)
             serialize = AccountSerializer(account)
             return serialize.data
         except Account.DoesNotExist:
@@ -30,17 +46,13 @@ class AccountService:
         # get search query
         search = request.GET.get('search', '')
         
-        accounts = Account.objects.all()
-        
-        if search != '':
-            accounts = accounts.filter(
-                Q(username__icontains=search) | Q(account_id__icontains=search) | Q(email__icontains=search)
-            ).distinct()
+        accounts = self.account_repo.list(search)
         
         serialize = AccountSecureSerializer(accounts, many=True)
         return {
             "accounts": serialize.data
         }
+    
 
     # TODO: Move this to submission service
     # def get_daily_submission(account_id:str):

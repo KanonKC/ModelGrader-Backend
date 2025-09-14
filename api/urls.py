@@ -1,7 +1,13 @@
 from django.urls import path
-from .controllers import problem_controller, collection_controller, topic_controller, group_controller, submission_controller
-from api.controllers import account_controller,auth_controller
 
+from api.repositories.account_repository import AccountRepositoryImpl
+from api.services.account.account_service import AccountService, AccountServiceImpl
+from .controllers import problem_controller, collection_controller, topic_controller, group_controller, submission_controller, auth_controller
+from api.controllers.account_controller import AccountControllerImpl
+
+account_repository = AccountRepositoryImpl()
+account_service = AccountServiceImpl(account_repository)
+account_controller = AccountControllerImpl(account_service)
 
 urlpatterns = [
     path("login",auth_controller.login),
