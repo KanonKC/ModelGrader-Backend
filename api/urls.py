@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import account,auth,problem, script,submission,topic,collection,group
 from .controllers import problem_controller
-from api.controllers import auth_controller
+from api.controllers import account_controller,auth_controller
 
 
 urlpatterns = [
@@ -9,10 +9,10 @@ urlpatterns = [
     path("logout",auth_controller.logout),
     path('token',auth_controller.authorization),
 
-    path("accounts",account.all_accounts_view),
-    path("accounts/<str:account_id>",account.one_creator_view),
-    path("accounts/<str:account_id>/daily-submissions",account.get_daily_submission),
-    path("accounts/<str:account_id>/password",account.change_password),
+    path("accounts",account_controller.all_accounts_view),
+    path("accounts/<str:account_id>",account_controller.one_creator_view),
+    path("accounts/<str:account_id>/daily-submissions",account_controller.get_daily_submission),
+    path("accounts/<str:account_id>/password",account_controller.change_password),
 
     path('accounts/<str:account_id>/problems',problem.all_problems_creator_view),
     path('accounts/<str:account_id>/problems/<str:problem_id>',problem.one_problem_creator_view),
