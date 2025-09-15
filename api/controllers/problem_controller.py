@@ -52,7 +52,7 @@ def get_problem_pdf(request, problem_id:str, token):
 
 def get_problem(request, problem_id:str, token):
     try:
-        problem = problem_service.get_problem(problem_id, request, token)
+        problem = problem_service.get_problem(problem_id, request, token, request.is_secure())
         return Response(problem, status=status.HTTP_200_OK)
     except Exception as e:
         if (isinstance(e, GraderException)):

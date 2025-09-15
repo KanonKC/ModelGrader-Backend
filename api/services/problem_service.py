@@ -19,18 +19,27 @@ def verifyProblem(problem_id):
     except Problem.DoesNotExist:
         return False
 
-def get_problem(problem_id, request, token):
+def get_problem(problem_id, request, token, is_secure):
     try:
         problem = Problem.objects.get(problem_id=problem_id)
         testcases = Testcase.objects.filter(problem=problem,deprecated=False)
         group_permissions = ProblemGroupPermission.objects.filter(problem=problem)
         domain = request.get_host()
         pdf_filename = problem.pdf_url
-        problem.pdf_url = f"http://{domain}/media/import-pdf/{pdf_filename}"
+        if is_secure:
+            problem.pdf_url = f"https://{domain}/media/import-pdf/{pdf_filename}" if pdf_filename else ""
+        else :
+            problem.pdf_url = f"http://{domain}/media/import-pdf/{pdf_filename}" if pdf_filename else ""
+        serialized_group_permissions = []
+        for group_permission in group_permissions:
+            group = model_to_dict(group_permission.group)
+            serialized_group_permission = model_to_dict(group_permission)
+            serialized_group_permission['group'] = group
+            serialized_group_permissions.append(serialized_group_permission)
         return {
             **model_to_dict(problem),
             "testcases": [model_to_dict(testcase) for testcase in testcases],
-            "group_permissions": [model_to_dict(group_permission) for group_permission in group_permissions],
+            "group_permissions": serialized_group_permissions,
         }
     except Problem.DoesNotExist:
         raise ItemNotFoundError()
