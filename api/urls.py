@@ -3,12 +3,7 @@ from django.urls import path
 from api.repositories.account_repository import AccountRepositoryImpl
 from api.services.account.account_service import AccountService, AccountServiceImpl
 from .controllers import problem_controller, collection_controller, topic_controller, group_controller, submission_controller, auth_controller
-from api.controllers.account_controller import AccountControllerImpl
-
-account_repository = AccountRepositoryImpl()
-account_service = AccountServiceImpl(account_repository)
-account_controller = AccountControllerImpl(account_service)
-
+import api.controllers.account_controller as account_controller
 urlpatterns = [
     path("login",auth_controller.login),
     path("logout",auth_controller.logout),
