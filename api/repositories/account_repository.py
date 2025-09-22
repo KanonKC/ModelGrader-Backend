@@ -32,16 +32,3 @@ class AccountRepositoryImpl:
                 Q(username__icontains=q) | Q(account_id__icontains=q) | Q(email__icontains=q)
             ).distinct()
         return accounts
-
-class AccountRepositoryMock(AccountRepository):
-    def __init__(self):
-        pass
-    
-    def create(self, r):
-        return {"message": "Account created"}
-    
-    def get(self, id: str):
-        return {"message": "Account"}
-    
-    def list(self, q):
-        return {"message": "Accounts"}
