@@ -1,11 +1,11 @@
 name: Run Jenkinsfile
 on: [push]
-  jobs:
-    build:
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v4
-        - name: Run Jenkinsfile
-          uses: jenkins-infra/jenkinsfile-runner-action@v1
-          with:
-            jenkinsfile: Jenkinsfile
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Jenkinsfile
+        uses: jenkins-infra/jenkinsfile-runner-action@v1
+        with:
+          jenkinsfile: Jenkinsfile
