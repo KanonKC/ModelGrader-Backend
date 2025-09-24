@@ -5,7 +5,7 @@ from ..constant import GET, POST, PUT, DELETE
 from ..models import *
 from api.errors.common import InternalServerError, BadRequestError
 from api.errors.core.grader_exception import GraderException
-import api.services.submission.submission_service as submission_service
+from api.setup import submission_service
 
 @api_view([POST, GET])
 @authentication_required

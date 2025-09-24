@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from api.errors.common import InternalServerError
 from api.errors.core.grader_exception import GraderException
 from ..constant import POST,PUT
-import api.services.auth.auth_service as auth_service
+from api.setup import auth_service
 
 @api_view([POST])
 def login(request):

@@ -5,7 +5,7 @@ from ..constant import GET, POST, PUT, DELETE
 from ..models import *
 from api.errors.common import InternalServerError
 from api.errors.core.grader_exception import GraderException
-import api.services.problem.problem_service as problem_service
+from api.setup import problem_service
 
 @api_view([POST, GET])
 @authentication_required

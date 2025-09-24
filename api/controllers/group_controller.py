@@ -5,7 +5,7 @@ from ..constant import GET, POST, PUT, DELETE
 from ..models import *
 from api.errors.common import InternalServerError, BadRequestError
 from api.errors.core.grader_exception import GraderException
-import api.services.group.group_service as group_service
+from api.setup import group_service
 
 @api_view([POST, GET])
 @authentication_required
