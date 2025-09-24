@@ -1,3 +1,4 @@
+from typing import List
 from api.models import Account, Group, Problem, ProblemGroupPermission, Testcase, GroupMember
 
 
@@ -50,13 +51,13 @@ class ProblemRepository:
         problem = Problem.objects.get(problem_id=id)
         problem.delete()
 
-    def delete_many(self, id_list: list[str]):
+    def delete_many(self, id_list: List[str]):
         Problem.objects.filter(problem_id__in=id_list).delete()
 
     def get_personal(self, account_id: str, q: str):
         return Problem.objects.filter(creator_id=account_id, title__icontains=q).order_by('-updated_date')
 
-    def get_manageable(self, group_ids: list[str], q: str):
+    def get_manageable(self, group_ids: List[str], q: str):
         return Problem.objects.filter(
             problemgrouppermission__permission_manage_problems=True,
             problemgrouppermission__group__in=group_ids,
@@ -69,7 +70,7 @@ class ProblemRepository:
     def list_group_permissions(self, problem_id: str):
         return ProblemGroupPermission.objects.filter(problem_id=problem_id)
 
-    def update_group_permission(self, problem_id: str, r: list[ProblemGroupPermission]):
+    def update_group_permission(self, problem_id: str, r: List[ProblemGroupPermission]):
         problem = self.get(problem_id)
         ProblemGroupPermission.objects.filter(problem=problem).delete()
         problem_group_permissions = []
