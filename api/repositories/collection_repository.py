@@ -14,8 +14,11 @@ class CollectionRepository:
     def get(self, collection_id: str):
         return Collection.objects.get(collection_id=collection_id)
 
+    def list(self):
+        return Collection.objects.all()
+
     def update(self, collection_id: str, r):
-        collection = Collection.objects.get(collection_id=collection_id)
+        collection = self.get(collection_id)
         collection.name = r.get('name', collection.name)
         collection.description = r.get('description', collection.description)
         collection.is_active = r.get('is_active', collection.is_active)
@@ -24,7 +27,7 @@ class CollectionRepository:
         return collection
 
     def delete(self, collection_id: str):
-        Collection.objects.filter(collection_id=collection_id).delete()
+        self.get(collection_id).delete()
 
     def get_problems(self, collection_id: str):
         return CollectionProblem.objects.filter(collection_id=collection_id).order_by('order')

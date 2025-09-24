@@ -1,14 +1,18 @@
 from django.utils import timezone
 
+from api.repositories.account_repository import AccountRepository
 from api.repositories.collection_repository import CollectionRepository
+from api.repositories.problem_repository import ProblemRepository
 from ...models import *
 from .serializers import *
 from ...errors.common import *
 
 class CollectionService:
 
-    def __init__(self):
-        pass
+    def __init__(self, collection_repo: CollectionRepository, account_repo: AccountRepository, problem_repo: ProblemRepository):
+        self.collection_repo = collection_repo
+        self.account_repo = account_repo
+        self.problem_repo = problem_repo
 
     def create_collection(self, account_id: str, request):
         request.data['creator'] = account_id
@@ -21,17 +25,17 @@ class CollectionService:
             raise BadRequestError(str(serialize.errors))
 
     def delete_collection(self, collection_id: str):
-        collection = Collection.objects.get(collection_id=collection_id)
+        collection = self.collection_repo.get(collection_id)
         collection.delete()
         return None
 
     def get_collection(self, collection_id: str):
-        collection = Collection.objects.get(collection_id=collection_id)
-        collection.problems = CollectionProblem.objects.filter(collection=collection).order_by('order')
+        collection = self.collection_repo.get(collection_id)
+        collection.problems = self.collection_repo.get_problems(collection_id)
         collection.group_permissions = CollectionGroupPermission.objects.filter(collection=collection)
 
         for cp in collection.problems:
-            cp.problem.testcases = Testcase.objects.filter(problem=cp.problem, deprecated=False)
+            cp.problem.testcases = self.problem_repo.get_testcases(cp.problem_id)
             cp.problem.group_permissions = ProblemGroupPermission.objects.filter(problem=cp.problem)
 
         serializer = CollectionPopulateCollectionProblemsPopulateProblemPopulateAccountAndTestcasesAndProblemGroupPermissionsPopulateGroupAndCollectionGroupPermissionsPopulateGroupSerializer(collection)
@@ -39,7 +43,7 @@ class CollectionService:
         return serializer.data
 
     def get_all_collections(self, request):
-        collections = Collection.objects.all()
+        collections = self.collection_repo.list()
 
         account_id = request.query_params.get('account_id', 0)
 
@@ -48,7 +52,7 @@ class CollectionService:
 
         populated_collections = []
         for collection in collections:
-            con_probs = CollectionProblem.objects.filter(collection=collection)
+            con_probs = self.collection_repo.get_problems(collection)
 
             populated_cp = []
             for cp in con_probs:
@@ -77,7 +81,7 @@ class CollectionService:
         return populated_collections
 
     def get_all_collections_by_account(self, account_id: str):
-        account = Account.objects.get(account_id=account_id)
+        account = self.account_repo.get(account_id)
         collections = Collection.objects.filter(creator=account).order_by('-updated_date')
         collections = self.populated_problems(collections)
         serialize = CollectionPopulateCollectionProblemsPopulateProblemSerializer(collections, many=True)
