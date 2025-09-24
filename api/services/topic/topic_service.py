@@ -20,11 +20,13 @@ class TopicService:
         else:
             raise BadRequestError(str(serializer.errors))
 
-    def delete_topic(self, topic: Topic):
+    def delete_topic(self, topic_id: str):
+        topic = Topic.objects.get(topic_id=topic_id)
         topic.delete()
         return None
 
-    def get_topic(self, topic: Topic):
+    def get_topic(self, topic_id: str):
+        topic = Topic.objects.get(topic_id=topic_id)
         topic.group_permissions = TopicGroupPermission.objects.filter(topic=topic)
         topic.collections = TopicCollection.objects.filter(topic=topic).order_by('order')
 
@@ -50,7 +52,8 @@ class TopicService:
             'topics': serializer.data
         }
 
-    def update_topic(self, topic: Topic, request):    
+    def update_topic(self, topic_id: str, request):    
+        topic = Topic.objects.get(topic_id=topic_id)
         topic_ser = TopicSerializer(topic, data=request.data, partial=True)
         if topic_ser.is_valid():
             topic_ser.save()
@@ -66,7 +69,8 @@ class TopicService:
             populated_topics.append(topic)
         return populated_topics
 
-    def get_all_topics_by_account(self, account: Account, request):
+    def get_all_topics_by_account(self, account_id: str, request):
+        account = Account.objects.get(account_id=account_id)
         personalTopics = Topic.objects.filter(creator=account).order_by('-updated_date')
         populatedPersonalTopics = self.populated_collections(personalTopics)
         personalSerialize = TopicPopulateTopicCollectionPopulateCollectionSerializer(populatedPersonalTopics, many=True)
@@ -83,7 +87,8 @@ class TopicService:
             'manageable_topics': manageableSerialize.data
         }
 
-    def get_all_accessed_topics_by_account(self, account: Account):
+    def get_all_accessed_topics_by_account(self, account_id: str):
+        account = Account.objects.get(account_id=account_id)
         groups = [gm.group for gm in GroupMember.objects.filter(account=account)]
         accessedTopics = TopicGroupPermission.objects.filter(
             Q(group__in=groups) & (Q(permission_view_topics=True) | Q(permission_manage_topics=True))
@@ -140,7 +145,8 @@ class TopicService:
 
         return serialize.data
 
-    def update_groups_permission_to_topic(self, topic: Topic, request):
+    def update_groups_permission_to_topic(self, topic_id: str, request):
+        topic = Topic.objects.get(topic_id=topic_id)
         TopicGroupPermission.objects.filter(topic=topic).delete()
         
         topic_group_permissions = []
@@ -161,7 +167,8 @@ class TopicService:
 
         return serialize.data
 
-    def update_collections_to_topic(self, topic: Topic, request):
+    def update_collections_to_topic(self, topic_id: str, request):
+        topic = Topic.objects.get(topic_id=topic_id)
         TopicCollection.objects.filter(topic=topic).delete()
 
         topic_collections = []

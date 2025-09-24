@@ -18,11 +18,13 @@ class CollectionService:
         else:
             raise BadRequestError(str(serialize.errors))
 
-    def delete_collection(self, collection: Collection):
+    def delete_collection(self, collection_id: str):
+        collection = Collection.objects.get(collection_id=collection_id)
         collection.delete()
         return None
 
-    def get_collection(self, collection: Collection):
+    def get_collection(self, collection_id: str):
+        collection = Collection.objects.get(collection_id=collection_id)
         collection.problems = CollectionProblem.objects.filter(collection=collection).order_by('order')
         collection.group_permissions = CollectionGroupPermission.objects.filter(collection=collection)
 
@@ -72,7 +74,8 @@ class CollectionService:
 
         return populated_collections
 
-    def get_all_collections_by_account(self, account: Account):
+    def get_all_collections_by_account(self, account_id: str):
+        account = Account.objects.get(account_id=account_id)
         collections = Collection.objects.filter(creator=account).order_by('-updated_date')
         collections = self.populated_problems(collections)
         serialize = CollectionPopulateCollectionProblemsPopulateProblemSerializer(collections, many=True)
@@ -89,7 +92,8 @@ class CollectionService:
             'manageable_collections': manageableSerialize.data
         }
 
-    def update_collection(self, collection: Collection, request):
+    def update_collection(self, collection_id: str, request):
+        collection = Collection.objects.get(collection_id=collection_id)
         collection.name = request.data.get('name', collection.name)
         collection.description = request.data.get('description', collection.description)
         collection.is_private = request.data.get('is_private', collection.is_private)
@@ -101,7 +105,8 @@ class CollectionService:
 
         return collection_ser.data
 
-    def update_group_permissions_collection(self, collection: Collection, request):
+    def update_group_permissions_collection(self, collection_id: str, request):
+        collection = Collection.objects.get(collection_id=collection_id)
         CollectionGroupPermission.objects.filter(collection=collection).delete()
 
         print(request.data['groups'])
@@ -123,7 +128,8 @@ class CollectionService:
 
         return serialize.data
 
-    def update_problems_to_collection(self, collection: Collection, request):
+    def update_problems_to_collection(self, collection_id: str, request):
+        collection = Collection.objects.get(collection_id=collection_id)
         CollectionProblem.objects.filter(collection=collection).delete()
 
         collection_problems = []
@@ -149,7 +155,8 @@ class CollectionService:
             'problems': problem_serialize.data
         }
 
-    def add_problems_to_collection(self, collection: Collection, request):
+    def add_problems_to_collection(self, collection_id: str, request):
+        collection = Collection.objects.get(collection_id=collection_id)
         populated_problems = []
 
         index = 0
@@ -179,7 +186,8 @@ class CollectionService:
             'problems': problem_serialize.data
         }
 
-    def remove_problems_from_collection(self, collection: Collection, request):
+    def remove_problems_from_collection(self, collection_id: str, request):
+        collection = Collection.objects.get(collection_id=collection_id)
         CollectionProblem.objects.filter(collection=collection, problem_id__in=request.data['problem_ids']).delete()
         collection.updated_date = timezone.now()
         collection.save()

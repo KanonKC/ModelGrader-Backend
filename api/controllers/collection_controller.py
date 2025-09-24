@@ -2,7 +2,6 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from api.wrappers.auth_wrapper import authentication_required
 from ..constant import GET, POST, PUT, DELETE
-from ..models import *
 from api.errors.common import InternalServerError, BadRequestError
 from api.errors.core.grader_exception import GraderException
 from api.setup import collection_service
@@ -14,8 +13,7 @@ def all_collections_creator_view(request, account_id):
         if request.method == POST:
             result = collection_service.create_collection(account_id, request)
         elif request.method == GET:
-            account = Account.objects.get(account_id=account_id)
-            result = collection_service.get_all_collections_by_account(account)
+            result = collection_service.get_all_collections_by_account(account_id)
         return Response(result, status=200)
     except GraderException as ge:
         return ge.django_response()
@@ -26,13 +24,12 @@ def all_collections_creator_view(request, account_id):
 @authentication_required
 def one_collection_creator_view(request, collection_id: str, account_id: str):
     try:
-        collection = Collection.objects.get(collection_id=collection_id)
         if request.method == GET:
-            result = collection_service.get_collection(collection)
+            result = collection_service.get_collection(collection_id)
         elif request.method == PUT:
-            result = collection_service.update_collection(collection, request)
+            result = collection_service.update_collection(collection_id, request)
         elif request.method == DELETE:
-            collection_service.delete_collection(collection)
+            collection_service.delete_collection(collection_id)
             return Response(status=204)
         return Response(result, status=200)
     except GraderException as ge:
@@ -54,9 +51,8 @@ def all_collections_view(request):
 @api_view([GET])
 def one_collection_view(request, collection_id: str):
     try:
-        collection = Collection.objects.get(collection_id=collection_id)
         if request.method == GET:
-            result = collection_service.get_collection(collection)
+            result = collection_service.get_collection(collection_id)
         return Response(result, status=200)
     except GraderException as ge:
         return ge.django_response()
@@ -67,9 +63,8 @@ def one_collection_view(request, collection_id: str):
 @authentication_required
 def collection_groups_view(request, account_id: str, collection_id: str):
     try:
-        collection = Collection.objects.get(collection_id=collection_id)
         if request.method == PUT:
-            result = collection_service.update_group_permissions_collection(collection, request)
+            result = collection_service.update_group_permissions_collection(collection_id, request)
         return Response(result, status=200)
     except GraderException as ge:
         return ge.django_response()
@@ -80,14 +75,13 @@ def collection_groups_view(request, account_id: str, collection_id: str):
 @authentication_required
 def collection_problems_view(request, collection_id: str, method: str):
     try:
-        collection = Collection.objects.get(collection_id=collection_id)
         
         if method == "add":
-            result = collection_service.add_problems_to_collection(collection, request)
+            result = collection_service.add_problems_to_collection(collection_id, request)
         elif method == "update":
-            result = collection_service.update_problems_to_collection(collection, request)
+            result = collection_service.update_problems_to_collection(collection_id, request)
         elif method == "remove":
-            collection_service.remove_problems_from_collection(collection, request)
+            collection_service.remove_problems_from_collection(collection_id, request)
             return Response(status=204)
         else:
             raise BadRequestError(f"Invalid method: {method}")

@@ -50,7 +50,8 @@ class ProblemService:
 
         return {**problem_serialize.data, 'testcases': testcases_serialize.data}
 
-    def delete_problem(self, problem: Problem):
+    def delete_problem(self, problem_id: str):
+        problem = Problem.objects.get(problem_id=problem_id)
         testcases = Testcase.objects.filter(problem=problem)
         problem.delete()
         testcases.delete()
@@ -70,7 +71,8 @@ class ProblemService:
             'runtime_results': result.getResult(),
         }
 
-    def import_elabsheet_problem(self, request, problem: Problem):
+    def import_elabsheet_problem(self, request, problem_id: str):
+        problem = Problem.objects.get(problem_id=problem_id)
         print("importing elabsheet problem")
         print(request.data)
         # Get file
@@ -80,7 +82,8 @@ class ProblemService:
         print(problem.pdf_url)
         return None
 
-    def get_all_problems_by_account(self, account: Account, request):
+    def get_all_problems_by_account(self, account_id: str, request):
+        account = Account.objects.get(account_id=account_id)
         start = int(request.query_params.get("start", 0))
         end = int(request.query_params.get("end", -1))
         query = request.query_params.get("query", "")
@@ -117,7 +120,8 @@ class ProblemService:
             "manageable_problems": manageableSerialize.data
         }
 
-    def get_all_problem_with_best_submission(self, account: Account):
+    def get_all_problem_with_best_submission(self, account_id: str):
+        account = Account.objects.get(account_id=account_id)
         problems = Problem.objects.all().order_by('-updated_date')
 
         for problem in problems:
@@ -152,7 +156,8 @@ class ProblemService:
 
         return {'problems': serialize.data}
 
-    def get_problem(self, problem: Problem):
+    def get_problem(self, problem_id: str):
+        problem = Problem.objects.get(problem_id=problem_id)
         problem.testcases = Testcase.objects.filter(problem=problem, deprecated=False)
         problem.group_permissions = ProblemGroupPermission.objects.filter(problem=problem)
 
@@ -177,7 +182,8 @@ class ProblemService:
         serialize = ProblemPopulateAccountAndSubmissionPopulateSubmissionTestcasesSecureSerializer(problem)
         return serialize.data
 
-    def get_problem_public(self, problem: Problem):
+    def get_problem_public(self, problem_id: str):
+        problem = Problem.objects.get(problem_id=problem_id)
         serialize = ProblemPopulateAccountSecureSerializer(problem)
         return serialize.data
 
@@ -187,7 +193,8 @@ class ProblemService:
         problems.delete()
         return None
 
-    def update_group_permission_to_problem(self, problem: Problem, request):
+    def update_group_permission_to_problem(self, problem_id: str, request):
+        problem = Problem.objects.get(problem_id=problem_id)
         ProblemGroupPermission.objects.filter(problem=problem).delete()
 
         problem_group_permissions = []
@@ -208,7 +215,8 @@ class ProblemService:
         serialize = ProblemPopulateAccountAndTestcasesAndProblemGroupPermissionsPopulateGroupSerializer(problem)
         return serialize.data
 
-    def update_problem(self, problem: Problem, request):
+    def update_problem(self, problem_id: str, request):
+        problem = Problem.objects.get(problem_id=problem_id)
         testcases = Testcase.objects.filter(problem=problem, deprecated=False)
 
         problem.title = request.data.get("title", problem.title)
@@ -257,7 +265,8 @@ class ProblemService:
         problem_serialize = ProblemSerializer(problem)
         return problem_serialize.data
 
-    def update_problem_difficulty(self, problem: Problem):
+    def update_problem_difficulty(self, problem_id: str):
+        problem = Problem.objects.get(problem_id=problem_id)
         if not pandas_success:
             return
 

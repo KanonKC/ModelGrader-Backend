@@ -8,7 +8,8 @@ class GroupService:
     def __init__(self):
         pass
 
-    def create_group(self, account: Account, request):
+    def create_group(self, account_id: str, request):
+        account = Account.objects.get(account_id=account_id)
         serialize = GroupSerializer(data={
             'creator': account.account_id,
             **request.data
@@ -20,11 +21,13 @@ class GroupService:
         else:
             raise BadRequestError(str(serialize.errors))
 
-    def delete_group(self, group: Group, request):
+    def delete_group(self, group_id: str):
+        group = Group.objects.get(group_id=group_id)
         group.delete()
         return None
 
-    def get_group(self, group: Group, request):
+    def get_group(self, group_id: str, request):
+        group = Group.objects.get(group_id=group_id)
         populate_members = request.GET.get('populate_members', False)
 
         if populate_members:
@@ -35,8 +38,8 @@ class GroupService:
         
         return serialize.data
 
-    def get_all_groups_by_account(self, account: Account, request):
-        print("GET ALL")
+    def get_all_groups_by_account(self, account_id: str, request):
+        account = Account.objects.get(account_id=account_id)
 
         # Get request headers
         headers = request.headers
@@ -54,7 +57,8 @@ class GroupService:
         
         return {"groups": serialize.data}
 
-    def update_group(self, group: Group, request):
+    def update_group(self, group_id: str, request):
+        group = Group.objects.get(group_id=group_id)
         serializer = GroupSerializer(group, data={
             **request.data,
             'updated_date': timezone.now()
@@ -66,7 +70,8 @@ class GroupService:
         else:
             raise BadRequestError(str(serializer.errors))
 
-    def add_members_to_group(self, group: Group, request):
+    def add_members_to_group(self, group_id: str, request):
+        group = Group.objects.get(group_id=group_id)
         group_members = []
         for accountId in request.data['account_ids']:
             account = Account.objects.get(account_id=accountId)
@@ -81,7 +86,8 @@ class GroupService:
         serialize = GroupPopulateGroupMemberPopulateAccountSecureSerializer(group)
         return serialize.data
 
-    def update_members_to_group(self, group: Group, request):
+    def update_members_to_group(self, group_id: str, request):
+        group = Group.objects.get(group_id=group_id)
         GroupMember.objects.filter(group=group).delete()
 
         group_members = []

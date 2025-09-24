@@ -13,7 +13,8 @@ class SubmissionService:
     def __init__(self):
         self.problem_service = ProblemService()
 
-    def get_all_submissions_by_creator_problem(self, problem:Problem, request):
+    def get_all_submissions_by_creator_problem(self, problem_id: str, request):
+        problem = Problem.objects.get(problem_id=problem_id)
         start = int(request.query_params.get("start",0))
         end = int(request.query_params.get("end",-1))
         # query = request.query_params.get("query","")

@@ -2,7 +2,6 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from api.wrappers.auth_wrapper import authentication_required
 from ..constant import GET, POST, PUT, DELETE
-from ..models import *
 from api.errors.common import InternalServerError, BadRequestError
 from api.errors.core.grader_exception import GraderException
 from api.setup import submission_service
@@ -11,9 +10,8 @@ from api.setup import submission_service
 @authentication_required
 def creator_problem_submissions_view(request, account_id: str, problem_id: str):
     try:
-        problem = Problem.objects.get(problem_id=problem_id)
         if request.method == GET:
-            result = submission_service.get_all_submissions_by_creator_problem(problem, request)
+            result = submission_service.get_all_submissions_by_creator_problem(problem_id, request)
         elif request.method == POST:
             result = submission_service.submit_problem(account_id, problem_id, request)
         return Response(result, status=200)
