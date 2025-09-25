@@ -40,7 +40,7 @@ class CollectionService:
 
         for cp in collection.problems:
             cp.problem.testcases = self.problem_repo.get_testcases(cp.problem_id)
-            cp.problem.group_permissions = self.permission_repo.get_problem_group_permissions(cp.problem_id)
+            cp.problem.group_permissions = self.permission_repo.get_problem_permissions(cp.problem_id)
 
         serializer = CollectionPopulateCollectionProblemsPopulateProblemPopulateAccountAndTestcasesAndProblemGroupPermissionsPopulateGroupAndCollectionGroupPermissionsPopulateGroupSerializer(collection)
         
@@ -76,7 +76,7 @@ class CollectionService:
 
     def populated_problems(self, collections: Collection):
         collection_ids = [collection.collection_id for collection in collections]
-        problemCollections = self.collection_repo.get_problems_by_collection_ids(collection_ids)
+        problemCollections = self.collection_repo.get_problems_by_collections(collection_ids)
 
         populated_collections = []
         for collection in collections:
@@ -90,7 +90,7 @@ class CollectionService:
         collections = self.populated_problems(collections)
         serialize = CollectionPopulateCollectionProblemsPopulateProblemSerializer(collections, many=True)
 
-        group_ids = self.group_repo.get_group_ids_by_account(account_id)
+        group_ids = self.group_repo.get_by_creator(account_id)
         manageableCollections = self.collection_repo.get_manageable_by_account(group_ids)
         manageableCollections = self.populated_problems(manageableCollections)
         manageableSerialize = CollectionPopulateCollectionProblemsPopulateProblemSerializer(manageableCollections, many=True)

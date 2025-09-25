@@ -3,49 +3,58 @@ from django.db.models import Q
 from ...models import *
 from .serializers import *
 from ...errors.common import *
+from api.repositories.topic_repository import TopicRepository
+from api.repositories.account_repository import AccountRepository
+from api.repositories.permission_repository import PermissionRepository
+from api.repositories.group_repository import GroupRepository
+from api.repositories.collection_repository import CollectionRepository
 
 class TopicService:
 
-    def __init__(self):
-        pass
+    def __init__(self, topic_repo: TopicRepository, account_repo: AccountRepository, 
+                 permission_repo: PermissionRepository, group_repo: GroupRepository, 
+                 collection_repo: CollectionRepository):
+        self.topic_repo = topic_repo
+        self.account_repo = account_repo
+        self.permission_repo = permission_repo
+        self.group_repo = group_repo
+        self.collection_repo = collection_repo
 
     def create_topic(self, account_id: str, request):
-        request.data._mutable = True
-        request.data['creator'] = account_id
-        serializer = TopicSerializer(data=request.data)
-
-        if serializer.is_valid():
-            serializer.save()
-            return serializer.data
-        else:
-            raise BadRequestError(str(serializer.errors))
+        topic_data = {
+            'creator_id': account_id,
+            **request.data
+        }
+        
+        topic = self.topic_repo.create(topic_data)
+        serializer = TopicSerializer(topic)
+        return serializer.data
 
     def delete_topic(self, topic_id: str):
-        topic = Topic.objects.get(topic_id=topic_id)
-        topic.delete()
+        self.topic_repo.delete(topic_id)
         return None
 
     def get_topic(self, topic_id: str):
-        topic = Topic.objects.get(topic_id=topic_id)
-        topic.group_permissions = TopicGroupPermission.objects.filter(topic=topic)
-        topic.collections = TopicCollection.objects.filter(topic=topic).order_by('order')
+        topic = self.topic_repo.get(topic_id)
+        topic.group_permissions = self.permission_repo.get_topic_permissions(topic_id)
+        topic.collections = self.topic_repo.get_collections(topic_id)
 
         for tp in topic.collections:
-            tp.collection.problems = CollectionProblem.objects.filter(collection=tp.collection)
-            tp.collection.group_permissions = CollectionGroupPermission.objects.filter(collection=tp.collection)
+            tp.collection.problems = self.collection_repo.get_problems(tp.collection.collection_id)
+            tp.collection.group_permissions = self.permission_repo.get_collection_permissions(tp.collection.collection_id)
 
         serialize = TopicPopulateTopicCollectionPopulateCollectionPopulateCollectionProblemsPopulateProblemAndCollectionGroupPermissionsPopulateGroupAndTopicGroupPermissionPopulateGroupSerializer(topic)
         
         return serialize.data
 
     def get_all_topics(self, request):
-        topics = Topic.objects.all()
-
         account_id = request.query_params.get('account_id', 0)
-
+        
+        filters = {}
         if account_id:
-            topics = topics.filter(creator_id=account_id)
+            filters['creator_id'] = account_id
 
+        topics = self.topic_repo.list(filters=filters)
         serializer = TopicSerializer(topics, many=True)
 
         return {
@@ -53,32 +62,27 @@ class TopicService:
         }
 
     def update_topic(self, topic_id: str, request):    
-        topic = Topic.objects.get(topic_id=topic_id)
-        topic_ser = TopicSerializer(topic, data=request.data, partial=True)
-        if topic_ser.is_valid():
-            topic_ser.save()
-            return topic_ser.data
-        else:
-            raise BadRequestError(str(topic_ser.errors))
+        topic = self.topic_repo.update(topic_id, request.data)
+        serializer = TopicSerializer(topic)
+        return serializer.data
 
     def populated_collections(self, topics: Topic):
-        topicCollections = TopicCollection.objects.filter(topic__in=topics)
+        topic_ids = [topic.topic_id for topic in topics]
+        topicCollections = self.topic_repo.get_many_collections(topic_ids)
         populated_topics = []
         for topic in topics:
-            topic.collections = topicCollections.filter(topic=topic)
+            topic.collections = topicCollections.filter(topic_id=topic.topic_id)
             populated_topics.append(topic)
         return populated_topics
 
     def get_all_topics_by_account(self, account_id: str, request):
-        account = Account.objects.get(account_id=account_id)
-        personalTopics = Topic.objects.filter(creator=account).order_by('-updated_date')
+        account = self.account_repo.get(account_id)
+        personalTopics = self.topic_repo.get_by_creator(account_id)
         populatedPersonalTopics = self.populated_collections(personalTopics)
         personalSerialize = TopicPopulateTopicCollectionPopulateCollectionSerializer(populatedPersonalTopics, many=True)
 
-        manageableTopics = Topic.objects.filter(
-            topicgrouppermission__permission_manage_topics=True,
-            topicgrouppermission__group__in=GroupMember.objects.filter(account=account).values_list("group", flat=True)
-        ).order_by('-updated_date')
+        group_ids = self.group_repo.get_ids_by_account(account_id)
+        manageableTopics = self.topic_repo.get_manageable_by_ids(group_ids)
         populatedmanageableTopics = self.populated_collections(manageableTopics)
         manageableSerialize = TopicPopulateTopicCollectionPopulateCollectionSerializer(populatedmanageableTopics, many=True)
 
@@ -88,11 +92,7 @@ class TopicService:
         }
 
     def get_all_accessed_topics_by_account(self, account_id: str):
-        account = Account.objects.get(account_id=account_id)
-        groups = [gm.group for gm in GroupMember.objects.filter(account=account)]
-        accessedTopics = TopicGroupPermission.objects.filter(
-            Q(group__in=groups) & (Q(permission_view_topics=True) | Q(permission_manage_topics=True))
-        )
+        accessedTopics = self.group_repo.get_accessible_by_account(account_id)
         
         topics = []
         for at in accessedTopics:
@@ -106,38 +106,17 @@ class TopicService:
     def get_topic_public(self, topic_id: str, request):
         account_id = request.query_params.get('account_id', None)
 
-        topic = Topic.objects.get(topic_id=topic_id)
-        account = Account.objects.get(account_id=account_id)
+        topic = self.topic_repo.get(topic_id)
+        account = self.account_repo.get(account_id)
 
-        topicCollections = TopicCollection.objects.filter(
-            topic=topic,
-            collection__in=
-                CollectionGroupPermission.objects.filter(
-                    Q(group__in=GroupMember.objects.filter(account=account).values_list("group", flat=True)) &
-                    (
-                        Q(permission_view_collections=True) | Q(permission_manage_collections=True)
-                    )
-                ).values_list("collection", flat=True))
+        topicCollections = self.group_repo.get_accessible_collections_with_access(topic_id, account_id)
+        group_ids = self.group_repo.get_ids_by_account(account_id)
+        topicCollections = self.permission_repo.get_accessible_problems_for_collections(topicCollections, group_ids)
 
         for tp in topicCollections:
-            collectionProblems = CollectionProblem.objects.filter(
-                collection=tp.collection,
-                problem__in=ProblemGroupPermission.objects.filter(
-                    Q(group__in=GroupMember.objects.filter(account=account).values_list("group", flat=True)) &
-                    (Q(permission_view_problems=True) |
-                    Q(permission_manage_problems=True))
-                ).values_list("problem", flat=True))
-
-            for cp in collectionProblems:
-                try:
-                    best_submission = BestSubmission.objects.get(problem=cp.problem, account=account, topic=topic)
-                    best_submission = best_submission.submission
-                    best_submission.runtime_output = SubmissionTestcase.objects.filter(submission=best_submission)
-                except:
-                    best_submission = None
+            for cp in tp.collection.problems:
+                best_submission = self.topic_repo.get_best_submission_for_problem(cp.problem.problem_id, account_id, topic_id)
                 cp.problem.best_submission = best_submission
-
-            tp.collection.problems = collectionProblems
 
         topic.collections = topicCollections
 
@@ -146,21 +125,21 @@ class TopicService:
         return serialize.data
 
     def update_groups_permission_to_topic(self, topic_id: str, request):
-        topic = Topic.objects.get(topic_id=topic_id)
-        TopicGroupPermission.objects.filter(topic=topic).delete()
+        topic = self.topic_repo.get(topic_id)
+        self.permission_repo.delete_topic_permissions(topic_id)
         
         topic_group_permissions = []
         for group_request in request.data['groups']:
             print(group_request)
-            group = Group.objects.get(group_id=group_request['group_id'])
+            group = self.group_repo.get(group_request['group_id'])
             topic_group_permissions.append(
                 TopicGroupPermission(
-                    topic=topic,
-                    group=group,
+                    topic_id=topic_id,
+                    group_id=group.group_id,
                     **group_request
             ))
 
-        TopicGroupPermission.objects.bulk_create(topic_group_permissions)
+        self.permission_repo.bulk_create_topic_permissions(topic_group_permissions)
 
         topic.group_permissions = topic_group_permissions
         serialize = TopicPopulateTopicGroupPermissionsSerializer(topic)
@@ -168,24 +147,23 @@ class TopicService:
         return serialize.data
 
     def update_collections_to_topic(self, topic_id: str, request):
-        topic = Topic.objects.get(topic_id=topic_id)
-        TopicCollection.objects.filter(topic=topic).delete()
+        topic = self.topic_repo.get(topic_id)
+        self.topic_repo.delete_collections(topic_id)
 
         topic_collections = []
         order = 0
         for collection_id in request.data['collection_ids']:
-            collection = Collection.objects.get(collection_id=collection_id)
+            collection = self.collection_repo.get(collection_id)
             topic_collection = TopicCollection(
-                collection=collection,
-                topic=topic,
+                collection_id=collection_id,
+                topic_id=topic_id,
                 order=order
             )
             topic_collections.append(topic_collection)
             order += 1
 
-        TopicCollection.objects.bulk_create(topic_collections)
-        topic.updated_date = timezone.now()
-        topic.save()
+        self.topic_repo.bulk_create_collections(topic_collections)
+        topic = self.topic_repo.update_with_timestamp(topic_id)
 
         collection_serialize = TopicCollectionPopulateCollectionSerializer(topic_collections, many=True)
         topic_serialize = TopicSerializer(topic)
@@ -196,23 +174,18 @@ class TopicService:
         }
 
     def add_collections_to_topic(self, topic_id: str, request):
-        topic = Topic.objects.get(topic_id=topic_id)
+        topic = self.topic_repo.get(topic_id)
         populated_collections = []
             
         index = 0
         for collection_id in request.data['collection_ids']:
-            collection = Collection.objects.get(collection_id=collection_id)
+            collection = self.collection_repo.get(collection_id)
 
-            alreadyExist = TopicCollection.objects.filter(topic_id=topic.topic_id, collection_id=collection.collection_id)
+            alreadyExist = self.topic_repo.find_existing_collection(topic_id, collection_id)
             if alreadyExist:
                 alreadyExist.delete()
                 
-            topicCollection = TopicCollection(
-                topic=topic,
-                collection=collection,
-                order=index
-            )
-            topicCollection.save()
+            topicCollection = self.topic_repo.create_collection(topic_id, collection_id, index)
             index += 1
             tc_serialize = TopicCollectionSerializer(topicCollection)
             populated_collections.append(tc_serialize.data)
@@ -223,5 +196,5 @@ class TopicService:
         }
 
     def remove_collections_from_topic(self, topic_id: str, request):
-        TopicCollection.objects.filter(topic_id=topic_id, collection_id__in=request.data['collection_ids']).delete()
+        self.topic_repo.delete_many_collections(topic_id, request.data['collection_ids'])
         return None

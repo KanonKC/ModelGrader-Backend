@@ -99,7 +99,7 @@ class ProblemService:
         for problem in personalProblems:
             problem.testcases = self.problem_repo.get_testcases(problem.problem_id, deprecated=False)
 
-        group_ids = self.group_repo.get_group_ids_by_account(account_id)
+        group_ids = self.group_repo.get_by_creator(account_id)
         manageableProblems = self.problem_repo.get_manageable_by_account(group_ids, query, start, end)
         maxManageable = len(manageableProblems)
         for problem in manageableProblems:
@@ -153,7 +153,7 @@ class ProblemService:
     def get_problem(self, problem_id: str):
         problem = self.problem_repo.get(problem_id)
         problem.testcases = self.problem_repo.get_testcases(problem_id, deprecated=False)
-        problem.group_permissions = self.permission_repo.get_problem_group_permissions(problem_id)
+        problem.group_permissions = self.permission_repo.get_problem_permissions(problem_id)
 
         serialize = ProblemPopulateAccountAndTestcasesAndProblemGroupPermissionsPopulateGroupSerializer(problem)
 

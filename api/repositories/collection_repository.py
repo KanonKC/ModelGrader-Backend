@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from django.db.models import Q
 from django.utils import timezone
-from api.models import Collection, CollectionProblem
+from api.models import Collection, CollectionProblem, TopicCollection
 from typing import List
 
 class CollectionRepository:
@@ -42,7 +42,7 @@ class CollectionRepository:
     def get_problems(self, collection_id: str):
         return CollectionProblem.objects.filter(collection_id=collection_id).order_by('order')
     
-    def get_problems_by_collection_ids(self, collection_ids):
+    def get_problems_by_collections(self, collection_ids):
         return CollectionProblem.objects.filter(collection__in=collection_ids)
     
     def get_by_creator(self, account_id: str, order_by: str = '-updated_date'):
@@ -66,7 +66,7 @@ class CollectionRepository:
     def find_existing_problem(self, problem_id: str, collection_id: str):
         return CollectionProblem.objects.filter(problem_id=problem_id, collection_id=collection_id)
     
-    def delete_problems_by_problem_ids(self, collection_id: str, problem_ids: List[str]):
+    def delete_many_problems(self, collection_id: str, problem_ids: List[str]):
         CollectionProblem.objects.filter(collection_id=collection_id, problem_id__in=problem_ids).delete()
     
     def get_accessible_problems_for_collection(self, collection_id: str, group_ids: List[str]):
@@ -88,4 +88,17 @@ class CollectionRepository:
             collectiongrouppermission__permission_manage_collections=True,
             collectiongrouppermission__group__in=group_ids
         ).order_by(order_by)
+    
+    def get_accessible_collections(self, topic_id: str, group_ids: List[str]):
+        """Get accessible collections for a topic based on group permissions"""
+        from api.models import CollectionGroupPermission
+        
+        accessible_collections = CollectionGroupPermission.objects.filter(
+            Q(group__in=group_ids) & (Q(permission_view_collections=True) | Q(permission_manage_collections=True))
+        ).values_list("collection", flat=True)
+        
+        return TopicCollection.objects.filter(
+            topic_id=topic_id,
+            collection__in=accessible_collections
+        )
     

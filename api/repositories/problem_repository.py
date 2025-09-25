@@ -82,7 +82,7 @@ class ProblemRepository:
     def get_submission_testcases(self, submission_id: str):
         return SubmissionTestcase.objects.filter(submission_id=submission_id)
     
-    def get_submissions_by_problem_id(self, problem_id: str):
+    def get_submissions_by_problem(self, problem_id: str):
         return Submission.objects.filter(problem_id=problem_id)
     
     def get_manageable_by_account(self, group_ids: List[str], query: str = '', start: int = 0, end: int = None):
