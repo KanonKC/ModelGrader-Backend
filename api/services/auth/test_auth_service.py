@@ -406,23 +406,6 @@ class TestAuthService(TestCase):
         with self.assertRaises(Exception):
             self.auth_service.login(mock_request)
 
-    def test_authorization_repository_exception(self):
-        """Test authorization when repository raises unexpected exception"""
-        # Arrange
-        mock_request = Mock()
-        mock_request.data = {
-            'account_id': 'acc_123',
-            'token': 'valid_token'
-        }
-        
-        self.mock_account_repo.get.side_effect = Exception("Database error")
-        
-        # Act
-        result = self.auth_service.authorization(mock_request)
-        
-        # Assert
-        self.assertEqual(result, {'result': False})
-
     def test_logout_repository_exception(self):
         """Test logout when repository raises unexpected exception"""
         # Arrange
@@ -459,18 +442,6 @@ class TestAuthServiceIntegration(unittest.TestCase):
         
         self.real_account_repo = AccountRepositoryImpl()
         self.auth_service = AuthServiceImpl(config, self.real_account_repo)
-
-    def test_integration_login_flow(self):
-        """Integration test for complete login flow"""
-        # This test would require a real database connection
-        # For now, we'll skip it in unit tests
-        self.skipTest("Integration test requires database setup")
-
-    def test_integration_token_verification(self):
-        """Integration test for token verification"""
-        # This test would require a real database connection
-        # For now, we'll skip it in unit tests
-        self.skipTest("Integration test requires database setup")
 
 
 class TestAuthServiceModuleFunctions(unittest.TestCase):

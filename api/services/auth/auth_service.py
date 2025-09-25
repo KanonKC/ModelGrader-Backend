@@ -47,7 +47,7 @@ class AuthServiceImpl:
                 return True
             else:
                 return False
-        except Account.DoesNotExist:
+        except:
             return False
         
     def getAccountByToken(self,token):
@@ -68,8 +68,7 @@ class AuthServiceImpl:
     def login(self,request):
         try:
             account = self.account_repo.get_by_username(request.data['username'])
-            account_dict = model_to_dict(account)
-            if passwordEncryption(request.data['password']) == account_dict['password']:
+            if passwordEncryption(request.data['password']) == account.password:
                 account.token = uuid4().hex
                 account.token_expire = int(time() + self.config.token_lifetime)
                 account.save()
