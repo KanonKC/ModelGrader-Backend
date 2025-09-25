@@ -68,9 +68,6 @@ class ProblemService:
         grader: ProgramGrader = Grader[request.data['language']]
         result: RuntimeResultList = grader(request.data['source_code'], request.data['testcases'], 1, request.data['time_limited']).generate_output()
 
-        print(result.getResult())
-        print(result.runnable)
-
         return {
             'runnable': result.runnable,
             'has_error': result.has_error,
@@ -78,14 +75,11 @@ class ProblemService:
             'runtime_results': result.getResult(),
         }
 
-    def import_elabsheet_problem(self, request, problem_id: str):
-        print("importing elabsheet problem")
-        print(request.data)
-        # Get file
-        file = request.data.get('file')
-        self.problem_repo.update(problem_id, {'pdf_url': file})
-        print(file)
-        return None
+    # def import_elabsheet_problem(self, request, problem_id: str):
+    #     # Get file
+    #     file = request.data.get('file')
+    #     self.problem_repo.update(problem_id, {'pdf_url': file})
+    #     return None
 
     def get_all_problems_by_account(self, account_id: str, request):
         start = int(request.query_params.get("start", 0))
@@ -165,7 +159,6 @@ class ProblemService:
         best_submission = self.problem_repo.get_best_submission_in_topic(problem_id, account_id, topic_id)
         if best_submission:
             testcases = self.problem_repo.get_submission_testcases(best_submission.submission.submission_id)
-            print(testcases)
             best_submission.runtime_output = testcases
             problem.best_submission = best_submission
         else:
