@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from django.db.models import Q
+from django.utils import timezone
 from api.models import Collection, CollectionProblem
+from typing import List
 
 class CollectionRepository:
     def __init__(self):
@@ -14,8 +16,16 @@ class CollectionRepository:
     def get(self, collection_id: str):
         return Collection.objects.get(collection_id=collection_id)
 
-    def list(self):
-        return Collection.objects.all()
+    def list(self, q: str = '', f: dict = {}):
+        if q:
+            collections = Collection.objects.filter(Q(name__icontains=q) | Q(description__icontains=q))
+        else:
+            collections = Collection.objects.all()
+
+        if 'creator_id' in f and f['creator_id']:
+            collections = collections.filter(creator__account_id=f['creator_id'])
+
+        return collections
 
     def update(self, collection_id: str, r):
         collection = self.get(collection_id)
@@ -31,3 +41,31 @@ class CollectionRepository:
 
     def get_problems(self, collection_id: str):
         return CollectionProblem.objects.filter(collection_id=collection_id).order_by('order')
+    
+    def get_problems_by_collection_ids(self, collection_ids):
+        return CollectionProblem.objects.filter(collection__in=collection_ids)
+    
+    def get_by_creator(self, account_id: str, order_by: str = '-updated_date'):
+        return Collection.objects.filter(creator_id=account_id).order_by(order_by)
+    
+    def update_with_timestamp(self, collection_id: str, data: dict):
+        collection = self.get(collection_id)
+        for key, value in data.items():
+            if hasattr(collection, key):
+                setattr(collection, key, value)
+        collection.updated_date = timezone.now()
+        collection.save()
+        return collection
+    
+    def delete_problems(self, collection_id: str):
+        CollectionProblem.objects.filter(collection_id=collection_id).delete()
+    
+    def bulk_create_problems(self, collection_problems: List[CollectionProblem]):
+        CollectionProblem.objects.bulk_create(collection_problems)
+    
+    def find_existing_problem(self, problem_id: str, collection_id: str):
+        return CollectionProblem.objects.filter(problem_id=problem_id, collection_id=collection_id)
+    
+    def delete_problems_by_problem_ids(self, collection_id: str, problem_ids: List[str]):
+        CollectionProblem.objects.filter(collection_id=collection_id, problem_id__in=problem_ids).delete()
+    
