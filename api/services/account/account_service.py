@@ -26,9 +26,12 @@ class AccountServiceImpl(AccountService):
         self.account_repo = account_repo
 
     def create_account(self, request):
-        request.data['password'] = passwordEncryption(request.data['password'])
+        body = {
+            **request.data,
+            'password': passwordEncryption(request.data['password'])
+        }
         try:
-            account = self.account_repo.create(request.data)
+            account = self.account_repo.create(body)
         except Exception as e:
             raise InternalServerError(e)
         serialize = AccountSerializer(account)

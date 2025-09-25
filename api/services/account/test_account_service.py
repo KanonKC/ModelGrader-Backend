@@ -391,13 +391,6 @@ class TestAccountServiceIntegration(unittest.TestCase):
         self.real_repo = AccountRepositoryImpl()
         self.account_service = AccountServiceImpl(self.real_repo)
 
-    @patch('api.services.account.account_service.passwordEncryption')
-    def test_create_and_get_account_integration(self, mock_password_encryption):
-        """Integration test for creating and retrieving an account"""
-        # This test would require a real database connection
-        # For now, we'll skip it in unit tests
-        self.skipTest("Integration test requires database setup")
-
     def test_error_handling_consistency(self):
         """Test that error handling is consistent across methods"""
         # Test that all methods handle repository exceptions appropriately
