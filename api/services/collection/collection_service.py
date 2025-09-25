@@ -90,7 +90,8 @@ class CollectionService:
         collections = self.populated_problems(collections)
         serialize = CollectionPopulateCollectionProblemsPopulateProblemSerializer(collections, many=True)
 
-        manageableCollections = self.group_repo.get_manageable_collections(account_id)
+        group_ids = self.group_repo.get_group_ids_by_account(account_id)
+        manageableCollections = self.collection_repo.get_manageable_by_account(group_ids)
         manageableCollections = self.populated_problems(manageableCollections)
         manageableSerialize = CollectionPopulateCollectionProblemsPopulateProblemSerializer(manageableCollections, many=True)
 

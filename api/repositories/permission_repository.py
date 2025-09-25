@@ -20,3 +20,15 @@ class PermissionRepository:
     
     def bulk_create_collection_group_permissions(self, permissions: List[CollectionGroupPermission]):
         return CollectionGroupPermission.objects.bulk_create(permissions)
+    
+    def delete_topic_group_permissions(self, topic_id: str):
+        TopicGroupPermission.objects.filter(topic_id=topic_id).delete()
+    
+    def bulk_create_topic_group_permissions(self, permissions: List[TopicGroupPermission]):
+        TopicGroupPermission.objects.bulk_create(permissions)
+    
+    def delete_problem_group_permissions(self, problem_id: str):
+        ProblemGroupPermission.objects.filter(problem_id=problem_id).delete()
+    
+    def bulk_create_problem_group_permissions(self, permissions: List[ProblemGroupPermission]):
+        ProblemGroupPermission.objects.bulk_create(permissions)

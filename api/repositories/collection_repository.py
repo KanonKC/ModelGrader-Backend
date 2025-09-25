@@ -69,3 +69,23 @@ class CollectionRepository:
     def delete_problems_by_problem_ids(self, collection_id: str, problem_ids: List[str]):
         CollectionProblem.objects.filter(collection_id=collection_id, problem_id__in=problem_ids).delete()
     
+    def get_accessible_problems_for_collection(self, collection_id: str, group_ids: List[str]):
+        from django.db.models import Q
+        from api.models import ProblemGroupPermission
+        
+        accessible_problems = ProblemGroupPermission.objects.filter(
+            Q(group__in=group_ids) & (Q(permission_view_problems=True) | Q(permission_manage_problems=True))
+        ).values_list("problem", flat=True)
+        
+        return CollectionProblem.objects.filter(
+            collection_id=collection_id,
+            problem__in=accessible_problems
+        )
+    
+    def get_manageable_by_account(self, group_ids: List[str], order_by: str = '-updated_date'):
+        """Get collections manageable by account through group permissions"""
+        return Collection.objects.filter(
+            collectiongrouppermission__permission_manage_collections=True,
+            collectiongrouppermission__group__in=group_ids
+        ).order_by(order_by)
+    

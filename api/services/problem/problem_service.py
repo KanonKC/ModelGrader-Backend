@@ -3,13 +3,14 @@ from api.repositories.group_repository import GroupRepository
 from api.repositories.problem_repository import ProblemRepository
 from api.repositories.submission_repository import SubmissionRepository
 from api.repositories.topic_repository import TopicRepository
+from api.repositories.permission_repository import PermissionRepository
+from api.repositories.account_repository import AccountRepository
 from api.sandbox.grader import PythonGrader, Grader, ProgramGrader, RuntimeResultList
 from ...models import *
 from .serializers import *
 from ...difficulty_predictor.preprocess import *
 from ...difficulty_predictor.predictor import *
 from ...errors.common import *
-from ...repositories.account_repository import AccountRepository
 
 try:
     import pandas as pd
@@ -20,23 +21,27 @@ except:
 
 class ProblemService:
 
-    def __init__(self):
-        pass
+    def __init__(self, problem_repo: ProblemRepository, account_repo: AccountRepository, permission_repo: PermissionRepository, group_repo: GroupRepository, topic_repo: TopicRepository):
+        self.problem_repo = problem_repo
+        self.account_repo = account_repo
+        self.permission_repo = permission_repo
+        self.group_repo = group_repo
+        self.topic_repo = topic_repo
 
     def create_problem(self, account_id: str, request):
-        account = Account.objects.get(account_id=account_id)
+        account = self.account_repo.get(account_id)
         running_result = PythonGrader(request.data['solution'], request.data['testcases'], 1, 1.5).generate_output()
 
-        problem = Problem(
-            language=request.data['language'],
-            creator=account,
-            title=request.data['title'],
-            description=request.data['description'],
-            solution=request.data['solution'],
-            time_limit=request.data['time_limit'],
-            allowed_languages=request.data['allowed_languages'],
-        )
-        problem.save()
+        problem_data = {
+            'language': request.data['language'],
+            'creator': account,
+            'title': request.data['title'],
+            'description': request.data['description'],
+            'solution': request.data['solution'],
+            'time_limit': request.data['time_limit'],
+            'allowed_languages': request.data['allowed_languages'],
+        }
+        problem = self.problem_repo.create(problem_data)
 
         testcases_result = []
         for unit in running_result.data:
@@ -48,7 +53,7 @@ class ProblemService:
                     runtime_status=unit.runtime_status
             ))
 
-        Testcase.objects.bulk_create(testcases_result)
+        self.problem_repo.bulk_create_testcases(testcases_result)
 
         problem_serialize = ProblemSerializer(problem)
         testcases_serialize = TestcaseSerializer(testcases_result, many=True)
@@ -56,10 +61,7 @@ class ProblemService:
         return {**problem_serialize.data, 'testcases': testcases_serialize.data}
 
     def delete_problem(self, problem_id: str):
-        problem = Problem.objects.get(problem_id=problem_id)
-        testcases = Testcase.objects.filter(problem=problem)
-        problem.delete()
-        testcases.delete()
+        self.problem_repo.delete(problem_id)
         return None
 
     def validate_program(self, request):
@@ -77,41 +79,31 @@ class ProblemService:
         }
 
     def import_elabsheet_problem(self, request, problem_id: str):
-        problem = Problem.objects.get(problem_id=problem_id)
         print("importing elabsheet problem")
         print(request.data)
         # Get file
         file = request.data.get('file')
-        problem.pdf_url = file
+        self.problem_repo.update(problem_id, {'pdf_url': file})
         print(file)
-        print(problem.pdf_url)
         return None
 
     def get_all_problems_by_account(self, account_id: str, request):
-        account = Account.objects.get(account_id=account_id)
         start = int(request.query_params.get("start", 0))
         end = int(request.query_params.get("end", -1))
         query = request.query_params.get("query", "")
         if end == -1: 
             end = None
 
-        personalProblems = Problem.objects.filter(creator=account, title__icontains=query).order_by('-updated_date')
+        personalProblems = self.problem_repo.get_personal(account_id, query, start, end)
         maxPersonal = len(personalProblems)
-        if start < maxPersonal and start < maxPersonal:
-            personalProblems = personalProblems[start:end]
         for problem in personalProblems:
-            problem.testcases = Testcase.objects.filter(problem=problem, deprecated=False)
+            problem.testcases = self.problem_repo.get_testcases(problem.problem_id, deprecated=False)
 
-        manageableProblems = Problem.objects.filter(
-            problemgrouppermission__permission_manage_problems=True,
-            problemgrouppermission__group__in=GroupMember.objects.filter(account=account).values_list("group", flat=True),
-            title__icontains=query
-        ).order_by('-updated_date')
+        group_ids = self.group_repo.get_group_ids_by_account(account_id)
+        manageableProblems = self.problem_repo.get_manageable_by_account(group_ids, query, start, end)
         maxManageable = len(manageableProblems)
-        if start < maxManageable and start < maxManageable:
-            manageableProblems = manageableProblems[start:end]
         for problem in manageableProblems:
-            problem.testcases = Testcase.objects.filter(problem=problem, deprecated=False)
+            problem.testcases = self.problem_repo.get_testcases(problem.problem_id, deprecated=False)
 
         personalSerialize = ProblemPopulatePartialTestcaseSerializer(personalProblems, many=True)
         manageableSerialize = ProblemPopulatePartialTestcaseSerializer(manageableProblems, many=True)
@@ -126,13 +118,12 @@ class ProblemService:
         }
 
     def get_all_problem_with_best_submission(self, account_id: str):
-        account = Account.objects.get(account_id=account_id)
-        problems = Problem.objects.all().order_by('-updated_date')
+        problems = self.problem_repo.get_with_best_submission(account_id)
 
         for problem in problems:
-            best_submission = Submission.objects.filter(problem=problem, account=account).order_by('-passed_ratio', '-submission_id').first()
-            if not (best_submission is None):
-                testcases = SubmissionTestcase.objects.filter(submission=best_submission)
+            best_submission = self.problem_repo.get_best_submission(problem.problem_id, account_id)
+            if best_submission:
+                testcases = self.problem_repo.get_submission_testcases(best_submission.submission_id)
                 best_submission.runtime_output = testcases
                 problem.best_submission = best_submission
             else:
@@ -142,42 +133,38 @@ class ProblemService:
         return {"problems": problem_ser.data}
 
     def get_all_problems(self, request):
-        problem = Problem.objects.all()
-
         get_private = int(request.query_params.get("private", 0))
         get_deactive = int(request.query_params.get("deactive", 0))
         account_id = str(request.query_params.get("account_id", ""))
         
+        filters = {}
         if not get_private:
-            problem = problem.filter(is_private=False)
+            filters['is_private'] = False
         if not get_deactive:
-            problem = problem.filter(is_active=True)
+            filters['is_active'] = True
         if account_id != "":
-            problem = problem.filter(creator_id=account_id)
+            filters['creator_id'] = account_id
 
-        problem = problem.order_by('-problem_id')
-
-        serialize = ProblemPopulateAccountSerializer(problem, many=True)
+        problems = self.problem_repo.list(filters=filters, order_by=['-problem_id'])
+        serialize = ProblemPopulateAccountSerializer(problems, many=True)
 
         return {'problems': serialize.data}
 
     def get_problem(self, problem_id: str):
-        problem = Problem.objects.get(problem_id=problem_id)
-        problem.testcases = Testcase.objects.filter(problem=problem, deprecated=False)
-        problem.group_permissions = ProblemGroupPermission.objects.filter(problem=problem)
+        problem = self.problem_repo.get(problem_id)
+        problem.testcases = self.problem_repo.get_testcases(problem_id, deprecated=False)
+        problem.group_permissions = self.permission_repo.get_problem_group_permissions(problem_id)
 
         serialize = ProblemPopulateAccountAndTestcasesAndProblemGroupPermissionsPopulateGroupSerializer(problem)
 
         return serialize.data
 
     def get_problem_in_topic_with_best_submission(self, account_id: str, topic_id: str, problem_id: int):
-        account = Account.objects.get(account_id=account_id)
-        problem = Problem.objects.get(problem_id=problem_id)
-        topic = Topic.objects.get(topic_id=topic_id)
+        problem = self.problem_repo.get(problem_id)
 
-        best_submission = BestSubmission.objects.filter(problem=problem, topic=topic, account=account).first()
-        if not (best_submission is None):
-            testcases = SubmissionTestcase.objects.filter(submission=best_submission.submission)
+        best_submission = self.problem_repo.get_best_submission_in_topic(problem_id, account_id, topic_id)
+        if best_submission:
+            testcases = self.problem_repo.get_submission_testcases(best_submission.submission.submission_id)
             print(testcases)
             best_submission.runtime_output = testcases
             problem.best_submission = best_submission
@@ -188,23 +175,22 @@ class ProblemService:
         return serialize.data
 
     def get_problem_public(self, problem_id: str):
-        problem = Problem.objects.get(problem_id=problem_id)
+        problem = self.problem_repo.get(problem_id)
         serialize = ProblemPopulateAccountSecureSerializer(problem)
         return serialize.data
 
     def remove_bulk_problems(self, request):
         target = request.data.get("problem", [])
-        problems = Problem.objects.filter(problem_id__in=target)
-        problems.delete()
+        self.problem_repo.delete_many(target)
         return None
 
     def update_group_permission_to_problem(self, problem_id: str, request):
-        problem = Problem.objects.get(problem_id=problem_id)
-        ProblemGroupPermission.objects.filter(problem=problem).delete()
+        problem = self.problem_repo.get(problem_id)
+        self.permission_repo.delete_problem_group_permissions(problem_id)
 
         problem_group_permissions = []
         for group_request in request.data['groups']:
-            group = Group.objects.get(group_id=group_request['group_id'])
+            group = self.group_repo.get(group_request['group_id'])
             problem_group_permissions.append(
                 ProblemGroupPermission(
                     problem=problem,
@@ -212,70 +198,68 @@ class ProblemService:
                     **group_request
             ))
 
-        ProblemGroupPermission.objects.bulk_create(problem_group_permissions)
+        self.permission_repo.bulk_create_problem_group_permissions(problem_group_permissions)
 
         problem.group_permissions = problem_group_permissions
-        problem.testcases = Testcase.objects.filter(problem=problem)
+        problem.testcases = self.problem_repo.get_testcases(problem_id)
         
         serialize = ProblemPopulateAccountAndTestcasesAndProblemGroupPermissionsPopulateGroupSerializer(problem)
         return serialize.data
 
     def update_problem(self, problem_id: str, request):
-        problem = Problem.objects.get(problem_id=problem_id)
-        testcases = Testcase.objects.filter(problem=problem, deprecated=False)
-
-        problem.title = request.data.get("title", problem.title)
-        problem.language = request.data.get("language", problem.language)
-        problem.description = request.data.get("description", problem.description)
-        problem.solution = request.data.get("solution", problem.solution)
-        problem.time_limit = request.data.get("time_limit", problem.time_limit)  
-        problem.is_private = request.data.get("is_private", problem.is_private)
-        problem.allowed_languages = request.data.get("allowed_languages", problem.allowed_languages)
-
-        problem.updated_date = timezone.now()
+        update_data = {
+            'title': request.data.get('title'),
+            'language': request.data.get('language'),
+            'description': request.data.get('description'),
+            'solution': request.data.get('solution'),
+            'time_limit': request.data.get('time_limit'),
+            'is_private': request.data.get('is_private'),
+            'allowed_languages': request.data.get('allowed_languages')
+        }
+        # Remove None values
+        update_data = {k: v for k, v in update_data.items() if v is not None}
+        
+        problem = self.problem_repo.update(problem_id, update_data)
 
         if 'testcases' in request.data:
             running_result = Grader[request.data['language']](problem.solution, request.data['testcases'], 1, 1.5).generate_output()
 
             # if not running_result.runnable:
             #     raise BadRequestError('Error during editing. Your code may has an error/timeout!')
-            for testcase in testcases:
-                testcase.deprecated = True
-                testcase.save()
+            self.problem_repo.deprecate_testcases(problem_id)
+            
             testcase_result = []
             for unit in running_result.data:
-                testcase2 = Testcase(
-                    problem=problem,
-                    input=unit.input,
-                    output=unit.output,
-                    runtime_status=unit.runtime_status
-                )
-                testcase2.save()
-                testcase_result.append(testcase2)
-            problem.save()
+                testcase_data = {
+                    'problem': problem,
+                    'input': unit.input,
+                    'output': unit.output,
+                    'runtime_status': unit.runtime_status
+                }
+                testcase = self.problem_repo.create_testcase(testcase_data)
+                testcase_result.append(testcase)
+                
             problem_serialize = ProblemSerializer(problem)
             testcases_serialize = TestcaseSerializer(testcase_result, many=True)
 
             return {**problem_serialize.data, 'testcases': testcases_serialize.data}
         
         if 'solution' in request.data:
-            testcases = Testcase.objects.filter(problem=problem, deprecated=False)
+            testcases = self.problem_repo.get_testcases(problem_id, deprecated=False)
             program_input = [i.input for i in testcases]
             running_result = Grader[request.data['language']](problem.solution, program_input, 1, 1.5).generate_output()
 
             if not running_result.runnable:
                 raise BadRequestError('Error during editing. Your code may has an error/timeout!')
 
-        problem.save()
         problem_serialize = ProblemSerializer(problem)
         return problem_serialize.data
 
     def update_problem_difficulty(self, problem_id: str):
-        problem = Problem.objects.get(problem_id=problem_id)
         if not pandas_success:
             return
 
-        submissions = Submission.objects.filter(problem=problem)
+        submissions = self.problem_repo.get_submissions_for_difficulty(problem_id)
 
         if submissions.count() < 10:
             return
@@ -297,5 +281,4 @@ class ProblemService:
         [total_attempt, time_used] = modelgrader_preprocessor(df)
         difficulty = predict(total_attempt, time_used)
         
-        problem.difficulty = difficulty
-        problem.save()
+        self.problem_repo.update(problem_id, {'difficulty': difficulty})
