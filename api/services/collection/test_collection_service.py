@@ -39,18 +39,26 @@ class TestCollectionService(TestCase):
         self.sample_collection.is_private = False
         self.sample_collection.is_active = True
         self.sample_collection.creator_id = 'acc_123'
+        self.sample_collection._state = Mock()
+        self.sample_collection._state.db = 'default'
         
         self.sample_problem = Mock(spec=Problem)
         self.sample_problem.problem_id = 'prob_123'
         self.sample_problem.title = 'Test Problem'
+        self.sample_problem._state = Mock()
+        self.sample_problem._state.db = 'default'
         
         self.sample_collection_problem = Mock(spec=CollectionProblem)
         self.sample_collection_problem.problem = self.sample_problem
         self.sample_collection_problem.order = 0
+        self.sample_collection_problem._state = Mock()
+        self.sample_collection_problem._state.db = 'default'
         
         self.sample_group = Mock(spec=Group)
         self.sample_group.group_id = 'group_123'
         self.sample_group.name = 'Test Group'
+        self.sample_group._state = Mock()
+        self.sample_group._state.db = 'default'
         
         self.sample_request_data = {
             'name': 'Test Collection',
@@ -82,7 +90,7 @@ class TestCollectionService(TestCase):
         
         # Assert
         mock_serializer_class.assert_called_once()
-        call_args = mock_serializer_class.call_args[0][0]
+        call_args = mock_serializer_class.call_args[1]['data']  # Get keyword arguments
         self.assertEqual(call_args['creator'], account_id)
         self.assertEqual(call_args['name'], 'Test Collection')
         
@@ -137,7 +145,7 @@ class TestCollectionService(TestCase):
         
         self.mock_collection_repo.get.return_value = self.sample_collection
         self.mock_collection_repo.get_problems.return_value = problems
-        self.mock_permission_repo.get_collection_group_permissions.return_value = permissions
+        self.mock_permission_repo.get_collection_permissions.return_value = permissions
         self.mock_problem_repo.get_testcases.return_value = []
         self.mock_permission_repo.get_problem_permissions.return_value = []
         
@@ -157,7 +165,7 @@ class TestCollectionService(TestCase):
         # Assert
         self.mock_collection_repo.get.assert_called_once_with(collection_id)
         self.mock_collection_repo.get_problems.assert_called_once_with(collection_id)
-        self.mock_permission_repo.get_collection_group_permissions.assert_called_once_with(collection_id)
+        self.mock_permission_repo.get_collection_permissions.assert_called_once_with(collection_id)
         
         # Verify result
         self.assertIsInstance(result, dict)
@@ -169,8 +177,11 @@ class TestCollectionService(TestCase):
         mock_request = Mock()
         mock_request.query_params = {'account_id': 'acc_123'}
         
+        # Create a mock QuerySet-like object
+        mock_queryset = Mock()
+        mock_queryset.filter.return_value = [self.sample_collection]
         collections = [self.sample_collection]
-        self.mock_collection_repo.list.return_value = collections
+        self.mock_collection_repo.list.return_value = mock_queryset
         self.mock_collection_repo.get_problems.return_value = []
         
         # Mock serializer
@@ -233,7 +244,10 @@ class TestCollectionService(TestCase):
         self.mock_collection_repo.get_by_creator.return_value = collections
         self.mock_collection_repo.get_manageable_by_account.return_value = manageable_collections
         self.mock_group_repo.get_by_creator.return_value = group_ids
-        self.mock_collection_repo.get_problems_by_collections.return_value = []
+        # Create a mock QuerySet-like object for problemCollections
+        mock_problem_queryset = Mock()
+        mock_problem_queryset.filter.return_value = []
+        self.mock_collection_repo.get_problems_by_collections.return_value = mock_problem_queryset
         
         # Mock serializers
         with patch('api.services.collection.collection_service.CollectionPopulateCollectionProblemsPopulateProblemSerializer') as mock_serializer:
@@ -335,7 +349,7 @@ class TestCollectionService(TestCase):
         mock_request = Mock()
         mock_request.data = {
             'groups': [
-                {'group_id': 'group_123', 'can_view': True, 'can_edit': False}
+                {'group_id': 'group_123', 'permission_view_collections': True, 'permission_manage_collections': False}
             ]
         }
         
@@ -356,9 +370,9 @@ class TestCollectionService(TestCase):
         
         # Assert
         self.mock_collection_repo.get.assert_called_once_with(collection_id)
-        self.mock_permission_repo.delete_collection_group_permissions.assert_called_once_with(collection_id)
+        self.mock_permission_repo.delete_collection_permissions.assert_called_once_with(collection_id)
         self.mock_group_repo.get.assert_called_once_with('group_123')
-        self.mock_permission_repo.bulk_create_collection_group_permissions.assert_called_once()
+        self.mock_permission_repo.bulk_create_collection_permissions.assert_called_once()
         
         # Verify result
         self.assertIsInstance(result, dict)
@@ -416,10 +430,16 @@ class TestCollectionService(TestCase):
         self.mock_collection_repo.get.return_value = self.sample_collection
         self.mock_problem_repo.get.return_value = self.sample_problem
         self.mock_collection_repo.find_existing_problem.return_value = None
+        self.mock_collection_repo.update_with_timestamp.return_value = self.sample_collection
         
-        # Mock serializers
-        with patch('api.services.collection.collection_service.CollectionProblemPopulateProblemSecureSerializer') as mock_problem_serializer, \
+        # Mock CollectionProblem creation and save
+        with patch('api.services.collection.collection_service.CollectionProblem') as mock_collection_problem_class, \
+             patch('api.services.collection.collection_service.CollectionProblemPopulateProblemSecureSerializer') as mock_problem_serializer, \
              patch('api.services.collection.collection_service.CollectionSerializer') as mock_collection_serializer:
+            
+            mock_collection_problem_instance = Mock()
+            mock_collection_problem_instance.save = Mock()
+            mock_collection_problem_class.return_value = mock_collection_problem_instance
             
             mock_problem_serializer_instance = Mock()
             mock_problem_serializer_instance.data = [{'problem_id': 'prob_123'}]
@@ -438,6 +458,10 @@ class TestCollectionService(TestCase):
         self.mock_collection_repo.find_existing_problem.assert_called_once_with('prob_123', collection_id)
         self.mock_collection_repo.update_with_timestamp.assert_called_once_with(collection_id, {})
         
+        # Verify CollectionProblem was created and saved
+        mock_collection_problem_class.assert_called_once()
+        mock_collection_problem_instance.save.assert_called_once()
+        
         # Verify result structure
         self.assertIsInstance(result, dict)
         self.assertIn('collection_id', result)
@@ -453,14 +477,21 @@ class TestCollectionService(TestCase):
         }
         
         existing_problem = Mock(spec=CollectionProblem)
+        existing_problem.delete = Mock()
         
         self.mock_collection_repo.get.return_value = self.sample_collection
         self.mock_problem_repo.get.return_value = self.sample_problem
         self.mock_collection_repo.find_existing_problem.return_value = existing_problem
+        self.mock_collection_repo.update_with_timestamp.return_value = self.sample_collection
         
-        # Mock serializers
-        with patch('api.services.collection.collection_service.CollectionProblemPopulateProblemSecureSerializer') as mock_problem_serializer, \
+        # Mock CollectionProblem creation and save
+        with patch('api.services.collection.collection_service.CollectionProblem') as mock_collection_problem_class, \
+             patch('api.services.collection.collection_service.CollectionProblemPopulateProblemSecureSerializer') as mock_problem_serializer, \
              patch('api.services.collection.collection_service.CollectionSerializer') as mock_collection_serializer:
+            
+            mock_collection_problem_instance = Mock()
+            mock_collection_problem_instance.save = Mock()
+            mock_collection_problem_class.return_value = mock_collection_problem_instance
             
             mock_problem_serializer_instance = Mock()
             mock_problem_serializer_instance.data = [{'problem_id': 'prob_123'}]
@@ -475,6 +506,8 @@ class TestCollectionService(TestCase):
         
         # Assert
         existing_problem.delete.assert_called_once()
+        mock_collection_problem_class.assert_called_once()
+        mock_collection_problem_instance.save.assert_called_once()
         
         # Verify result structure
         self.assertIsInstance(result, dict)
@@ -494,7 +527,7 @@ class TestCollectionService(TestCase):
         result = self.collection_service.remove_problems_from_collection(collection_id, mock_request)
         
         # Assert
-        self.mock_collection_repo.delete_problems_by_problem_ids.assert_called_once_with(collection_id, ['prob_123', 'prob_456'])
+        self.mock_collection_repo.delete_many_problems.assert_called_once_with(collection_id, ['prob_123', 'prob_456'])
         self.mock_collection_repo.update_with_timestamp.assert_called_once_with(collection_id, {})
         self.assertIsNone(result)
 

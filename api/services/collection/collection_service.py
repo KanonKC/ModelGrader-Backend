@@ -36,7 +36,7 @@ class CollectionService:
     def get_collection(self, collection_id: str):
         collection = self.collection_repo.get(collection_id)
         collection.problems = self.collection_repo.get_problems(collection_id)
-        collection.group_permissions = self.permission_repo.get_collection_group_permissions(collection_id)
+        collection.group_permissions = self.permission_repo.get_collection_permissions(collection_id)
 
         for cp in collection.problems:
             cp.problem.testcases = self.problem_repo.get_testcases(cp.problem_id)
@@ -117,9 +117,7 @@ class CollectionService:
 
     def update_group_permissions_collection(self, collection_id: str, request):
         collection = self.collection_repo.get(collection_id)
-        self.permission_repo.delete_collection_group_permissions(collection_id)
-
-        print(request.data['groups'])
+        self.permission_repo.delete_collection_permissions(collection_id)
 
         collection_group_permissions = []
         for collection_request in request.data['groups']:
@@ -131,7 +129,7 @@ class CollectionService:
                     **collection_request
             ))
 
-        self.permission_repo.bulk_create_collection_group_permissions(collection_group_permissions)
+        self.permission_repo.bulk_create_collection_permissions(collection_group_permissions)
 
         collection.group_permissions = collection_group_permissions
         serialize = CollectionPopulateCollectionGroupPermissionsPopulateGroupSerializer(collection)
@@ -195,6 +193,6 @@ class CollectionService:
         }
 
     def remove_problems_from_collection(self, collection_id: str, request):
-        self.collection_repo.delete_problems_by_problem_ids(collection_id, request.data['problem_ids'])
+        self.collection_repo.delete_many_problems(collection_id, request.data['problem_ids'])
         self.collection_repo.update_with_timestamp(collection_id, {})
         return None

@@ -7,6 +7,10 @@ This script runs unit tests for:
 - AccountService
 - ProblemService  
 - AuthService
+- CollectionService
+- GroupService
+- SubmissionService
+- TopicService
 
 Options:
   --verbose, -v    : Run with verbose output
@@ -18,7 +22,7 @@ Examples:
   python run_all_tests.py
   python run_all_tests.py --verbose
   python run_all_tests.py --coverage
-  python run_all_tests.py --services account,auth
+  python run_all_tests.py --services account,auth,collection
   python run_all_tests.py -v -c
 """
 
@@ -42,15 +46,19 @@ django.setup()
 from api.services.account.test_account_service import TestAccountService, TestAccountServiceIntegration
 from api.services.problem.test_problem_service import TestProblemService, TestProblemServiceIntegration
 from api.services.auth.test_auth_service import TestAuthService, TestAuthServiceIntegration, TestAuthServiceModuleFunctions
+from api.services.collection.test_collection_service import TestCollectionService
+from api.services.group.test_group_service import TestGroupService
+from api.services.submission.test_submission_service import TestSubmissionService
+from api.services.topic.test_topic_service import TestTopicService
 
 
 class TestRunner:
     """Main test runner class for all service tests"""
-    
+
     def __init__(self, verbose=False, coverage=False, services=None):
         self.verbose = verbose
         self.coverage = coverage
-        self.services = services or ['account', 'problem', 'auth']
+        self.services = services or ['account', 'problem', 'auth', 'collection', 'group', 'submission', 'topic']
         self.results = {}
         self.total_tests = 0
         self.total_failures = 0
@@ -78,6 +86,26 @@ class TestRunner:
                 'unit': TestAuthService,
                 'integration': TestAuthServiceIntegration,
                 'module_functions': TestAuthServiceModuleFunctions
+            }
+        
+        if 'collection' in self.services:
+            test_classes['CollectionService'] = {
+                'unit': TestCollectionService
+            }
+        
+        if 'group' in self.services:
+            test_classes['GroupService'] = {
+                'unit': TestGroupService
+            }
+        
+        if 'submission' in self.services:
+            test_classes['SubmissionService'] = {
+                'unit': TestSubmissionService
+            }
+        
+        if 'topic' in self.services:
+            test_classes['TopicService'] = {
+                'unit': TestTopicService
             }
         
         return test_classes
@@ -232,7 +260,7 @@ Examples:
   python run_all_tests.py                    # Run all tests
   python run_all_tests.py --verbose          # Run with verbose output
   python run_all_tests.py --coverage         # Run with coverage analysis
-  python run_all_tests.py --services account,auth  # Run specific services
+  python run_all_tests.py --services account,auth,collection,group  # Run specific services
   python run_all_tests.py -v -c              # Verbose with coverage
         """
     )
@@ -252,7 +280,7 @@ Examples:
     parser.add_argument(
         '--services', '-s',
         type=str,
-        help='Comma-separated list of services to test (account,problem,auth)'
+        help='Comma-separated list of services to test (account,problem,auth,collection,group,submission,topic)'
     )
     
     return parser.parse_args()
@@ -266,7 +294,7 @@ def main():
     services = None
     if args.services:
         services = [s.strip().lower() for s in args.services.split(',')]
-        valid_services = ['account', 'problem', 'auth']
+        valid_services = ['account', 'problem', 'auth', 'collection', 'group', 'submission', 'topic']
         invalid_services = [s for s in services if s not in valid_services]
         if invalid_services:
             print(f"❌ Invalid services: {', '.join(invalid_services)}")
