@@ -1,0 +1,42 @@
+name: Simple Test Runner
+
+on:
+  pull_request:
+    branches: [ "*" ]
+  push:
+    branches: [ main, dev ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Set up environment variables
+      run: |
+        echo "PORT=8000" >> $GITHUB_ENV
+        echo "FRONTEND_URL=http://localhost:3000" >> $GITHUB_ENV
+        echo "TOKEN_LIFETIME_SECOND=3600" >> $GITHUB_ENV
+        echo "DATABASE_NAME=test_db.sqlite3" >> $GITHUB_ENV
+        echo "DATABASE_USER=test_user" >> $GITHUB_ENV
+        echo "DATABASE_PASSWORD=test_password" >> $GITHUB_ENV
+        echo "DATABASE_HOST=localhost" >> $GITHUB_ENV
+        echo "DATABASE_PORT=5432" >> $GITHUB_ENV
+        echo "SECRET_KEY=test-secret-key-for-github-actions" >> $GITHUB_ENV
+        echo "DEBUG=True" >> $GITHUB_ENV
+        
+    - name: Run tests
+      run: |
+        python run_all_tests.py --verbose

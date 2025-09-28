@@ -224,7 +224,7 @@ class CppGrader(ProgramGrader):
             return result
 
 
-Grader:list[ProgramGrader] = {
+Grader:dict[str,ProgramGrader] = {
     "python": PythonGrader,
     "c": CGrader,
     "cpp": CppGrader
