@@ -2,10 +2,9 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from api.wrappers.auth_wrapper import authentication_required
 from ..constant import GET, POST, PUT, DELETE
-from ..models import *
 from api.errors.common import InternalServerError, BadRequestError
 from api.errors.core.grader_exception import GraderException
-import api.services.topic.topic_service as topic_service
+from api.setup import topic_service
 
 @api_view([POST, GET])
 @authentication_required
@@ -14,8 +13,7 @@ def all_topics_creator_view(request, account_id):
         if request.method == POST:
             result = topic_service.create_topic(account_id, request)
         elif request.method == GET:
-            account = Account.objects.get(account_id=account_id)
-            result = topic_service.get_all_topics_by_account(account, request)
+            result = topic_service.get_all_topics_by_account(account_id, request)
         return Response(result, status=200)
     except GraderException as ge:
         return ge.django_response()
@@ -26,13 +24,12 @@ def all_topics_creator_view(request, account_id):
 @authentication_required
 def one_topic_creator_view(request, topic_id: str, account_id: str):
     try:
-        topic = Topic.objects.get(topic_id=topic_id)
         if request.method == GET:
-            result = topic_service.get_topic(topic)
+            result = topic_service.get_topic(topic_id)
         elif request.method == PUT:
-            result = topic_service.update_topic(topic, request)
+            result = topic_service.update_topic(topic_id, request)
         elif request.method == DELETE:
-            topic_service.delete_topic(topic)
+            topic_service.delete_topic(topic_id)
             return Response(status=204)
         return Response(result, status=200)
     except GraderException as ge:
@@ -67,8 +64,7 @@ def one_topic_view(request, topic_id: str):
 def all_topics_access_view(request, account_id: str):
     try:
         if request.method == GET:
-            account = Account.objects.get(account_id=account_id)
-            result = topic_service.get_all_accessed_topics_by_account(account)
+            result = topic_service.get_all_accessed_topics_by_account(account_id)
         return Response(result, status=200)
     except GraderException as ge:
         return ge.django_response()
@@ -79,9 +75,8 @@ def all_topics_access_view(request, account_id: str):
 @authentication_required
 def topic_groups_view(request, account_id: str, topic_id: str):
     try:
-        topic = Topic.objects.get(topic_id=topic_id)
         if request.method == PUT:
-            result = topic_service.update_groups_permission_to_topic(topic, request)
+            result = topic_service.update_groups_permission_to_topic(topic_id, request)
         return Response(result, status=200)
     except GraderException as ge:
         return ge.django_response()
@@ -95,8 +90,7 @@ def topic_collections_view(request, topic_id: str, method: str):
         if method == "add":
             result = topic_service.add_collections_to_topic(topic_id, request)
         elif method == "update":
-            topic = Topic.objects.get(topic_id=topic_id)
-            result = topic_service.update_collections_to_topic(topic, request)
+            result = topic_service.update_collections_to_topic(topic_id, request)
         elif method == "remove":
             topic_service.remove_collections_from_topic(topic_id, request)
             return Response(status=204)

@@ -1,16 +1,11 @@
-from api.utility import passwordEncryption
+from api.setup import account_service
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from api.sandbox.grader import PythonGrader
 from api.wrappers.auth_wrapper import authentication_required
 from ..constant import GET,POST,PUT,DELETE
-from ..models import *
-from rest_framework import status
-from django.forms.models import model_to_dict
 from ..serializers import *
 from api.errors.common import InternalServerError
 from api.errors.core.grader_exception import GraderException
-import api.services.account.account_service as account_service
 
 @api_view([GET,POST])
 def all_accounts(request):
