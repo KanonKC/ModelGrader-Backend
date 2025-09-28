@@ -1,8 +1,9 @@
 from time import sleep
+from unittest.mock import Mock
 from api.services.problem.problem_service import ProblemService
 from api.services.problem.serializers import ProblemPopulateTestcaseSerializer
 from api.utility import regexMatching
-from api.sandbox.grader import Grader, ProgramGrader
+from api.sandbox.grader import GradingResult, GradingResultList, ProgramGrader, RuntimeResult
 from ...models import *
 from django.forms.models import model_to_dict
 from .serializers import *
@@ -15,12 +16,15 @@ from api.repositories.topic_repository import TopicRepository
 class SubmissionService:
 
     def __init__(self, submission_repo: SubmissionRepository, problem_repo: ProblemRepository, 
-        account_repo: AccountRepository, topic_repo: TopicRepository, problem_service: ProblemService):
+        account_repo: AccountRepository, topic_repo: TopicRepository, problem_service: ProblemService, grader: dict[ProgramGrader]):
         self.submission_repo = submission_repo
         self.problem_repo = problem_repo
         self.account_repo = account_repo
         self.topic_repo = topic_repo
         self.problem_service = problem_service
+        self.QUEUE = [0,0,0,0,0,0,0,0,0,0]
+        self.grader = grader
+
 
     def get_all_submissions_by_creator_problem(self, problem_id: str, request):
         problem = self.problem_repo.get(problem_id)
@@ -145,8 +149,6 @@ class SubmissionService:
     def submit_problem_on_topic(self, account_id:str,problem_id:str,topic_id:str,request):
         return self.submit_problem_function(account_id,problem_id,topic_id,request)
 
-    QUEUE = [0,0,0,0,0,0,0,0,0,0]
-
     def avaliableQueue(self):
         for i in range(len(self.QUEUE)):
             if self.QUEUE[i] == 0:
@@ -156,14 +158,20 @@ class SubmissionService:
     def submit_problem_function(self, account_id:str,problem_id:str,topic_id:str,request):
         problem = self.problem_repo.get(problem_id)
         testcases = self.problem_repo.get_testcases(problem_id, deprecated=False)
-        account = self.account_repo.get(account_id)
 
         submission_code = request.data['submission_code']
         solution_input = [model_to_dict(i)['input'] for i in testcases]
         solution_output = [model_to_dict(i)['output'] for i in testcases]
 
         if not regexMatching(problem.submission_regex,submission_code):
-            grading_result = '-'*len(solution_input)
+            # grading_result = '-'*len(solution_input)
+            grading_result: GradingResultList = GradingResultList(gradingResult=[GradingResult(
+                input=solution_input[i],
+                output="",
+                runtime_status="FAILED",
+                expected_output=solution_output[i],
+                is_passed=False,
+            ) for i in range(len(solution_input))])
         else:
             empty_queue = self.avaliableQueue()
             while empty_queue == -1:
@@ -172,8 +180,8 @@ class SubmissionService:
 
             self.QUEUE[empty_queue] = 1
             # grading_result = grader.grading(empty_queue+1,submission_code,solution_input,solution_output)
-            grader: ProgramGrader = Grader[request.data['language']]
-            grading_result = grader(submission_code,solution_input,empty_queue+1,1.5).grading(solution_output)
+            grader: ProgramGrader = self.grader[request.data['language']](submission_code,solution_input,empty_queue+1,1.5)
+            grading_result = grader.grading(solution_output)
             self.QUEUE[empty_queue] = 0
 
         total_score = sum([i.is_passed for i in grading_result.data if i.is_passed])

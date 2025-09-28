@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import Mock, patch, MagicMock
 from django.test import TestCase
 from django.http import HttpRequest
+from api.sandbox.grader import ProgramGrader
 from api.services.submission.submission_service import SubmissionService
 from api.repositories.submission_repository import SubmissionRepository
 from api.repositories.problem_repository import ProblemRepository
@@ -22,13 +23,14 @@ class TestSubmissionService(TestCase):
         self.mock_account_repo = Mock(spec=AccountRepository)
         self.mock_topic_repo = Mock(spec=TopicRepository)
         self.mock_problem_service = Mock(spec=ProblemService)
-        
+        self.mock_grader = Mock()
         self.submission_service = SubmissionService(
             submission_repo=self.mock_submission_repo,
             problem_repo=self.mock_problem_repo,
             account_repo=self.mock_account_repo,
             topic_repo=self.mock_topic_repo,
-            problem_service=self.mock_problem_service
+            problem_service=self.mock_problem_service,
+            grader=self.mock_grader
         )
         
         # Sample data
@@ -392,16 +394,20 @@ class TestSubmissionService(TestCase):
         # Mock grading result
         mock_grading_result = Mock()
         mock_grading_result.is_passed = True
-        mock_grading_result.data = [Mock(is_passed=True, output='output', runtime_status='AC')]
+        mock_testcase_result = Mock()
+        mock_testcase_result.is_passed = True
+        mock_grading_result.data = [mock_testcase_result]
         
         # Mock grader
-        with patch('api.services.submission.submission_service.Grader') as mock_grader, \
-             patch('api.services.submission.submission_service.regexMatching') as mock_regex, \
+        with patch('api.services.submission.submission_service.regexMatching') as mock_regex, \
              patch('api.services.submission.submission_service.model_to_dict') as mock_model_to_dict:
             
+            # Mock grader dictionary access
+            mock_grader_class = Mock()
             mock_grader_instance = Mock()
-            mock_grader_instance.return_value.grading.return_value = mock_grading_result
-            mock_grader.__getitem__.return_value = mock_grader_instance
+            mock_grader_instance.grading.return_value = mock_grading_result
+            mock_grader_class.return_value = mock_grader_instance
+            self.mock_grader.__getitem__ = Mock(return_value=mock_grader_class)
             
             mock_regex.return_value = True
             mock_model_to_dict.return_value = {'input': 'input', 'output': 'output'}
@@ -421,7 +427,6 @@ class TestSubmissionService(TestCase):
         # Assert
         self.mock_problem_repo.get.assert_called_once_with(problem_id)
         self.mock_problem_repo.get_testcases.assert_called_once_with(problem_id, deprecated=False)
-        self.mock_account_repo.get.assert_called_once_with(account_id)
         self.mock_submission_repo.create.assert_called_once()
         self.mock_submission_repo.create_or_update_best.assert_called_once()
         self.mock_submission_repo.bulk_create_testcases.assert_called_once()
@@ -448,16 +453,20 @@ class TestSubmissionService(TestCase):
         # Mock grading result
         mock_grading_result = Mock()
         mock_grading_result.is_passed = True
-        mock_grading_result.data = [Mock(is_passed=True, output='output', runtime_status='AC')]
+        mock_testcase_result = Mock()
+        mock_testcase_result.is_passed = True
+        mock_grading_result.data = [mock_testcase_result]
         
         # Mock grader
-        with patch('api.services.submission.submission_service.Grader') as mock_grader, \
-             patch('api.services.submission.submission_service.regexMatching') as mock_regex, \
+        with patch('api.services.submission.submission_service.regexMatching') as mock_regex, \
              patch('api.services.submission.submission_service.model_to_dict') as mock_model_to_dict:
             
+            # Mock grader dictionary access
+            mock_grader_class = Mock()
             mock_grader_instance = Mock()
-            mock_grader_instance.return_value.grading.return_value = mock_grading_result
-            mock_grader.__getitem__.return_value = mock_grader_instance
+            mock_grader_instance.grading.return_value = mock_grading_result
+            mock_grader_class.return_value = mock_grader_instance
+            self.mock_grader.__getitem__ = Mock(return_value=mock_grader_class)
             
             mock_regex.return_value = True
             mock_model_to_dict.return_value = {'input': 'input', 'output': 'output'}
@@ -477,7 +486,6 @@ class TestSubmissionService(TestCase):
         # Assert
         self.mock_problem_repo.get.assert_called_once_with(problem_id)
         self.mock_problem_repo.get_testcases.assert_called_once_with(problem_id, deprecated=False)
-        self.mock_account_repo.get.assert_called_once_with(account_id)
         self.mock_submission_repo.create.assert_called_once()
         self.mock_submission_repo.create_or_update_best.assert_called_once()
         self.mock_submission_repo.bulk_create_testcases.assert_called_once()
@@ -519,16 +527,20 @@ class TestSubmissionService(TestCase):
         # Mock grading result for failed submission
         mock_grading_result = Mock()
         mock_grading_result.is_passed = False
-        mock_grading_result.data = [Mock(is_passed=False, output='output', runtime_status='WA')]
+        mock_testcase_result = Mock()
+        mock_testcase_result.is_passed = False
+        mock_grading_result.data = [mock_testcase_result]
         
         # Mock grader and regex mismatch
-        with patch('api.services.submission.submission_service.Grader') as mock_grader, \
-             patch('api.services.submission.submission_service.regexMatching') as mock_regex, \
+        with patch('api.services.submission.submission_service.regexMatching') as mock_regex, \
              patch('api.services.submission.submission_service.model_to_dict') as mock_model_to_dict:
             
+            # Mock grader dictionary access
+            mock_grader_class = Mock()
             mock_grader_instance = Mock()
-            mock_grader_instance.return_value.grading.return_value = mock_grading_result
-            mock_grader.__getitem__.return_value = mock_grader_instance
+            mock_grader_instance.grading.return_value = mock_grading_result
+            mock_grader_class.return_value = mock_grader_instance
+            self.mock_grader.__getitem__ = Mock(return_value=mock_grader_class)
             
             mock_regex.return_value = False
             mock_model_to_dict.return_value = {'input': 'input', 'output': 'output'}
@@ -561,7 +573,8 @@ class TestSubmissionService(TestCase):
             problem_repo=self.mock_problem_repo,
             account_repo=self.mock_account_repo,
             topic_repo=self.mock_topic_repo,
-            problem_service=self.mock_problem_service
+            problem_service=self.mock_problem_service,
+            grader=self.mock_grader
         )
         
         # Assert
