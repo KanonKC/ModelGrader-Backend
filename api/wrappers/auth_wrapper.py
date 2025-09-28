@@ -1,4 +1,4 @@
-from api.services.auth_service import verify_token
+from api.services.auth.auth_service import verify_token
 from api.utility import extract_bearer_token
 from api.errors.common import InvalidTokenError
 

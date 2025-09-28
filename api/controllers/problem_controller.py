@@ -1,107 +1,141 @@
-# from ..utility import JSONParser, JSONParserOne, passwordEncryption
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from ..constant import PUT, GET, POST
-from rest_framework import status
-from ..utility import extract_bearer_token, ERROR_TYPE_TO_STATUS
-from ..services import problem_service
-from ..errors.common import *
-from django.http import FileResponse
+from api.wrappers.auth_wrapper import authentication_required
+from ..constant import GET, POST, PUT, DELETE
+from ..models import *
+from api.errors.common import InternalServerError
+from api.errors.core.grader_exception import GraderException
+import api.services.problem.problem_service as problem_service
 
-@api_view([PUT])
-def upload_pdf(request, problem_id:str):
+@api_view([POST, GET])
+@authentication_required
+def all_problems_creator_view(request, account_id):
     try:
-        file = request.FILES.get('file')
-        token = extract_bearer_token(request)
-        if not token:
-            raise InvalidTokenError()
-        if not file:
-            raise InvalidFileError()
-        problem_service.upload_pdf(problem_id, file, token)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        if request.method == POST:
+            result = problem_service.create_problem(account_id, request)
+        elif request.method == GET:
+            account = Account.objects.get(account_id=account_id)
+            result = problem_service.get_all_problems_by_account(account, request)
+        return Response(result, status=200)
+    except GraderException as ge:
+        return ge.django_response()
     except Exception as e:
-        if (isinstance(e, GraderException)):
-            return Response({
-                "status": e.status,
-                "error": e.error
-            }, status=e.status)
-        else:
-            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return InternalServerError(e).django_response()
+
+@api_view([GET, PUT, DELETE])
+@authentication_required
+def one_problem_creator_view(request, problem_id: str, account_id: str):
+    try:
+        problem = Problem.objects.get(problem_id=problem_id)
+        if request.method == GET:
+            result = problem_service.get_problem(problem)
+        elif request.method == PUT:
+            result = problem_service.update_problem(problem, request)
+        elif request.method == DELETE:
+            problem_service.delete_problem(problem)
+            return Response(status=204)
+        return Response(result, status=200)
+    except GraderException as ge:
+        return ge.django_response()
+    except Exception as e:
+        return InternalServerError(e).django_response()
+
+@api_view([GET, DELETE])
+@authentication_required
+def all_problems_view(request):
+    try:
+        account_id = request.GET.get("account_id", None)
+        try:
+            account = Account.objects.get(account_id=account_id)
+        except:
+            account = None
+        
+        if request.method == GET:
+            result = problem_service.get_all_problem_with_best_submission(account)
+        elif request.method == DELETE:
+            problem_service.remove_bulk_problems(request)
+            return Response(status=204)
+        return Response(result, status=200)
+    except GraderException as ge:
+        return ge.django_response()
+    except Exception as e:
+        return InternalServerError(e).django_response()
+
+@api_view([GET, PUT, DELETE])
+def one_problem_view(request, problem_id: int):
+    try:
+        problem = Problem.objects.get(problem_id=problem_id)
+        if request.method == GET:
+            result = problem_service.get_problem_public(problem)
+        elif request.method == PUT:
+            result = problem_service.update_problem(problem, request)
+        elif request.method == DELETE:
+            problem_service.delete_problem(problem)
+            return Response(status=204)
+        return Response(result, status=200)
+    except GraderException as ge:
+        return ge.django_response()
+    except Exception as e:
+        return InternalServerError(e).django_response()
+
+@api_view([POST])
+@authentication_required
+def validation_view(request):
+    try:
+        if request.method == POST:
+            result = problem_service.validate_program(request)
+        return Response(result, status=200)
+    except GraderException as ge:
+        return ge.django_response()
+    except Exception as e:
+        return InternalServerError(e).django_response()
 
 @api_view([GET])
-def get_problem_pdf(request, problem_id:str, token):
-    """
-    Get problem PDF file
-    200: OK
-    401: Unauthorized - No token / Token expired
-    403: Forbidden - No permission
-    404: Not Found - Problem not found
-    500: Internal Server Error
-    """
+@authentication_required
+def problem_in_topic_account_view(request, account_id: str, topic_id: str, problem_id: str):
     try:
-        pdf_file = problem_service.get_problem_pdf(problem_id, token)
-        return FileResponse(pdf_file, content_type='application/pdf')
+        if request.method == GET:
+            result = problem_service.get_problem_in_topic_with_best_submission(account_id, topic_id, int(problem_id))
+        return Response(result, status=200)
+    except GraderException as ge:
+        return ge.django_response()
     except Exception as e:
-        if (isinstance(e, GraderException)):
-            return Response({
-                "status": e.status,
-                "error": e.error
-            }, status=e.status)
-        else :
-            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return InternalServerError(e).django_response()
 
-def get_problem(request, problem_id:str, token):
+@api_view([PUT])
+@authentication_required
+def problem_group_view(request, account_id: int, problem_id: int):
     try:
-        problem = problem_service.get_problem(problem_id, request, token)
-        return Response(problem, status=status.HTTP_200_OK)
+        problem = Problem.objects.get(problem_id=problem_id)
+        if request.method == PUT:
+            result = problem_service.update_group_permission_to_problem(problem, request)
+        return Response(result, status=200)
+    except GraderException as ge:
+        return ge.django_response()
     except Exception as e:
-        if (isinstance(e, GraderException)):
-            return Response({
-                "status": e.status,
-                "error": e.error
-            }, status=e.status)
-        else:
-            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
-@api_view([POST])
-def create_problem(request, token):
-    """
-    create problem
-    201: Created
-    401: Unauthorized - No token / Token expired
-    403: Forbidden - No permission
-    404: Not Found - Problem not found
-    500: Internal Server Error
-    """
+        return InternalServerError(e).django_response()
+
+@api_view([PUT])
+@authentication_required
+def import_pdf_view(request, problem_id: int):
     try:
-        problem, testcases = problem_service.create_problem(request.data, token)
-        return Response({**problem.data,'testcases': testcases.data},status=status.HTTP_201_CREATED)
+        problem = Problem.objects.get(problem_id=problem_id)
+        if request.method == PUT:
+            problem_service.import_elabsheet_problem(request, problem)
+            return Response(status=204)
+    except GraderException as ge:
+        return ge.django_response()
     except Exception as e:
-        if (isinstance(e, GraderException)):
-            return Response({
-                "status": e.status,
-                "error": e.error
-            }, status=e.status)
-        else:
-            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-  
-def update_problem(request, problem_id, token):
+        return InternalServerError(e).django_response()
+
+@api_view([GET])
+@authentication_required
+def all_problems_list_view(request):
     try:
-        problem, testcases = problem_service.update_problem(request.data, token, problem_id)
-        return Response({**problem,'testcases': testcases},status=status.HTTP_201_CREATED)
+        if request.method == GET:
+            result = problem_service.get_all_problems(request)
+        return Response(result, status=200)
+    except GraderException as ge:
+        return ge.django_response()
     except Exception as e:
-        if (isinstance(e, GraderException)):
-            return Response({
-                "status": e.status,
-                "error": e.error
-            }, status=e.status)
-        else:
-            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            
-@api_view([GET, PUT])
-def get_or_update_problem(request, problem_id, token):
-    if request.method == GET:
-        return get_problem(request, problem_id, token)
-    elif request.method == PUT:
-        return update_problem(request, problem_id, token)
-    
+        return InternalServerError(e).django_response()

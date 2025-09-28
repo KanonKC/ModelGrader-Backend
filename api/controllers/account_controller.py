@@ -1,0 +1,60 @@
+from api.utility import passwordEncryption
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from api.sandbox.grader import PythonGrader
+from api.wrappers.auth_wrapper import authentication_required
+from ..constant import GET,POST,PUT,DELETE
+from ..models import *
+from rest_framework import status
+from django.forms.models import model_to_dict
+from ..serializers import *
+from api.errors.common import InternalServerError
+from api.errors.core.grader_exception import GraderException
+import api.services.account.account_service as account_service
+
+@api_view([GET,POST])
+def all_accounts(request):
+    try:
+        if request.method == GET:
+            result = account_service.get_all_accounts(request)
+        elif request.method == POST:
+            result = account_service.create_account(request)
+        return Response(result, status=200)
+    except GraderException as ge:
+        return ge.django_response()
+    except Exception as e:
+        return InternalServerError(e).django_response()
+
+@api_view([GET])
+@authentication_required
+def one_creator(request,account_id):
+    try:
+        result = account_service.get_account(account_id)
+        return Response(result, status=200)
+    except GraderException as ge:
+        return ge.django_response()
+    except Exception as e:
+        return InternalServerError(e).django_response()
+
+@api_view([PUT])
+@authentication_required
+def change_password(request,account_id):
+    try:
+        result = account_service.change_password(account_id, request.data['password'])
+        return Response(result, status=200)
+    except GraderException as ge:
+        return ge.django_response()
+    except Exception as e:
+        return InternalServerError(e).django_response()
+
+# @api_view([GET])
+# @authentication_required
+# def get_daily_submission(request,account_id:str):
+#     try:
+#         result = account_service.get_daily_submission(account_id)
+#         return Response(result, status=200)
+#     except GraderException as ge:
+#         return ge.django_response()
+#     except Exception as e:
+#         return InternalServerError(e).django_response()
+
