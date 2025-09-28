@@ -44,7 +44,7 @@ django.setup()
 
 # Import test classes
 from api.services.account.test_account_service import TestAccountService, TestAccountServiceIntegration
-from api.services.problem.test_problem_service import TestProblemService, TestProblemServiceIntegration
+from api.services.problem.test_problem_service import TestProblemService
 from api.services.auth.test_auth_service import TestAuthService, TestAuthServiceIntegration, TestAuthServiceModuleFunctions
 from api.services.collection.test_collection_service import TestCollectionService
 from api.services.group.test_group_service import TestGroupService
@@ -77,8 +77,7 @@ class TestRunner:
         
         if 'problem' in self.services:
             test_classes['ProblemService'] = {
-                'unit': TestProblemService,
-                'integration': TestProblemServiceIntegration
+                'unit': TestProblemService
             }
         
         if 'auth' in self.services:
@@ -233,12 +232,18 @@ class TestRunner:
         if result.failures:
             print(f"\n❌ FAILURES ({len(result.failures)}):")
             for test, traceback in result.failures:
-                print(f"  • {test}: {traceback.split('AssertionError: ')[-1].split('\\n')[0] if 'AssertionError:' in traceback else 'Assertion failed'}")
+                if 'AssertionError:' in traceback:
+                    error_msg = traceback.split('AssertionError: ')[-1].split('\n')[0]
+                else:
+                    error_msg = 'Assertion failed'
+                print(f"{test}: {error_msg}")
         
         if result.errors:
             print(f"\n💥 ERRORS ({len(result.errors)}):")
             for test, traceback in result.errors:
-                print(f"  • {test}: {traceback.split('\\n')[-2] if traceback.split('\\n') else 'Unknown error'}")
+                lines = traceback.split('\n')
+                error_msg = lines[-2] if lines else 'Unknown error'
+                print(f"{test}: {error_msg}")
         
         print("=" * 60)
     

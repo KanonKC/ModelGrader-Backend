@@ -130,13 +130,15 @@ class TopicService:
         
         topic_group_permissions = []
         for group_request in request.data['groups']:
-            print(group_request)
             group = self.group_repo.get(group_request['group_id'])
+            # Remove group_id from group_request to avoid duplication
+            group_request_copy = group_request.copy()
+            group_request_copy.pop('group_id', None)
             topic_group_permissions.append(
                 TopicGroupPermission(
                     topic_id=topic_id,
                     group_id=group.group_id,
-                    **group_request
+                    **group_request_copy
             ))
 
         self.permission_repo.bulk_create_topic_permissions(topic_group_permissions)

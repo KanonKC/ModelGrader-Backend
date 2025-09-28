@@ -41,10 +41,13 @@ class TestTopicService(TestCase):
         self.sample_topic.name = 'Test Topic'
         self.sample_topic.description = 'Test Description'
         self.sample_topic.creator_id = 'acc_123'
+        self.sample_topic.created_date = '2023-01-01T00:00:00Z'
+        self.sample_topic.updated_date = '2023-01-01T00:00:00Z'
         
         self.sample_collection = Mock(spec=Collection)
         self.sample_collection.collection_id = 'coll_123'
         self.sample_collection.name = 'Test Collection'
+        self.sample_collection.problems = []
         
         self.sample_topic_collection = Mock(spec=TopicCollection)
         self.sample_topic_collection.topic_id = 'topic_123'
@@ -247,7 +250,10 @@ class TestTopicService(TestCase):
         self.mock_topic_repo.get_by_creator.return_value = personal_topics
         self.mock_group_repo.get_ids_by_account.return_value = group_ids
         self.mock_topic_repo.get_manageable_by_ids.return_value = manageable_topics
-        self.mock_topic_repo.get_many_collections.return_value = []
+        # Mock QuerySet-like object for collections
+        mock_collections = Mock()
+        mock_collections.filter.return_value = []
+        self.mock_topic_repo.get_many_collections.return_value = mock_collections
         
         # Mock serializers
         with patch('api.services.topic.topic_service.TopicPopulateTopicCollectionPopulateCollectionSerializer') as mock_serializer:
@@ -359,7 +365,7 @@ class TestTopicService(TestCase):
         mock_request = Mock()
         mock_request.data = {
             'groups': [
-                {'group_id': 'group_123', 'can_view': True, 'can_edit': False}
+                {'group_id': 'group_123', 'permission_view_topics': True, 'permission_manage_topics': False, 'permission_view_topics_log': False}
             ]
         }
         
