@@ -516,9 +516,19 @@ class TestSubmissionService(TestCase):
         self.mock_problem_repo.get_testcases.return_value = testcases
         self.mock_account_repo.get.return_value = self.sample_account
         
-        # Mock regex mismatch
-        with patch('api.services.submission.submission_service.regexMatching') as mock_regex, \
+        # Mock grading result for failed submission
+        mock_grading_result = Mock()
+        mock_grading_result.is_passed = False
+        mock_grading_result.data = [Mock(is_passed=False, output='output', runtime_status='WA')]
+        
+        # Mock grader and regex mismatch
+        with patch('api.services.submission.submission_service.Grader') as mock_grader, \
+             patch('api.services.submission.submission_service.regexMatching') as mock_regex, \
              patch('api.services.submission.submission_service.model_to_dict') as mock_model_to_dict:
+            
+            mock_grader_instance = Mock()
+            mock_grader_instance.return_value.grading.return_value = mock_grading_result
+            mock_grader.__getitem__.return_value = mock_grader_instance
             
             mock_regex.return_value = False
             mock_model_to_dict.return_value = {'input': 'input', 'output': 'output'}

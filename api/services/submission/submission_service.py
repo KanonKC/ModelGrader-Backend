@@ -30,9 +30,9 @@ class SubmissionService:
         if end == -1: end = None
 
         submissions = self.submission_repo.get_by_problem(problem_id, start, end)
-        total = submissions.count()
+        total = len(submissions)
 
-        if submissions.count() == 0:
+        if total == 0:
             return {"submissions": []}
         
         result = []
@@ -94,7 +94,8 @@ class SubmissionService:
     def get_submissions_by_account_problem_in_topic(self, account_id:str,problem_id:str,topic_id:str):
         submissions = self.submission_repo.get_by_account_problem_topic(account_id, problem_id, topic_id)
 
-        if submissions.count() == 0:
+        total = len(submissions)
+        if total == 0:
             return {"best_submission": None, "submissions": []}
         
         result = []
@@ -119,10 +120,11 @@ class SubmissionService:
     def get_submissions_by_account_problem(self, account_id:str,problem_id:str):
         submissions = self.submission_repo.get_by_account_problem(account_id, problem_id)
 
-        if submissions.count() == 0:
+        total = len(submissions)
+        if total == 0:
             return {"best_submission": None, "submissions": []}
         
-        best_submission_id = submissions.order_by('-passed_ratio','-date').first().submission_id
+        best_submission_id = self.submission_repo.get_best(problem_id, account_id).submission_id
 
         best_submission = None
         result = []
@@ -225,5 +227,4 @@ class SubmissionService:
         try:
             return self.submit_problem_function(account_id,problem_id,None,request)
         except Exception as e:
-            print(e)
             raise InternalServerError(e)
