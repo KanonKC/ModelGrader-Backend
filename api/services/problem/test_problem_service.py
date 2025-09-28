@@ -23,12 +23,20 @@ class TestProblemService(TestCase):
         self.mock_group_repo = Mock(spec=GroupRepository)
         self.mock_topic_repo = Mock(spec=TopicRepository)
         
+        # Mock grader dictionary
+        self.mock_grader = {
+            'python': Mock(),
+            'java': Mock(),
+            'cpp': Mock()
+        }
+        
         self.problem_service = ProblemService(
             problem_repo=self.mock_problem_repo,
             account_repo=self.mock_account_repo,
             permission_repo=self.mock_permission_repo,
             group_repo=self.mock_group_repo,
-            topic_repo=self.mock_topic_repo
+            topic_repo=self.mock_topic_repo,
+            grader=self.mock_grader
         )
         
         # Sample data
@@ -47,12 +55,21 @@ class TestProblemService(TestCase):
         self.sample_problem.is_private = False
         self.sample_problem.is_active = True
         self.sample_problem.creator = self.sample_account
+        self.sample_problem._state = Mock()
+        self.sample_problem._state.db = 'default'
+        from datetime import datetime
+        self.sample_problem.created_at = datetime(2023, 1, 1, 0, 0, 0)
+        self.sample_problem.updated_at = datetime(2023, 1, 1, 0, 0, 0)
         
         self.sample_testcase = Mock(spec=Testcase)
         self.sample_testcase.testcase_id = 'tc_123'
         self.sample_testcase.input = 'input'
         self.sample_testcase.output = 'output'
         self.sample_testcase.runtime_status = 'AC'
+        self.sample_testcase._state = Mock()
+        self.sample_testcase._state.db = 'default'
+        self.sample_testcase.created_at = datetime(2023, 1, 1, 0, 0, 0)
+        self.sample_testcase.updated_at = datetime(2023, 1, 1, 0, 0, 0)
         
         self.sample_request_data = {
             'title': 'Test Problem',
@@ -64,10 +81,10 @@ class TestProblemService(TestCase):
             'testcases': [{'input': 'input', 'output': 'output'}]
         }
 
-    @patch('api.services.problem.problem_service.PythonGrader')
     @patch('api.services.problem.problem_service.ProblemSerializer')
     @patch('api.services.problem.problem_service.TestcaseSerializer')
-    def test_create_problem_success(self, mock_testcase_serializer, mock_problem_serializer, mock_python_grader):
+    @patch('api.services.problem.problem_service.Testcase')
+    def test_create_problem_success(self, mock_testcase_class, mock_testcase_serializer, mock_problem_serializer):
         """Test successful problem creation"""
         # Arrange
         account_id = 'acc_123'
@@ -78,11 +95,14 @@ class TestProblemService(TestCase):
         self.mock_problem_repo.create.return_value = self.sample_problem
         
         # Mock grader result
-        mock_grader_instance = Mock()
         mock_grader_result = Mock()
         mock_grader_result.data = [Mock(input='input', output='output', runtime_status='AC')]
-        mock_grader_instance.generate_output.return_value = mock_grader_result
-        mock_python_grader.return_value = mock_grader_instance
+        self.mock_grader['python'].return_value = Mock()
+        self.mock_grader['python'].return_value.generate_output.return_value = mock_grader_result
+        
+        # Mock Testcase creation
+        mock_testcase_instance = Mock()
+        mock_testcase_class.return_value = mock_testcase_instance
         
         # Mock serializers
         mock_problem_serializer_instance = Mock()
@@ -102,7 +122,7 @@ class TestProblemService(TestCase):
         self.mock_problem_repo.bulk_create_testcases.assert_called_once()
         
         # Verify grader was called with correct parameters
-        mock_python_grader.assert_called_once_with(
+        self.mock_grader['python'].assert_called_once_with(
             self.sample_request_data['solution'],
             self.sample_request_data['testcases'],
             1,
@@ -141,8 +161,7 @@ class TestProblemService(TestCase):
         self.mock_problem_repo.delete.assert_called_once_with(problem_id)
         self.assertIsNone(result)
 
-    @patch('api.services.problem.problem_service.Grader')
-    def test_validate_program_success(self, mock_grader):
+    def test_validate_program_success(self):
         """Test successful program validation"""
         # Arrange
         mock_request = Mock()
@@ -154,27 +173,27 @@ class TestProblemService(TestCase):
         }
         
         # Mock grader
-        mock_grader_instance = Mock()
         mock_grader_result = Mock()
         mock_grader_result.runnable = True
         mock_grader_result.has_error = False
         mock_grader_result.has_timeout = False
         mock_grader_result.getResult.return_value = [{'input': 'input', 'output': 'output', 'is_passed': True}]
-        mock_grader_instance.generate_output.return_value = mock_grader_result
-        mock_grader.__getitem__.return_value = mock_grader_instance
+        
+        mock_grader_instance = Mock()
+        mock_grader_instance.return_value = Mock()
+        mock_grader_instance.return_value.generate_output.return_value = mock_grader_result
+        self.mock_grader['python'] = mock_grader_instance
         
         # Act
         result = self.problem_service.validate_program(mock_request)
         
         # Assert
-        mock_grader.__getitem__.assert_called_once_with('python')
-        mock_grader_instance.assert_called_once_with(
+        self.mock_grader['python'].assert_called_once_with(
             'print("Hello")',
             [{'input': 'input', 'output': 'output'}],
             1,
             1.5
         )
-        
         # Verify result structure
         self.assertIsInstance(result, dict)
         self.assertIn('runnable', result)
@@ -185,7 +204,8 @@ class TestProblemService(TestCase):
         self.assertFalse(result['has_error'])
         self.assertFalse(result['has_timeout'])
 
-    def test_get_all_problems_by_account_success(self):
+    @patch('api.services.problem.problem_service.ProblemPopulatePartialTestcaseSerializer')
+    def test_get_all_problems_by_account_success(self, mock_serializer_class):
         """Test getting all problems by account"""
         # Arrange
         account_id = 'acc_123'
@@ -206,11 +226,15 @@ class TestProblemService(TestCase):
         self.mock_group_repo.get_by_creator.return_value = group_ids
         self.mock_problem_repo.get_testcases.return_value = [self.sample_testcase]
         
-        # Mock serializers
-        with patch('api.services.problem.problem_service.ProblemPopulatePartialTestcaseSerializer') as mock_serializer:
-        mock_serializer_instance = Mock()
-            mock_serializer_instance.data = [{'problem_id': 'prob_123', 'title': 'Test Problem'}]
-            mock_serializer.return_value = mock_serializer_instance
+        # Create mock instances for both calls
+        mock_personal_serializer = Mock()
+        mock_personal_serializer.data = [{'problem_id': 'prob_123', 'title': 'Test Problem', 'created_at': '2023-01-01T00:00:00Z', 'updated_at': '2023-01-01T00:00:00Z'}]
+        
+        mock_manageable_serializer = Mock()
+        mock_manageable_serializer.data = []
+        
+        # Configure the mock class to return different instances based on call
+        mock_serializer_class.side_effect = [mock_personal_serializer, mock_manageable_serializer]
         
         # Act
         result = self.problem_service.get_all_problems_by_account(account_id, mock_request)
@@ -247,7 +271,7 @@ class TestProblemService(TestCase):
         
         # Mock serializers
         with patch('api.services.problem.problem_service.ProblemPopulatePartialTestcaseSerializer') as mock_serializer:
-        mock_serializer_instance = Mock()
+            mock_serializer_instance = Mock()
             mock_serializer_instance.data = []
             mock_serializer.return_value = mock_serializer_instance
         
@@ -416,7 +440,7 @@ class TestProblemService(TestCase):
         
         # Mock serializer
         with patch('api.services.problem.problem_service.ProblemPopulateAccountSecureSerializer') as mock_serializer:
-        mock_serializer_instance = Mock()
+            mock_serializer_instance = Mock()
             mock_serializer_instance.data = {'problem_id': 'prob_123', 'title': 'Test Problem'}
             mock_serializer.return_value = mock_serializer_instance
             
@@ -522,7 +546,8 @@ class TestProblemService(TestCase):
             account_repo=self.mock_account_repo,
             permission_repo=self.mock_permission_repo,
             group_repo=self.mock_group_repo,
-            topic_repo=self.mock_topic_repo
+            topic_repo=self.mock_topic_repo,
+            grader=self.mock_grader
         )
         
         # Assert
@@ -531,6 +556,7 @@ class TestProblemService(TestCase):
         self.assertEqual(service.permission_repo, self.mock_permission_repo)
         self.assertEqual(service.group_repo, self.mock_group_repo)
         self.assertEqual(service.topic_repo, self.mock_topic_repo)
+        self.assertEqual(service.grader, self.mock_grader)
 
 
 if __name__ == '__main__':

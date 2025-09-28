@@ -5,7 +5,7 @@ from api.repositories.submission_repository import SubmissionRepository
 from api.repositories.topic_repository import TopicRepository
 from api.repositories.permission_repository import PermissionRepository
 from api.repositories.account_repository import AccountRepository
-from api.sandbox.grader import PythonGrader, Grader, ProgramGrader, RuntimeResultList
+from api.sandbox.grader import ProgramGrader, RuntimeResultList
 from ...models import *
 from .serializers import *
 from ...difficulty_predictor.preprocess import *
@@ -21,16 +21,18 @@ except:
 
 class ProblemService:
 
-    def __init__(self, problem_repo: ProblemRepository, account_repo: AccountRepository, permission_repo: PermissionRepository, group_repo: GroupRepository, topic_repo: TopicRepository):
+    def __init__(self, problem_repo: ProblemRepository, account_repo: AccountRepository, permission_repo: PermissionRepository, group_repo: GroupRepository, topic_repo: TopicRepository, grader: dict[ProgramGrader]):
         self.problem_repo = problem_repo
         self.account_repo = account_repo
         self.permission_repo = permission_repo
         self.group_repo = group_repo
         self.topic_repo = topic_repo
+        self.grader = grader
 
     def create_problem(self, account_id: str, request):
         account = self.account_repo.get(account_id)
-        running_result = PythonGrader(request.data['solution'], request.data['testcases'], 1, 1.5).generate_output()
+        python_grader: ProgramGrader = self.grader['python']
+        running_result = python_grader(request.data['solution'], request.data['testcases'], 1, 1.5).generate_output()
 
         problem_data = {
             'language': request.data['language'],
@@ -65,7 +67,7 @@ class ProblemService:
         return None
 
     def validate_program(self, request):
-        grader: ProgramGrader = Grader[request.data['language']]
+        grader: ProgramGrader = self.grader[request.data['language']]
         result: RuntimeResultList = grader(request.data['source_code'], request.data['testcases'], 1, request.data['time_limited']).generate_output()
 
         return {
@@ -215,7 +217,7 @@ class ProblemService:
         problem = self.problem_repo.update(problem_id, update_data)
 
         if 'testcases' in request.data:
-            running_result = Grader[request.data['language']](problem.solution, request.data['testcases'], 1, 1.5).generate_output()
+            running_result = self.grader[request.data['language']](problem.solution, request.data['testcases'], 1, 1.5).generate_output()
 
             # if not running_result.runnable:
             #     raise BadRequestError('Error during editing. Your code may has an error/timeout!')
@@ -240,7 +242,7 @@ class ProblemService:
         if 'solution' in request.data:
             testcases = self.problem_repo.get_testcases(problem_id, deprecated=False)
             program_input = [i.input for i in testcases]
-            running_result = Grader[request.data['language']](problem.solution, program_input, 1, 1.5).generate_output()
+            running_result = self.grader[request.data['language']](problem.solution, program_input, 1, 1.5).generate_output()
 
             if not running_result.runnable:
                 raise BadRequestError('Error during editing. Your code may has an error/timeout!')
