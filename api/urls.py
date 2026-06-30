@@ -10,6 +10,7 @@ urlpatterns = [
     path("logout",auth_controller.logout),
     path('token',auth_controller.authorization),
     path("auth/google/callback", google_auth_controller.google_callback),
+    path("auth/token/refresh", auth_controller.token_refresh),
 
     path("accounts",account_controller.all_accounts),
     path("accounts/<str:account_id>",account_controller.one_creator),

@@ -1,32 +1,51 @@
 from django.forms.models import model_to_dict
-from time import time
 from api.config import Configuration
 from api.errors.auth import IncorrectPasswordError
 from api.models import Account
 from api.repositories.account_repository import AccountRepository, AccountRepositoryImpl
 from api.errors.common import *
 from api.utility import passwordEncryption
+from api.services.auth.jwt_service import (
+    create_access_token,
+    create_refresh_token,
+    verify_access_token,
+    verify_refresh_token,
+)
 
-from uuid import uuid4
 from abc import ABC, abstractmethod
 from decouple import AutoConfig
 
+
+def _build_token_response(account: Account) -> dict:
+    account_data = model_to_dict(account)
+    account_data.pop("password", None)
+    account_data.pop("token", None)
+    account_data.pop("token_expire", None)
+    return {
+        "access_token": create_access_token(account.account_id),
+        "refresh_token": create_refresh_token(account.account_id),
+        "account_id": account.account_id,
+        "username": account.username,
+        "email": account.email,
+    }
+
+
 class AuthService(ABC):
     @abstractmethod
-    def verify_token(self,token):
-        pass
+    def verify_token(self, token): pass
+
     @abstractmethod
-    def getAccountByToken(self,token):
-        pass
+    def getAccountByToken(self, token): pass
+
     @abstractmethod
-    def login(self,request):
-        pass
+    def login(self, request): pass
+
     @abstractmethod
-    def authorization(self,request):
-        pass
+    def refresh(self, request): pass
+
     @abstractmethod
-    def logout(self,request):
-        pass
+    def logout(self, request): pass
+
 
 class AuthServiceImpl:
 
@@ -34,101 +53,77 @@ class AuthServiceImpl:
         self.config = config
         self.account_repo = account_repo
 
-    def verify_token(self,token):
-        """
-        Check if user has valid token and not expired
-        Return: True/False
-        """
+    def verify_token(self, token) -> bool:
         try:
-            account = self.account_repo.get_by_token(token)
-            account_dict = model_to_dict(account)
-            if account_dict['token_expire'] >= time():
-                return True
-            else:
-                return False
-        except:
+            verify_access_token(token)
+            return True
+        except Exception:
             return False
-        
-    def getAccountByToken(self,token):
-        """
-        Get account from token
-        Return: account object
-        """
+
+    def getAccountByToken(self, token) -> Account:
         try:
-            account = self.account_repo.get_by_token(token)
-            if account.token_expire < time():
-                raise InvalidTokenError()
-            return account
+            account_id = verify_access_token(token)
+            return self.account_repo.get(account_id)
         except Account.DoesNotExist:
             raise InvalidTokenError()
-        except Exception as e:
-            raise e
+        except Exception:
+            raise InvalidTokenError()
 
-    def login(self,request):
+    def login(self, request) -> dict:
         try:
-            account = self.account_repo.get_by_username(request.data['username'])
-            if passwordEncryption(request.data['password']) == account.password:
-                account.token = uuid4().hex
-                account.token_expire = int(time() + self.config.token_lifetime)
-                account.save()
-                return model_to_dict(account)
+            account = self.account_repo.get_by_username(request.data["username"])
+            if passwordEncryption(request.data["password"]) == account.password:
+                return _build_token_response(account)
             else:
                 raise IncorrectPasswordError()
         except Account.DoesNotExist:
             raise ItemNotFoundError("User")
 
-    def authorization(self,request):
+    def refresh(self, request) -> dict:
         try:
-            account = self.account_repo.get(request.data['account_id'])
-            account_dict = model_to_dict(account)
-            if account_dict['token_expire'] >= time() and account_dict['token'] == request.data['token']:
-                return {'result': True}
-            return {'result': False}
-        except Account.DoesNotExist:
-            return {'result': False}
-
-    def logout(self,request):
-        try:
-            account = self.account_repo.get(request.data['account_id'])
-            if account.token == request.data['token']:
-                account.token = None
-                account.save()
-                return model_to_dict(account)
-            else:
+            refresh_token = request.data.get("refresh_token")
+            if not refresh_token:
                 raise InvalidTokenError()
+            account_id = verify_refresh_token(refresh_token)
+            account = self.account_repo.get(account_id)
+            return {"access_token": create_access_token(account.account_id)}
         except Account.DoesNotExist:
-            raise ItemNotFoundError("User")
+            raise InvalidTokenError()
+        except Exception:
+            raise InvalidTokenError()
 
-# Module-level functions for backward compatibility
-# These provide the function-based interface expected by existing code
+    def authorization(self, request) -> dict:
+        try:
+            token = request.data.get("token") or request.data.get("access_token")
+            if not token:
+                return {"result": False}
+            account_id = verify_access_token(token)
+            self.account_repo.get(account_id)
+            return {"result": True}
+        except Exception:
+            return {"result": False}
+
+    def logout(self, request) -> dict:
+        return {"result": True}
+
+
+# Module-level helpers used by wrappers and other services
 
 def _get_auth_service():
-    """Get a configured auth service instance"""
     try:
         config = Configuration(AutoConfig())
         account_repo = AccountRepositoryImpl()
         return AuthServiceImpl(config, account_repo)
     except Exception:
-        # Fallback configuration if decouple is not available
         class FallbackConfig:
-            def __init__(self):
-                self.token_lifetime = 3600  # 1 hour default
-        
+            token_lifetime = 3600
         account_repo = AccountRepositoryImpl()
         return AuthServiceImpl(FallbackConfig(), account_repo)
 
-def verify_token(token):
-    """
-    Check if user has valid token and not expired
-    Return: True/False
-    """
-    auth_service = _get_auth_service()
-    return auth_service.verify_token(token)
 
-def getAccountByToken(token):
-    """
-    Get account from token
-    Return: account object
-    """
-    auth_service = _get_auth_service()
-    return auth_service.getAccountByToken(token)
+def verify_token(token) -> bool:
+    return _get_auth_service().verify_token(token)
+
+
+def getAccountByToken(token) -> Account:
+    return _get_auth_service().getAccountByToken(token)

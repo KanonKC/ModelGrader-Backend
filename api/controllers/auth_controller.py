@@ -2,8 +2,9 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from api.errors.common import InternalServerError
 from api.errors.core.grader_exception import GraderException
-from ..constant import POST,PUT
+from ..constant import POST, PUT
 from api.setup import auth_service
+
 
 @api_view([POST])
 def login(request):
@@ -15,6 +16,7 @@ def login(request):
     except Exception as e:
         return InternalServerError(e).django_response()
 
+
 @api_view([POST])
 def logout(request):
     try:
@@ -25,10 +27,22 @@ def logout(request):
     except Exception as e:
         return InternalServerError(e).django_response()
 
+
 @api_view([PUT])
 def authorization(request):
     try:
         result = auth_service.authorization(request)
+        return Response(result, status=200)
+    except GraderException as ge:
+        return ge.django_response()
+    except Exception as e:
+        return InternalServerError(e).django_response()
+
+
+@api_view([POST])
+def token_refresh(request):
+    try:
+        result = auth_service.refresh(request)
         return Response(result, status=200)
     except GraderException as ge:
         return ge.django_response()
