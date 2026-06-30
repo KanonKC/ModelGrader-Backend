@@ -1,24 +1,18 @@
 import jwt
 from datetime import datetime, timezone, timedelta
-from decouple import config
+from api.config import settings
 
-ACCESS_TOKEN_EXPIRE_MINUTES = 15
-REFRESH_TOKEN_EXPIRE_DAYS = 7
-ALGORITHM = "HS256"
-
-
-def _secret() -> str:
-    return config("JWT_SECRET_KEY")
+_auth = settings.auth
 
 
 def create_access_token(account_id: str) -> str:
     payload = {
         "sub": account_id,
         "type": "access",
-        "exp": datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
+        "exp": datetime.now(timezone.utc) + timedelta(minutes=_auth.access_token_expire_minutes),
         "iat": datetime.now(timezone.utc),
     }
-    token = jwt.encode(payload, _secret(), algorithm=ALGORITHM)
+    token = jwt.encode(payload, _auth.jwt_secret_key, algorithm=_auth.jwt_algorithm)
     return token if isinstance(token, str) else token.decode("utf-8")
 
 
@@ -26,15 +20,15 @@ def create_refresh_token(account_id: str) -> str:
     payload = {
         "sub": account_id,
         "type": "refresh",
-        "exp": datetime.now(timezone.utc) + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS),
+        "exp": datetime.now(timezone.utc) + timedelta(days=_auth.refresh_token_expire_days),
         "iat": datetime.now(timezone.utc),
     }
-    token = jwt.encode(payload, _secret(), algorithm=ALGORITHM)
+    token = jwt.encode(payload, _auth.jwt_secret_key, algorithm=_auth.jwt_algorithm)
     return token if isinstance(token, str) else token.decode("utf-8")
 
 
 def decode_token(token: str) -> dict:
-    return jwt.decode(token, _secret(), algorithms=[ALGORITHM])
+    return jwt.decode(token, _auth.jwt_secret_key, algorithms=[_auth.jwt_algorithm])
 
 
 def verify_access_token(token: str) -> str:

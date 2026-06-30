@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 import os
 from datetime import timedelta
 from pathlib import Path
-from decouple import config 
+from api.config import settings as app_settings
 
 # env = environ.Env(
 #     # set casting, default value
@@ -30,7 +30,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-7fk!^ke_z%97-at2-fff=%v+mk!7)&0(!bvku5)v#&*olpu#gp'
-FRONEND_URL = config('FRONTEND_URL')
+FRONEND_URL = app_settings.frontend_url
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -116,11 +116,11 @@ WSGI_APPLICATION = 'Backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DATABASE_NAME'),
-        'USER': config('DATABASE_USER'),
-        'PASSWORD': config('DATABASE_PASSWORD'),
-        'HOST': config('DATABASE_HOST'),
-        'PORT': config('DATABASE_PORT', default='5432'),
+        'NAME': app_settings.db.name,
+        'USER': app_settings.db.user,
+        'PASSWORD': app_settings.db.password,
+        'HOST': app_settings.db.host,
+        'PORT': app_settings.db.port,
         'OPTIONS': {
             'sslmode': 'require',
         },

@@ -1,5 +1,4 @@
 from django.forms.models import model_to_dict
-from api.config import Configuration
 from api.errors.auth import IncorrectPasswordError
 from api.models import Account
 from api.repositories.account_repository import AccountRepository, AccountRepositoryImpl
@@ -13,7 +12,6 @@ from api.services.auth.jwt_service import (
 )
 
 from abc import ABC, abstractmethod
-from decouple import AutoConfig
 
 
 def _build_token_response(account: Account) -> dict:
@@ -49,8 +47,7 @@ class AuthService(ABC):
 
 class AuthServiceImpl:
 
-    def __init__(self, config: Configuration, account_repo: AccountRepository):
-        self.config = config
+    def __init__(self, account_repo: AccountRepository):
         self.account_repo = account_repo
 
     def verify_token(self, token) -> bool:
@@ -116,15 +113,7 @@ class AuthServiceImpl:
 # Module-level helpers used by wrappers and other services
 
 def _get_auth_service():
-    try:
-        config = Configuration(AutoConfig())
-        account_repo = AccountRepositoryImpl()
-        return AuthServiceImpl(config, account_repo)
-    except Exception:
-        class FallbackConfig:
-            token_lifetime = 3600
-        account_repo = AccountRepositoryImpl()
-        return AuthServiceImpl(FallbackConfig(), account_repo)
+    return AuthServiceImpl(AccountRepositoryImpl())
 
 
 def verify_token(token) -> bool:

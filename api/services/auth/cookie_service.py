@@ -1,28 +1,27 @@
 from django.http import HttpResponse
-from api.services.auth.jwt_service import REFRESH_TOKEN_EXPIRE_DAYS
+from api.config import settings
 
-REFRESH_COOKIE_NAME = "refresh_token"
-REFRESH_COOKIE_MAX_AGE = REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
+_auth = settings.auth
 
 
 def set_refresh_cookie(response: HttpResponse, refresh_token: str) -> None:
     response.set_cookie(
-        key=REFRESH_COOKIE_NAME,
+        key=_auth.refresh_cookie_name,
         value=refresh_token,
-        max_age=REFRESH_COOKIE_MAX_AGE,
+        max_age=_auth.refresh_token_expire_days * 24 * 60 * 60,
         httponly=True,
-        secure=False,   # set True in production (requires HTTPS)
-        samesite="Lax",
+        secure=_auth.refresh_cookie_secure,
+        samesite=_auth.refresh_cookie_samesite,
         path="/api/auth/token/refresh",
     )
 
 
 def get_refresh_token_from_cookie(request) -> str | None:
-    return request.COOKIES.get(REFRESH_COOKIE_NAME)
+    return request.COOKIES.get(_auth.refresh_cookie_name)
 
 
 def clear_refresh_cookie(response: HttpResponse) -> None:
     response.delete_cookie(
-        key=REFRESH_COOKIE_NAME,
+        key=_auth.refresh_cookie_name,
         path="/api/auth/token/refresh",
     )
