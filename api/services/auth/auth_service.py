@@ -6,8 +6,7 @@ from api.models import Account
 from api.repositories.account_repository import AccountRepository, AccountRepositoryImpl
 from api.errors.common import *
 from api.utility import passwordEncryption
-from rest_framework.response import Response
-from rest_framework import status
+
 from uuid import uuid4
 from abc import ABC, abstractmethod
 from decouple import AutoConfig
@@ -94,7 +93,7 @@ class AuthServiceImpl:
             if account.token == request.data['token']:
                 account.token = None
                 account.save()
-                return Response(model_to_dict(account), status=status.HTTP_200_OK)
+                return model_to_dict(account)
             else:
                 raise InvalidTokenError()
         except Account.DoesNotExist:
