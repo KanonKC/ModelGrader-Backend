@@ -84,6 +84,12 @@ class AuthServiceImpl:
             refresh_token = request.data.get("refresh_token")
             if not refresh_token:
                 raise InvalidTokenError()
+            return self.refresh_from_token(refresh_token)
+        except Exception:
+            raise InvalidTokenError()
+
+    def refresh_from_token(self, refresh_token: str) -> dict:
+        try:
             account_id = verify_refresh_token(refresh_token)
             account = self.account_repo.get(account_id)
             return {"access_token": create_access_token(account.account_id)}

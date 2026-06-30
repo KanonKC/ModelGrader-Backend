@@ -8,6 +8,7 @@ from api.errors.core.grader_exception import GraderException
 from api.models import Account
 from api.constant import POST
 from api.services.auth.jwt_service import create_access_token, create_refresh_token
+from api.services.auth.cookie_service import set_refresh_cookie
 
 GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token"
 GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v3/userinfo"
@@ -50,14 +51,16 @@ def _get_or_create_account(email: str) -> Account:
         return Account.objects.create(email=email, username=username, password="")
 
 
-def _build_jwt_response(account: Account) -> dict:
-    return {
-        "access_token": create_access_token(account.account_id),
-        "refresh_token": create_refresh_token(account.account_id),
+def _build_jwt_response(account: Account) -> tuple[dict, str]:
+    access_token = create_access_token(account.account_id)
+    refresh_token = create_refresh_token(account.account_id)
+    body = {
+        "access_token": access_token,
         "account_id": account.account_id,
         "username": account.username,
         "email": account.email,
     }
+    return body, refresh_token
 
 
 @api_view([POST])
@@ -78,7 +81,10 @@ def google_callback(request):
             return Response({"error": "Could not retrieve email from Google."}, status=400)
 
         account = _get_or_create_account(email)
-        return Response(_build_jwt_response(account), status=200)
+        body, refresh_token = _build_jwt_response(account)
+        response = Response(body, status=200)
+        set_refresh_cookie(response, refresh_token)
+        return response
 
     except GraderException as ge:
         return ge.django_response()
