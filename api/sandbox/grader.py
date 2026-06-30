@@ -155,16 +155,16 @@ class PythonGrader(ProgramGrader):
         
         for i in range(len(self.testcases)):
             try:
-                runner = subprocess.check_output([
-                    'python',f'./api/sandbox/section{self.section}/runner.py'],
-                    stdin=open(f'./api/sandbox/section{self.section}/testcases/{i}.txt',
-                    'r'
-                ),stderr=subprocess.DEVNULL,timeout=float(self.timeout))
-                result.append(RuntimeResult(self.testcases[i],runner.decode(),"OK"))
-            except subprocess.CalledProcessError as e:
-                result.append(RuntimeResult(self.testcases[i],None,"ERROR"))
+                runner = subprocess.run([
+                    'python', f'./api/sandbox/section{self.section}/runner.py'],
+                    stdin=open(f'./api/sandbox/section{self.section}/testcases/{i}.txt', 'r'),
+                    capture_output=True, timeout=float(self.timeout))
+                if runner.returncode != 0:
+                    result.append(RuntimeResult(self.testcases[i], runner.stderr.decode(), "ERROR"))
+                else:
+                    result.append(RuntimeResult(self.testcases[i], runner.stdout.decode(), "OK"))
             except subprocess.TimeoutExpired:
-                result.append(RuntimeResult(self.testcases[i],None,"TIMEOUT"))
+                result.append(RuntimeResult(self.testcases[i], None, "TIMEOUT"))
 
         return result
 
@@ -183,17 +183,17 @@ class CGrader(ProgramGrader):
             
             for i in range(len(self.testcases)):
                 try:
-                    runner = subprocess.check_output([
+                    runner = subprocess.run([
                         f'./api/sandbox/section{self.section}/runner.exe'],
-                        stdin=open(f'./api/sandbox/section{self.section}/testcases/{i}.txt',
-                        'r'
-                    ),stderr=subprocess.DEVNULL,timeout=float(self.timeout))
-                    result.append(RuntimeResult(self.testcases[i],runner.decode(),"OK"))
-                except subprocess.CalledProcessError:
-                    result.append(RuntimeResult(self.testcases[i],None,"ERROR"))
+                        stdin=open(f'./api/sandbox/section{self.section}/testcases/{i}.txt', 'r'),
+                        capture_output=True, timeout=float(self.timeout))
+                    if runner.returncode != 0:
+                        result.append(RuntimeResult(self.testcases[i], runner.stderr.decode(), "ERROR"))
+                    else:
+                        result.append(RuntimeResult(self.testcases[i], runner.stdout.decode(), "OK"))
                 except subprocess.TimeoutExpired:
-                    result.append(RuntimeResult(self.testcases[i],None,"TIMEOUT"))
-    
+                    result.append(RuntimeResult(self.testcases[i], None, "TIMEOUT"))
+
             return result
 
 class CppGrader(ProgramGrader):
@@ -210,17 +210,17 @@ class CppGrader(ProgramGrader):
             
             for i in range(len(self.testcases)):
                 try:
-                    runner = subprocess.check_output([
+                    runner = subprocess.run([
                         f'./api/sandbox/section{self.section}/runner.exe'],
-                        stdin=open(f'./api/sandbox/section{self.section}/testcases/{i}.txt',
-                        'r'
-                    ),stderr=subprocess.DEVNULL,timeout=float(self.timeout))
-                    result.append(RuntimeResult(self.testcases[i],runner.decode(),"OK"))
-                except subprocess.CalledProcessError:
-                    result.append(RuntimeResult(self.testcases[i],None,"ERROR"))
+                        stdin=open(f'./api/sandbox/section{self.section}/testcases/{i}.txt', 'r'),
+                        capture_output=True, timeout=float(self.timeout))
+                    if runner.returncode != 0:
+                        result.append(RuntimeResult(self.testcases[i], runner.stderr.decode(), "ERROR"))
+                    else:
+                        result.append(RuntimeResult(self.testcases[i], runner.stdout.decode(), "OK"))
                 except subprocess.TimeoutExpired:
-                    result.append(RuntimeResult(self.testcases[i],None,"TIMEOUT"))
-    
+                    result.append(RuntimeResult(self.testcases[i], None, "TIMEOUT"))
+
             return result
 
 
