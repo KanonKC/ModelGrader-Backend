@@ -1,0 +1,28 @@
+services:
+  app:
+    build: .
+    container_name: modelgrader-backend
+    restart: always
+    ports:
+      - "${PORT}:8000"
+    environment:
+      - PORT=${PORT}
+      - FRONTEND_URL=${FRONTEND_URL}
+      - TOKEN_LIFETIME_SECOND=${TOKEN_LIFETIME_SECOND}
+      - DATABASE_NAME=${DATABASE_NAME}
+      - DATABASE_USER=${DATABASE_USER}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - DATABASE_HOST=${DATABASE_HOST}
+      - DATABASE_PORT=${DATABASE_PORT}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_S3_BUCKET_NAME=${AWS_S3_BUCKET_NAME}
+      - AWS_S3_REGION=${AWS_S3_REGION}
+      - AWS_S3_PDF_PREFIX=${AWS_S3_PDF_PREFIX}
+networks:
+  default:
+    name: modelgrader-network
+    driver: bridge

@@ -1,22 +1,23 @@
-# base image  
-FROM python:3.11.3 
+# Stage 1: Build dependencies
+FROM python:3.11.3-slim AS builder
 
-# set work directory  
-WORKDIR /home/app/webapp  
+WORKDIR /app
 
-# set environment variables  
+COPY requirements.txt .
+RUN pip install --upgrade pip && pip install --prefix=/install -r requirements.txt
+
+# Stage 2: Production
+FROM python:3.11.3-slim
+
+WORKDIR /app
+
 ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1  
+ENV PYTHONUNBUFFERED=1
+ENV DJANGO_SETTINGS_MODULE=Backend.settings
 
-# install dependencies  
-COPY requirements.txt /home/app/webapp/  
-RUN pip install --upgrade pip && pip install -r requirements.txt
+COPY --from=builder /install /usr/local
+COPY . .
 
-# copy whole project to your docker home directory. 
-COPY . .  
-
-# port where the Django app runs  
 EXPOSE 8000
 
-# start server  
-CMD ["python3", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["gunicorn", "Backend.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3"]
