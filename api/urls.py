@@ -55,6 +55,9 @@ urlpatterns = [
     path('groups/<str:group_id>',group_controller.one_group_view),
     path('groups/<str:group_id>/members/<str:method>',group_controller.group_members_view),
 
+    path('upload/pdf', problem_controller.upload_pdf_view),
+    path('problems/<str:problem_id>/pdf/url', problem_controller.problem_pdf_url_view),
+
     path('submissions',submission_controller.all_submission_view),
 
     # New Versions

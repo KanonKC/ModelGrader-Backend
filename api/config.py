@@ -29,11 +29,20 @@ class GoogleConfig:
     userinfo_url: str  = "https://www.googleapis.com/oauth2/v3/userinfo"
 
 
+class S3Config:
+    bucket_name: str  = _env("AWS_S3_BUCKET_NAME")
+    region: str       = _env("AWS_S3_REGION", default="ap-southeast-1")
+    access_key: str   = _env("AWS_ACCESS_KEY_ID")
+    secret_key: str   = _env("AWS_SECRET_ACCESS_KEY")
+    pdf_prefix: str   = _env("AWS_S3_PDF_PREFIX", default="problem-pdfs/")
+
+
 class AppConfig:
     frontend_url: str = _env("FRONTEND_URL")
     db = DatabaseConfig()
     auth = AuthConfig()
     google = GoogleConfig()
+    s3 = S3Config()
 
 
 # Singleton — import this everywhere instead of reading .env directly

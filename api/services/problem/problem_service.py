@@ -42,6 +42,8 @@ class ProblemService:
             'solution': request.data['solution'],
             'time_limit': request.data['time_limit'],
             'allowed_languages': request.data['allowed_languages'],
+            'view_mode': request.data.get('view_mode', 'plate'),
+            'pdf_url': request.data.get('pdf_url', None),
         }
         problem = self.problem_repo.create(problem_data)
 
@@ -181,7 +183,7 @@ class ProblemService:
 
     def update_group_permission_to_problem(self, problem_id: str, request):
         problem = self.problem_repo.get(problem_id)
-        self.permission_repo.delete_problem_group_permissions(problem_id)
+        self.permission_repo.delete_problem_permissions(problem_id)
 
         problem_group_permissions = []
         for group_request in request.data['groups']:
@@ -193,7 +195,7 @@ class ProblemService:
                     **group_request
             ))
 
-        self.permission_repo.bulk_create_problem_group_permissions(problem_group_permissions)
+        self.permission_repo.bulk_create_problem_permissions(problem_group_permissions)
 
         problem.group_permissions = problem_group_permissions
         problem.testcases = self.problem_repo.get_testcases(problem_id)
@@ -209,7 +211,9 @@ class ProblemService:
             'solution': request.data.get('solution'),
             'time_limit': request.data.get('time_limit'),
             'is_private': request.data.get('is_private'),
-            'allowed_languages': request.data.get('allowed_languages')
+            'allowed_languages': request.data.get('allowed_languages'),
+            'view_mode': request.data.get('view_mode'),
+            'pdf_url': request.data.get('pdf_url'),
         }
         # Remove None values
         update_data = {k: v for k, v in update_data.items() if v is not None}

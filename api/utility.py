@@ -42,7 +42,7 @@ def check_pdf(file) -> bool:
     
     header = file.read(4)
     file.seek(0)
-    if header != b'%PDF' or file.size >= 5 * 1024 * 1024:
+    if header != b'%PDF' or file.size >= 2.5 * 1024 * 1024:
         return False
     return True
 

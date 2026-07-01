@@ -1,5 +1,15 @@
 from rest_framework import serializers
 from ...models import *
+from api.services import s3_service
+
+
+def _get_pdf_presigned_url(obj):
+    if obj.pdf_url:
+        try:
+            return s3_service.get_presigned_url(obj.pdf_url)
+        except Exception:
+            return None
+    return None
 
 # Account related serializers (dependencies)
 class AccountSecureSerializer(serializers.ModelSerializer):
@@ -40,6 +50,11 @@ class ProblemPopulateAccountSerializer(serializers.ModelSerializer):
 
 class ProblemPopulateAccountSecureSerializer(serializers.ModelSerializer):
     creator = AccountSecureSerializer()
+    pdf_presigned_url = serializers.SerializerMethodField()
+
+    def get_pdf_presigned_url(self, obj):
+        return _get_pdf_presigned_url(obj)
+
     class Meta:
         model = Problem
         exclude = ['solution', 'submission_regex', 'is_private', 'is_active', 'sharing']
@@ -152,6 +167,11 @@ class ProblemPopulateAccountAndTestcasesAndProblemGroupPermissionsPopulateGroupS
     creator = AccountSecureSerializer()
     group_permissions = ProblemGroupPermissionsPopulateGroupSerializer(many=True)
     testcases = TestcaseSerializer(many=True)
+    pdf_presigned_url = serializers.SerializerMethodField()
+
+    def get_pdf_presigned_url(self, obj):
+        return _get_pdf_presigned_url(obj)
+
     class Meta:
         model = Problem
         fields = "__all__"
