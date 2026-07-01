@@ -1,0 +1,64 @@
+pipeline {
+    tools {
+        git "Default"
+    }
+    environment {
+        ENV_FILE=credentials("modelgrader-dev")
+    }
+    stages {
+        stage("Checkout Version") {
+            steps {
+                script {
+                    echo "🏷️ Checking out branch: develop"
+                    checkout([
+                        $class: 'GitSCM',
+                        branches: [[name: '*/develop']],
+                        userRemoteConfigs: scm.userRemoteConfigs
+                    ])
+                }
+            }
+        }
+        stage("Setup Environment") {
+            steps {
+                echo "⚙️ Creating environment file with credentials..."
+                sh 'cp $ENV_FILE .env'
+            }
+        }
+        stage("Run Container") {
+            steps {
+                script {
+                    echo "🐳 Starting Docker container ..."
+                    sh "docker compose up -d --build || docker-compose up -d --build"
+                }
+            }
+        }
+        stage("Migrate Database") {
+            steps {
+                echo "🔼 Waiting for app container to be ready..."
+                sh '''
+                for i in $(seq 1 30); do
+                    if docker compose ps app --format "{{.Status}}" 2>/dev/null | grep -q "Up" || docker-compose ps app 2>/dev/null | grep -q "Up"; then
+                        echo "✅ App container is running"
+                        break
+                    fi
+                    sleep 1
+                done
+                '''
+                echo "🔼 Running Django migrations..."
+                sh 'docker compose exec -T app python manage.py migrate || docker-compose exec -T app python manage.py migrate'
+            }
+        }
+    }
+    post {
+        success {
+            echo "🎉 Deployment successful!"
+        }
+        failure {
+            echo "🚨 Deployment failed!"
+        }
+        always {
+            echo "🧹 Cleaning up environment file..."
+            sh 'rm -f .env'
+        }
+    }
+}
