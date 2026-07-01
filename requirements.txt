@@ -31,3 +31,4 @@ threadpoolctl==3.2.0
 tzdata==2023.4
 urllib3==1.26.12
 boto3==1.35.0
+gunicorn==21.2.0
