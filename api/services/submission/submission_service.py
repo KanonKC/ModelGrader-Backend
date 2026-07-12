@@ -33,17 +33,19 @@ class SubmissionService:
         # query = request.query_params.get("query","")
         if end == -1: end = None
 
-        submissions = self.submission_repo.get_by_problem(problem_id, start, end)
+        submissions = list(self.submission_repo.get_by_problem(problem_id, start, end))
         total = len(submissions)
 
         if total == 0:
             return {"submissions": []}
-        
+
         result = []
-        
+        testcases_by_submission = self.submission_repo.get_testcases_for_submissions(
+            [submission.submission_id for submission in submissions]
+        )
+
         for submission in submissions:
-            submission_testcases = self.submission_repo.get_testcases(submission.submission_id)
-            submission.runtime_output = submission_testcases
+            submission.runtime_output = testcases_by_submission.get(submission.submission_id, [])
             result.append(submission)
 
         problem.testcases = self.problem_repo.get_testcases(problem_id, deprecated=False)
@@ -89,26 +91,32 @@ class SubmissionService:
             end=end
         )
 
+        submissions = list(submissions)
+        testcases_by_submission = self.submission_repo.get_testcases_for_submissions(
+            [submission.submission_id for submission in submissions]
+        )
         for submission in submissions:
-            submission.runtime_output = self.submission_repo.get_testcases(submission.submission_id)
-            
+            submission.runtime_output = testcases_by_submission.get(submission.submission_id, [])
+
         serialize = SubmissionPopulateSubmissionTestcaseAndProblemSecureSerializer(submissions,many=True)
         return {"submissions": serialize.data}
 
     def get_submissions_by_account_problem_in_topic(self, account_id:str,problem_id:str,topic_id:str):
-        submissions = self.submission_repo.get_by_account_problem_topic(account_id, problem_id, topic_id)
+        submissions = list(self.submission_repo.get_by_account_problem_topic(account_id, problem_id, topic_id))
 
         total = len(submissions)
         if total == 0:
             return {"best_submission": None, "submissions": []}
-        
+
         result = []
-        
+        testcases_by_submission = self.submission_repo.get_testcases_for_submissions(
+            [submission.submission_id for submission in submissions]
+        )
+
         for submission in submissions:
-            submission_testcases = self.submission_repo.get_testcases(submission.submission_id)
-            submission.runtime_output = submission_testcases
+            submission.runtime_output = testcases_by_submission.get(submission.submission_id, [])
             result.append(submission)
-        
+
         best_submission = self.submission_repo.get_best_record(problem_id, account_id, topic_id)
         if best_submission:
             best_submission.submission.runtime_output = self.submission_repo.get_testcases(best_submission.submission_id)
@@ -122,20 +130,22 @@ class SubmissionService:
         return {"best_submission": best_submission_result, "submissions": submissions_serializer.data}
 
     def get_submissions_by_account_problem(self, account_id:str,problem_id:str):
-        submissions = self.submission_repo.get_by_account_problem(account_id, problem_id)
+        submissions = list(self.submission_repo.get_by_account_problem(account_id, problem_id))
 
         total = len(submissions)
         if total == 0:
             return {"best_submission": None, "submissions": []}
-        
+
         best_submission_id = self.submission_repo.get_best(problem_id, account_id).submission_id
 
         best_submission = None
         result = []
-        
+        testcases_by_submission = self.submission_repo.get_testcases_for_submissions(
+            [submission.submission_id for submission in submissions]
+        )
+
         for submission in submissions:
-            submission_testcases = self.submission_repo.get_testcases(submission.submission_id)
-            submission.runtime_output = submission_testcases
+            submission.runtime_output = testcases_by_submission.get(submission.submission_id, [])
             result.append(submission)
 
             if submission.submission_id == best_submission_id:

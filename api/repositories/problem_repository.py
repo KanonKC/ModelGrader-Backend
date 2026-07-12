@@ -1,6 +1,7 @@
 from typing import List
 from django.utils import timezone
 from api.models import Problem, Testcase, Submission, SubmissionTestcase, BestSubmission
+from api.utility import group_by
 
 
 class ProblemRepository:
@@ -46,7 +47,11 @@ class ProblemRepository:
 
     def get_testcases(self, problem_id: str, deprecated: bool = False):
         return Testcase.objects.filter(problem_id=problem_id, deprecated=deprecated)
-    
+
+    def get_testcases_for_problems(self, problem_ids: List[str], deprecated: bool = False):
+        testcases = Testcase.objects.filter(problem_id__in=problem_ids, deprecated=deprecated)
+        return group_by(testcases, lambda testcase: testcase.problem_id)
+
     def create_testcase(self, data: dict) -> Testcase:
         testcase = Testcase(**data)
         testcase.save()
@@ -75,13 +80,28 @@ class ProblemRepository:
     
     def get_best_submission(self, problem_id: str, account_id: str):
         return Submission.objects.filter(problem_id=problem_id, account_id=account_id).order_by('-passed_ratio', '-submission_id').first()
-    
+
+    def get_best_submissions_for_problems(self, problem_ids: List[str], account_id: str):
+        """One best submission per problem_id for a fixed account, in a single query."""
+        submissions = Submission.objects.filter(
+            problem_id__in=problem_ids, account_id=account_id
+        ).order_by('problem_id', '-passed_ratio', '-submission_id')
+        best_by_problem = {}
+        for submission in submissions:
+            if submission.problem_id not in best_by_problem:
+                best_by_problem[submission.problem_id] = submission
+        return best_by_problem
+
     def get_best_submission_in_topic(self, problem_id: str, account_id: str, topic_id: str):
         return BestSubmission.objects.filter(problem_id=problem_id, account_id=account_id, topic_id=topic_id).first()
-    
+
     def get_submission_testcases(self, submission_id: str):
         return SubmissionTestcase.objects.filter(submission_id=submission_id)
-    
+
+    def get_submission_testcases_for_submissions(self, submission_ids: List[str]):
+        testcases = SubmissionTestcase.objects.filter(submission_id__in=submission_ids)
+        return group_by(testcases, lambda testcase: testcase.submission_id)
+
     def get_submissions_by_problem(self, problem_id: str):
         return Submission.objects.filter(problem_id=problem_id)
     

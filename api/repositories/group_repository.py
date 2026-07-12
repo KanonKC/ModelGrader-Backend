@@ -1,6 +1,7 @@
 from django.db.models import Q
 from django.utils import timezone
 from api.models import GroupMember, Group, TopicCollection, CollectionGroupPermission
+from api.utility import group_by
 from typing import List
 
 
@@ -44,7 +45,11 @@ class GroupRepository:
     
     def get_members(self, group_id: str):
         return GroupMember.objects.filter(group_id=group_id)
-    
+
+    def get_members_for_groups(self, group_ids: List[str]):
+        members = GroupMember.objects.filter(group_id__in=group_ids)
+        return group_by(members, lambda member: member.group_id)
+
     def update(self, group_id: str, group_data: dict):
         group = self.get(group_id)
         for key, value in group_data.items():

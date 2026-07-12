@@ -69,9 +69,13 @@ class TopicService:
     def populated_collections(self, topics: Topic):
         topic_ids = [topic.topic_id for topic in topics]
         topicCollections = self.topic_repo.get_many_collections(topic_ids)
+        collections_by_topic = {}
+        for tc in topicCollections:
+            collections_by_topic.setdefault(tc.topic_id, []).append(tc)
+
         populated_topics = []
         for topic in topics:
-            topic.collections = topicCollections.filter(topic_id=topic.topic_id)
+            topic.collections = collections_by_topic.get(topic.topic_id, [])
             populated_topics.append(topic)
         return populated_topics
 
@@ -111,12 +115,18 @@ class TopicService:
 
         topicCollections = self.group_repo.get_accessible_collections_with_access(topic_id, account_id)
         group_ids = self.group_repo.get_ids_by_account(account_id)
-        topicCollections = self.permission_repo.get_accessible_problems_for_collections(topicCollections, group_ids)
+        topicCollections = list(self.permission_repo.get_accessible_problems_for_collections(topicCollections, group_ids))
+
+        problem_ids = [
+            cp.problem.problem_id
+            for tp in topicCollections
+            for cp in tp.collection.problems
+        ]
+        best_by_problem = self.topic_repo.get_best_submissions_for_problems(problem_ids, account_id, topic_id)
 
         for tp in topicCollections:
             for cp in tp.collection.problems:
-                best_submission = self.topic_repo.get_best_submission_for_problem(cp.problem.problem_id, account_id, topic_id)
-                cp.problem.best_submission = best_submission
+                cp.problem.best_submission = best_by_problem.get(cp.problem.problem_id)
 
         topic.collections = topicCollections
 

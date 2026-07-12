@@ -92,16 +92,22 @@ class ProblemService:
         if end == -1: 
             end = None
 
-        personalProblems = self.problem_repo.get_personal(account_id, query, start, end)
+        personalProblems = list(self.problem_repo.get_personal(account_id, query, start, end))
         maxPersonal = len(personalProblems)
+        personalTestcases = self.problem_repo.get_testcases_for_problems(
+            [problem.problem_id for problem in personalProblems], deprecated=False
+        )
         for problem in personalProblems:
-            problem.testcases = self.problem_repo.get_testcases(problem.problem_id, deprecated=False)
+            problem.testcases = personalTestcases.get(problem.problem_id, [])
 
         group_ids = self.group_repo.get_by_creator(account_id)
-        manageableProblems = self.problem_repo.get_manageable_by_account(group_ids, query, start, end)
+        manageableProblems = list(self.problem_repo.get_manageable_by_account(group_ids, query, start, end))
         maxManageable = len(manageableProblems)
+        manageableTestcases = self.problem_repo.get_testcases_for_problems(
+            [problem.problem_id for problem in manageableProblems], deprecated=False
+        )
         for problem in manageableProblems:
-            problem.testcases = self.problem_repo.get_testcases(problem.problem_id, deprecated=False)
+            problem.testcases = manageableTestcases.get(problem.problem_id, [])
 
         personalSerialize = ProblemPopulatePartialTestcaseSerializer(personalProblems, many=True)
         manageableSerialize = ProblemPopulatePartialTestcaseSerializer(manageableProblems, many=True)
@@ -116,17 +122,23 @@ class ProblemService:
         }
 
     def get_all_problem_with_best_submission(self, account_id: str):
-        problems = self.problem_repo.get_with_best_submission(account_id)
+        problems = list(self.problem_repo.get_with_best_submission(account_id))
+
+        best_by_problem = self.problem_repo.get_best_submissions_for_problems(
+            [problem.problem_id for problem in problems], account_id
+        )
+        testcases_by_submission = self.problem_repo.get_submission_testcases_for_submissions(
+            [submission.submission_id for submission in best_by_problem.values()]
+        )
 
         for problem in problems:
-            best_submission = self.problem_repo.get_best_submission(problem.problem_id, account_id)
+            best_submission = best_by_problem.get(problem.problem_id)
             if best_submission:
-                testcases = self.problem_repo.get_submission_testcases(best_submission.submission_id)
-                best_submission.runtime_output = testcases
+                best_submission.runtime_output = testcases_by_submission.get(best_submission.submission_id, [])
                 problem.best_submission = best_submission
             else:
                 problem.best_submission = None
-        
+
         problem_ser = ProblemPopulateAccountAndSubmissionPopulateSubmissionTestcasesSecureSerializer(problems, many=True)
         return {"problems": problem_ser.data}
 

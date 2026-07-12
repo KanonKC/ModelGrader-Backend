@@ -48,8 +48,12 @@ class GroupService:
         populate_members = request.GET.get('populate_members', False)
 
         if populate_members:
+            groups = list(groups)
+            members_by_group = self.group_repo.get_members_for_groups(
+                [group.group_id for group in groups]
+            )
             for group in groups:
-                group.members = self.group_repo.get_members(group.group_id)
+                group.members = members_by_group.get(group.group_id, [])
             serialize = GroupPopulateGroupMemberPopulateAccountSecureSerializer(groups, many=True)
         else:
             serialize = GroupSerializer(groups, many=True)

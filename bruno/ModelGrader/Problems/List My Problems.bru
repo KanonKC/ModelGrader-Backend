@@ -1,0 +1,21 @@
+meta {
+  name: List My Problems
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{base_url}}/accounts/{{account_id}}/problems?start=0&end=10&query=
+  body: none
+  auth: bearer
+}
+
+params:query {
+  start: 0
+  end: 10
+  query:
+}
+
+auth:bearer {
+  token: {{access_token}}
+}

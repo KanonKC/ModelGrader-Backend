@@ -1,4 +1,5 @@
 from api.models import Submission, SubmissionTestcase, BestSubmission
+from api.utility import group_by
 from typing import List
 
 
@@ -21,7 +22,11 @@ class SubmissionRepository:
 
     def get_testcases(self, submission_id: str):
         return SubmissionTestcase.objects.filter(submission_id=submission_id)
-    
+
+    def get_testcases_for_submissions(self, submission_ids: List[str]):
+        testcases = SubmissionTestcase.objects.filter(submission_id__in=submission_ids)
+        return group_by(testcases, lambda testcase: testcase.submission_id)
+
     def get_by_problem(self, problem_id: str, start: int = 0, end: int = None):
         submissions = Submission.objects.filter(problem_id=problem_id).order_by('-date')
         if end:

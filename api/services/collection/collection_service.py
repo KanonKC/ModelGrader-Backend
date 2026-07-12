@@ -54,16 +54,23 @@ class CollectionService:
         if account_id:
             collections = collections.filter(creator_id=account_id)
 
+        collections = list(collections)
+        collection_problems_map = {}
+        for cp in self.collection_repo.get_problems_by_collections(
+            [collection.collection_id for collection in collections]
+        ):
+            collection_problems_map.setdefault(cp.collection_id, []).append(cp)
+
         populated_collections = []
         for collection in collections:
-            con_probs = self.collection_repo.get_problems(collection)
+            con_probs = collection_problems_map.get(collection.collection_id, [])
 
             populated_cp = []
             for cp in con_probs:
                 prob_serialize = ProblemSerializer(cp.problem)
                 cp_serialize = CollectionProblemSerializer(cp)
                 populated_cp.append({**cp_serialize.data, **prob_serialize.data})
-        
+
             serialize = CollectionSerializer(collection)
             collection_data = serialize.data
             collection_data['problems'] = populated_cp
@@ -75,12 +82,17 @@ class CollectionService:
         }
 
     def populated_problems(self, collections: Collection):
+        collections = list(collections)
         collection_ids = [collection.collection_id for collection in collections]
-        problemCollections = self.collection_repo.get_problems_by_collections(collection_ids)
+        problemCollections = list(self.collection_repo.get_problems_by_collections(collection_ids))
+
+        problems_by_collection = {}
+        for cp in problemCollections:
+            problems_by_collection.setdefault(cp.collection_id, []).append(cp)
 
         populated_collections = []
         for collection in collections:
-            collection.problems = problemCollections.filter(collection=collection)
+            collection.problems = problems_by_collection.get(collection.collection_id, [])
             populated_collections.append(collection)
 
         return populated_collections

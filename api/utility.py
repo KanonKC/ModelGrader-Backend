@@ -2,6 +2,10 @@ from hashlib import sha512
 import regex as re
 import random
 import string
+from typing import Callable, Dict, Iterable, List, TypeVar
+
+T = TypeVar('T')
+K = TypeVar('K')
 
 def passwordEncryption(password):
     ePassword = sha512(str(password).encode('utf8'))
@@ -45,6 +49,19 @@ def check_pdf(file) -> bool:
     if header != b'%PDF' or file.size >= 2.5 * 1024 * 1024:
         return False
     return True
+
+def group_by(iterable: Iterable[T], key_fn: Callable[[T], K]) -> Dict[K, List[T]]:
+    """
+    Group items of an iterable into a dict of lists keyed by key_fn(item).
+
+    Replaces the copy-pasted `grouped = {}; for x in qs: grouped.setdefault(...)`
+    pattern used across repositories to turn a single batched queryset into a
+    per-parent-id lookup (e.g. testcases per problem_id, members per group_id).
+    """
+    grouped: Dict[K, List[T]] = {}
+    for item in iterable:
+        grouped.setdefault(key_fn(item), []).append(item)
+    return grouped
 
 def ERROR_TYPE_TO_STATUS(errorType: str) -> int:
     errorMap = {

@@ -1,6 +1,7 @@
 from django.utils import timezone
 from django.db.models import Q
 from api.models import Topic, TopicCollection, Collection, BestSubmission, SubmissionTestcase
+from api.utility import group_by
 from typing import List
 
 class TopicRepository:
@@ -79,7 +80,24 @@ class TopicRepository:
             return best_submission
         except:
             return None
-    
+
+    def get_best_submissions_for_problems(self, problem_ids: List[str], account_id: str, topic_id: str):
+        """Best submission per problem_id for a fixed account/topic, batched into 2 queries total."""
+        best_records = BestSubmission.objects.filter(
+            problem_id__in=problem_ids, account_id=account_id, topic_id=topic_id
+        ).select_related('submission')
+
+        best_by_problem = {record.problem_id: record.submission for record in best_records}
+        submission_ids = [submission.submission_id for submission in best_by_problem.values()]
+        testcases_by_submission = {}
+        for testcase in SubmissionTestcase.objects.filter(submission_id__in=submission_ids):
+            testcases_by_submission.setdefault(testcase.submission_id, []).append(testcase)
+
+        for submission in best_by_problem.values():
+            submission.runtime_output = testcases_by_submission.get(submission.submission_id, [])
+
+        return best_by_problem
+
     
     def create_collection(self, topic_id: str, collection_id: str, order: int):
         topic_collection = TopicCollection(

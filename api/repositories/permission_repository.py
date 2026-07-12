@@ -43,7 +43,7 @@ class PermissionRepository:
     def get_accessible_problems_for_collections(self, topic_collections, ids: List[str]):
         """Get accessible problems for collections based on group permissions"""
         for tp in topic_collections:
-            collection_problems = CollectionProblem.objects.filter(
+            collection_problems = CollectionProblem.objects.select_related('problem').filter(
                 collection_id=tp.collection_id,
                 problem_id__in=ProblemGroupPermission.objects.filter(
                     Q(group__in=ids) & (Q(permission_view_problems=True) | Q(permission_manage_problems=True))

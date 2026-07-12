@@ -43,7 +43,7 @@ class CollectionRepository:
         return CollectionProblem.objects.filter(collection_id=collection_id).order_by('order')
     
     def get_problems_by_collections(self, collection_ids):
-        return CollectionProblem.objects.filter(collection__in=collection_ids)
+        return CollectionProblem.objects.filter(collection__in=collection_ids).order_by('order')
     
     def get_by_creator(self, account_id: str, order_by: str = '-updated_date'):
         return Collection.objects.filter(creator_id=account_id).order_by(order_by)
