@@ -6,6 +6,9 @@ pipeline {
     environment {
         ENV_FILE=credentials("modelgrader-dev")
     }
+    agent {
+        label "stargaze-builder"
+    }
     stages {
         stage("Checkout Version") {
             steps {
