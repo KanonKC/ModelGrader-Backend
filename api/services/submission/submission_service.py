@@ -237,7 +237,7 @@ class SubmissionService:
         submission.runtime_output = submission_testcases
         testser = SubmissionPopulateSubmissionTestcaseSecureSerializer(submission)
 
-        self.problem_service.update_problem_difficulty(problem)
+        self.problem_service.update_problem_difficulty(problem.problem_id)
 
         return testser.data
 
