@@ -34,12 +34,14 @@ def topic_account_problem_submission_view(request, account_id: str, topic_id: st
     except Exception as e:
         return InternalServerError(e).django_response()
 
-@api_view([GET])
+@api_view([GET, POST])
 @authentication_required
 def account_problem_submission_view(request, problem_id: str, account_id: str):
     try:
         if request.method == GET:
             result = submission_service.get_submissions_by_account_problem(account_id, problem_id)
+        elif request.method == POST:
+            result = submission_service.submit_problem(account_id, problem_id, request)
         return Response(result, status=200)
     except GraderException as ge:
         return ge.django_response()
