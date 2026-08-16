@@ -99,21 +99,28 @@ class SubmissionRepository:
     def bulk_create_testcases(self, testcases: List[SubmissionTestcase]):
         return SubmissionTestcase.objects.bulk_create(testcases)
     
-    def create_or_update_best(self, problem_id: str, account_id: str, 
+    def create_or_update_best(self, problem_id: str, account_id: str,
                              submission_id: str, topic_id: str = None):
-        try:
-            if topic_id:
-                best_submission = BestSubmission.objects.get(
-                    problem_id=problem_id, 
-                    account_id=account_id, 
-                    topic_id=topic_id
-                )
-            else:
-                best_submission = BestSubmission.objects.get(
-                    problem_id=problem_id, 
-                    account_id=account_id
-                )
-        except BestSubmission.DoesNotExist:
+        if topic_id:
+            existing = BestSubmission.objects.filter(
+                problem_id=problem_id,
+                account_id=account_id,
+                topic_id=topic_id
+            ).order_by('-best_submission_id')
+        else:
+            existing = BestSubmission.objects.filter(
+                problem_id=problem_id,
+                account_id=account_id,
+                topic_id__isnull=True
+            ).order_by('-best_submission_id')
+
+        best_submission = existing.first()
+        # Self-heal duplicate rows left over from a prior race/bug
+        BestSubmission.objects.filter(
+            best_submission_id__in=[b.best_submission_id for b in existing[1:]]
+        ).delete()
+
+        if not best_submission:
             best_submission = BestSubmission(
                 problem_id=problem_id,
                 account_id=account_id,
