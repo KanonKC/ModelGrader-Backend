@@ -70,7 +70,19 @@ class TestcasePartialSerializer(serializers.ModelSerializer):
         model = Testcase
         fields = ['testcase_id', 'runtime_status']
 
+class TestcaseShownSerializer(serializers.ModelSerializer):
+    """Sample testcases the creator explicitly marked as visible to solvers."""
+    class Meta:
+        model = Testcase
+        fields = ['testcase_id', 'input', 'output']
+
 # Problem with Testcase Serializers
+class ProblemPopulateAccountAndShownTestcasesSecureSerializer(ProblemPopulateAccountSecureSerializer):
+    shown_testcases = TestcaseShownSerializer(many=True, read_only=True)
+
+    class Meta(ProblemPopulateAccountSecureSerializer.Meta):
+        pass
+
 class ProblemPopulatePartialTestcaseSerializer(serializers.ModelSerializer):
     creator = AccountSecureSerializer()
     testcases = TestcasePartialSerializer(many=True)
