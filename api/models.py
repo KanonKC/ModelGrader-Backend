@@ -55,6 +55,7 @@ class Testcase(models.Model):
     output = models.TextField(null=True)
     runtime_status = models.CharField(max_length=16)
     deprecated = models.BooleanField(default=False,blank=True)
+    is_shown = models.BooleanField(default=False,blank=True)
 
 class Collection(models.Model):
     collection_id = models.CharField(primary_key=True,blank=True,default=generate_uuid4_hex,max_length=32)

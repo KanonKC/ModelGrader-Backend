@@ -48,6 +48,9 @@ class ProblemRepository:
     def get_testcases(self, problem_id: str, deprecated: bool = False):
         return Testcase.objects.filter(problem_id=problem_id, deprecated=deprecated)
 
+    def get_shown_testcases(self, problem_id: str):
+        return Testcase.objects.filter(problem_id=problem_id, deprecated=False, is_shown=True)
+
     def get_testcases_for_problems(self, problem_ids: List[str], deprecated: bool = False):
         testcases = Testcase.objects.filter(problem_id__in=problem_ids, deprecated=deprecated)
         return group_by(testcases, lambda testcase: testcase.problem_id)

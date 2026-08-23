@@ -29,6 +29,17 @@ class ProblemService:
         self.topic_repo = topic_repo
         self.grader = grader
 
+    @staticmethod
+    def _shown_testcase_indexes(request) -> set:
+        """0-based positions into `testcases` that the creator marked visible to solvers."""
+        indexes = set()
+        for value in request.data.get('shown_testcases') or []:
+            try:
+                indexes.add(int(value))
+            except (TypeError, ValueError):
+                continue
+        return indexes
+
     def create_problem(self, account_id: str, request):
         account = self.account_repo.get(account_id)
         python_grader: ProgramGrader = self.grader['python']
@@ -47,14 +58,17 @@ class ProblemService:
         }
         problem = self.problem_repo.create(problem_data)
 
+        shown_indexes = self._shown_testcase_indexes(request)
+
         testcases_result = []
-        for unit in running_result.data:
+        for index, unit in enumerate(running_result.data):
             testcases_result.append(
                 Testcase(
                     problem=problem,
                     input=unit.input,
                     output=unit.output,
-                    runtime_status=unit.runtime_status
+                    runtime_status=unit.runtime_status,
+                    is_shown=index in shown_indexes
             ))
 
         self.problem_repo.bulk_create_testcases(testcases_result)
@@ -185,7 +199,8 @@ class ProblemService:
 
     def get_problem_public(self, problem_id: str):
         problem = self.problem_repo.get(problem_id)
-        serialize = ProblemPopulateAccountSecureSerializer(problem)
+        problem.shown_testcases = self.problem_repo.get_shown_testcases(problem_id)
+        serialize = ProblemPopulateAccountAndShownTestcasesSecureSerializer(problem)
         return serialize.data
 
     def remove_bulk_problems(self, request):
@@ -238,14 +253,17 @@ class ProblemService:
             # if not running_result.runnable:
             #     raise BadRequestError('Error during editing. Your code may has an error/timeout!')
             self.problem_repo.deprecate_testcases(problem_id)
-            
+
+            shown_indexes = self._shown_testcase_indexes(request)
+
             testcase_result = []
-            for unit in running_result.data:
+            for index, unit in enumerate(running_result.data):
                 testcase_data = {
                     'problem': problem,
                     'input': unit.input,
                     'output': unit.output,
-                    'runtime_status': unit.runtime_status
+                    'runtime_status': unit.runtime_status,
+                    'is_shown': index in shown_indexes
                 }
                 testcase = self.problem_repo.create_testcase(testcase_data)
                 testcase_result.append(testcase)
