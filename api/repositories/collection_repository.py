@@ -40,10 +40,10 @@ class CollectionRepository:
         self.get(collection_id).delete()
 
     def get_problems(self, collection_id: str):
-        return CollectionProblem.objects.filter(collection_id=collection_id).order_by('order')
+        return CollectionProblem.objects.filter(collection_id=collection_id).select_related('problem', 'problem__creator').order_by('order')
     
     def get_problems_by_collections(self, collection_ids):
-        return CollectionProblem.objects.filter(collection__in=collection_ids).order_by('order')
+        return CollectionProblem.objects.filter(collection__in=collection_ids).select_related('problem').order_by('order')
     
     def get_by_creator(self, account_id: str, order_by: str = '-updated_date'):
         return Collection.objects.filter(creator_id=account_id).order_by(order_by)

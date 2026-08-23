@@ -28,15 +28,15 @@ class SubmissionRepository:
         return group_by(testcases, lambda testcase: testcase.submission_id)
 
     def get_by_problem(self, problem_id: str, start: int = 0, end: int = None):
-        submissions = Submission.objects.filter(problem_id=problem_id).order_by('-date')
+        submissions = Submission.objects.filter(problem_id=problem_id).select_related('account', 'topic').order_by('-date')
         if end:
             return submissions[start:end]
         return submissions[start:]
-    
-    def list(self, problem_id: str = None, account_id: str = None, topic_id: str = None, 
-             passed: int = None, sort_score: int = 0, sort_date: int = 0, 
+
+    def list(self, problem_id: str = None, account_id: str = None, topic_id: str = None,
+             passed: int = None, sort_score: int = 0, sort_date: int = 0,
              start: int = None, end: int = None):
-        submissions = Submission.objects.all()
+        submissions = Submission.objects.select_related('problem', 'topic').all()
         
         if problem_id:
             submissions = submissions.filter(problem_id=problem_id)

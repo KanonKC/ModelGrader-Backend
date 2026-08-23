@@ -44,10 +44,10 @@ class GroupRepository:
         return Group.objects.filter(creator_id=account_id).order_by(order_by)
     
     def get_members(self, group_id: str):
-        return GroupMember.objects.filter(group_id=group_id)
+        return GroupMember.objects.filter(group_id=group_id).select_related('account')
 
     def get_members_for_groups(self, group_ids: List[str]):
-        members = GroupMember.objects.filter(group_id__in=group_ids)
+        members = GroupMember.objects.filter(group_id__in=group_ids).select_related('account')
         return group_by(members, lambda member: member.group_id)
 
     def update(self, group_id: str, group_data: dict):

@@ -121,8 +121,8 @@ class TestTopicService(TestCase):
         self.mock_topic_repo.get.return_value = self.sample_topic
         self.mock_permission_repo.get_topic_permissions.return_value = permissions
         self.mock_topic_repo.get_collections.return_value = collections
-        self.mock_collection_repo.get_problems.return_value = []
-        self.mock_permission_repo.get_collection_permissions.return_value = []
+        self.mock_collection_repo.get_problems_by_collections.return_value = []
+        self.mock_permission_repo.get_collection_permissions_for_collections.return_value = {}
         
         # Mock serializer
         with patch('api.services.topic.topic_service.TopicPopulateTopicCollectionPopulateCollectionPopulateCollectionProblemsPopulateProblemAndCollectionGroupPermissionsPopulateGroupAndTopicGroupPermissionPopulateGroupSerializer') as mock_serializer:

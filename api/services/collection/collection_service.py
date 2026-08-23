@@ -35,12 +35,16 @@ class CollectionService:
 
     def get_collection(self, collection_id: str):
         collection = self.collection_repo.get(collection_id)
-        collection.problems = self.collection_repo.get_problems(collection_id)
+        collection.problems = list(self.collection_repo.get_problems(collection_id))
         collection.group_permissions = self.permission_repo.get_collection_permissions(collection_id)
 
+        problem_ids = [cp.problem_id for cp in collection.problems]
+        testcases_by_problem = self.problem_repo.get_testcases_for_problems(problem_ids)
+        permissions_by_problem = self.permission_repo.get_problem_permissions_for_problems(problem_ids)
+
         for cp in collection.problems:
-            cp.problem.testcases = self.problem_repo.get_testcases(cp.problem_id)
-            cp.problem.group_permissions = self.permission_repo.get_problem_permissions(cp.problem_id)
+            cp.problem.testcases = testcases_by_problem.get(cp.problem_id, [])
+            cp.problem.group_permissions = permissions_by_problem.get(cp.problem_id, [])
 
         serializer = CollectionPopulateCollectionProblemsPopulateProblemPopulateAccountAndTestcasesAndProblemGroupPermissionsPopulateGroupAndCollectionGroupPermissionsPopulateGroupSerializer(collection)
         

@@ -37,11 +37,17 @@ class TopicService:
     def get_topic(self, topic_id: str):
         topic = self.topic_repo.get(topic_id)
         topic.group_permissions = self.permission_repo.get_topic_permissions(topic_id)
-        topic.collections = self.topic_repo.get_collections(topic_id)
+        topic.collections = list(self.topic_repo.get_collections(topic_id))
+
+        collection_ids = [tp.collection_id for tp in topic.collections]
+        problems_by_collection = {}
+        for cp in self.collection_repo.get_problems_by_collections(collection_ids):
+            problems_by_collection.setdefault(cp.collection_id, []).append(cp)
+        permissions_by_collection = self.permission_repo.get_collection_permissions_for_collections(collection_ids)
 
         for tp in topic.collections:
-            tp.collection.problems = self.collection_repo.get_problems(tp.collection.collection_id)
-            tp.collection.group_permissions = self.permission_repo.get_collection_permissions(tp.collection.collection_id)
+            tp.collection.problems = problems_by_collection.get(tp.collection_id, [])
+            tp.collection.group_permissions = permissions_by_collection.get(tp.collection_id, [])
 
         serialize = TopicPopulateTopicCollectionPopulateCollectionPopulateCollectionProblemsPopulateProblemAndCollectionGroupPermissionsPopulateGroupAndTopicGroupPermissionPopulateGroupSerializer(topic)
         

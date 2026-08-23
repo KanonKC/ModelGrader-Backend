@@ -21,7 +21,7 @@ class TopicRepository:
         return Topic.objects.filter(creator_id=account_id).order_by('-updated_date')
     
     def get_collections(self, topic_id: str):
-        return TopicCollection.objects.filter(topic_id=topic_id).order_by('order')
+        return TopicCollection.objects.filter(topic_id=topic_id).select_related('collection').order_by('order')
     
     def get_many_collections(self, topic_ids: List[str]):
         return TopicCollection.objects.filter(topic__in=topic_ids)

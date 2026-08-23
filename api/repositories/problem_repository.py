@@ -23,7 +23,7 @@ class ProblemRepository:
             problems = problems.filter(creator_id=filters['creator_id'])
         if 'id_list' in filters and filters['id_list'] is not None:
             problems = problems.filter(problem_id__in=filters['id_list'])
-        problems = problems.order_by(*order_by)
+        problems = problems.select_related('creator').order_by(*order_by)
         return problems
 
     def get(self, id: str):
