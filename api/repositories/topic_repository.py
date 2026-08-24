@@ -89,9 +89,10 @@ class TopicRepository:
 
         best_by_problem = {record.problem_id: record.submission for record in best_records}
         submission_ids = [submission.submission_id for submission in best_by_problem.values()]
-        testcases_by_submission = {}
-        for testcase in SubmissionTestcase.objects.filter(submission_id__in=submission_ids):
-            testcases_by_submission.setdefault(testcase.submission_id, []).append(testcase)
+        testcases_by_submission = group_by(
+            SubmissionTestcase.objects.filter(submission_id__in=submission_ids),
+            lambda testcase: testcase.submission_id,
+        )
 
         for submission in best_by_problem.values():
             submission.runtime_output = testcases_by_submission.get(submission.submission_id, [])
